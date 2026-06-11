@@ -1,75 +1,91 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MeetingScribe.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="MeetingScribe.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="MeetingScribe">
+        x:DataType="vm:MainWindowViewModel" 
+        Title="MeetingScribe"
+        Background="{StaticResource SurfaceBrush}">
 
- <Grid ColumnDefinitions="240, *">
+    <Grid ColumnDefinitions="Auto, *">
+        
         <!-- Sidebar -->
-        <Border Grid.Column="0" Background="#11140d" Padding="16">
-            <StackPanel Spacing="10">
-                <!-- Record Button -->
-                <Button Classes="Primary" 
-                        Content="Record New" 
-                        Command="{Binding ToggleRecordingCommand}" 
-                        HorizontalAlignment="Stretch"/>
+        <Border Grid.Column="0" 
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="#2D2D2D" 
+                BorderThickness="0,0,1,0">
+            
+            <!-- We control Sidebar width using a simple binding or hardcoded values for now -->
+            <StackPanel Width="240"> <!-- Later we will make this dynamic -->
                 
-                <TextBlock Text="{Binding StatusText}" 
-                           Foreground="{StaticResource SecondaryBrush}" 
-                           FontSize="12" 
-                           HorizontalAlignment="Center" 
-                           Margin="0,10,0,0"/>
+                <!-- Logo Area: Fixed with Border for Padding -->
+                <Border Padding="20">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Image Source="/Assets/Images/Logo_main.png" Width="32" Height="32"/>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Meeting" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock Text="Scribe" Foreground="{StaticResource PrimaryBrush}" FontSize="14"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Navigation Menu -->
+                <StackPanel Margin="0,20,0,0">
+                    
+                    <!-- New Meeting Button (Blue highlight when not selected) -->
+                    <Button Classes="Menu" 
+                            Command="{Binding NavigateCommand}" 
+                            CommandParameter="New"
+                            Foreground="{StaticResource AccentBlueBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <PathIcon Data="{StaticResource AddIcon}"/>
+                            <TextBlock Text="New Meeting"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Archive">
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <PathIcon Data="{StaticResource ArchiveIcon}"/>
+                            <TextBlock Text="Meeting Archive"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Team">
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <PathIcon Data="{StaticResource TeamIcon}"/>
+                            <TextBlock Text="Team"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Settings">
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <PathIcon Data="{StaticResource SettingsIcon}"/>
+                            <TextBlock Text="Settings"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </StackPanel>
         </Border>
 
-        <!-- Main Content -->
-        <ScrollViewer Grid.Column="1">
-            <!-- Use Border to provide Padding instead of StackPanel -->
-            <Border Padding="24">
-                <StackPanel Spacing="20">
-                    <TextBlock Text="New Meeting" 
-                               FontSize="24" 
+        <!-- Main Workspace -->
+        <Grid Grid.Column="1" RowDefinitions="Auto, *">
+            
+            <!-- Header (Current Page Title) -->
+            <Border Grid.Row="0" Height="60" Padding="24,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="30">
+                    <TextBlock Text="{Binding CurrentPageTitle}" 
+                               FontSize="20" 
                                FontWeight="Bold" 
                                Foreground="{StaticResource PrimaryBrush}"/>
-
-                    <Grid ColumnDefinitions="*, *">
-                        <!-- Left: Meeting Details -->
-                        <Border Grid.Column="0" 
-                                Background="#1e2119" 
-                                CornerRadius="8" 
-                                Padding="16" 
-                                BorderBrush="{StaticResource OutlineBrush}" 
-                                BorderThickness="1">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="Meeting Name" Foreground="#c3c9b6"/>
-                                <TextBox Text="{Binding MeetingName}"/>
-                                <TextBlock Text="Description" Foreground="#c3c9b6"/>
-                                <TextBox Text="{Binding Description}" Height="200" AcceptsReturn="True"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Right: Real-time Transcript -->
-                        <Border Grid.Column="1" 
-                                Margin="16,0,0,0" 
-                                Background="#1e2119" 
-                                CornerRadius="8" 
-                                Padding="16">
-                            <TextBox Text="{Binding TranscriptText}" 
-                                     IsReadOnly="True" 
-                                     AcceptsReturn="True" 
-                                     TextWrapping="Wrap"
-                                     Background="Transparent" 
-                                     BorderThickness="0"/>
-                        </Border>
-                    </Grid>
+                    <TextBlock Text="Analytics" 
+                               FontSize="18" 
+                               Foreground="Gray" 
+                               Cursor="Hand"/>
                 </StackPanel>
             </Border>
-        </ScrollViewer>
-    </Grid>
 
+            <!-- Dynamic Content Area -->
+            <ContentControl Grid.Row="1" Content="{Binding CurrentPage}"/>
+        </Grid>
+    </Grid>
 </Window>
