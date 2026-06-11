@@ -1,0 +1,32 @@
+## --- Visual Studio & .NET ---
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## --- Avalonia UI ---
+# Временные файлы превьюера
+.avalonia/
+
+## --- AI Models (ВАЖНО!) ---
+# Не пускаем тяжелые модели в гит. Их нужно скачивать отдельно.
+*.bin
+*.onnx
+*.mlmodel
+
+## --- Audio & Transcripts ---
+# Чтобы случайно не выгрузить свои записи совещаний
+/Recordings/
+/Exports/
+*.wav
+*.mp3
+*.docx
+
+## --- API Keys & Secrets ---
+# Если создадите файл для ключей Gemini
+appsettings.json
+*.env
