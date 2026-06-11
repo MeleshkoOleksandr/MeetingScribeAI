@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MeetingScribe.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,12 +9,67 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="MeetingScribe">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+ <Grid ColumnDefinitions="240, *">
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#11140d" Padding="16">
+            <StackPanel Spacing="10">
+                <!-- Record Button -->
+                <Button Classes="Primary" 
+                        Content="Record New" 
+                        Command="{Binding ToggleRecordingCommand}" 
+                        HorizontalAlignment="Stretch"/>
+                
+                <TextBlock Text="{Binding StatusText}" 
+                           Foreground="{StaticResource SecondaryBrush}" 
+                           FontSize="12" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- Main Content -->
+        <ScrollViewer Grid.Column="1">
+            <!-- Use Border to provide Padding instead of StackPanel -->
+            <Border Padding="24">
+                <StackPanel Spacing="20">
+                    <TextBlock Text="New Meeting" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="{StaticResource PrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="*, *">
+                        <!-- Left: Meeting Details -->
+                        <Border Grid.Column="0" 
+                                Background="#1e2119" 
+                                CornerRadius="8" 
+                                Padding="16" 
+                                BorderBrush="{StaticResource OutlineBrush}" 
+                                BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Meeting Name" Foreground="#c3c9b6"/>
+                                <TextBox Text="{Binding MeetingName}"/>
+                                <TextBlock Text="Description" Foreground="#c3c9b6"/>
+                                <TextBox Text="{Binding Description}" Height="200" AcceptsReturn="True"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Right: Real-time Transcript -->
+                        <Border Grid.Column="1" 
+                                Margin="16,0,0,0" 
+                                Background="#1e2119" 
+                                CornerRadius="8" 
+                                Padding="16">
+                            <TextBox Text="{Binding TranscriptText}" 
+                                     IsReadOnly="True" 
+                                     AcceptsReturn="True" 
+                                     TextWrapping="Wrap"
+                                     Background="Transparent" 
+                                     BorderThickness="0"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
 
 </Window>
