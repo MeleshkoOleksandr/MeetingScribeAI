@@ -9,17 +9,15 @@
 *.sln.docstates
 
 ## --- Avalonia UI ---
-# Временные файлы превьюера
+# Previewer temporary files
 .avalonia/
 
-## --- AI Models (ВАЖНО!) ---
-# Не пускаем тяжелые модели в гит. Их нужно скачивать отдельно.
+## --- AI Models ---
 *.bin
 *.onnx
 *.mlmodel
 
 ## --- Audio & Transcripts ---
-# Чтобы случайно не выгрузить свои записи совещаний
 /Recordings/
 /Exports/
 *.wav
@@ -27,6 +25,5 @@
 *.docx
 
 ## --- API Keys & Secrets ---
-# Если создадите файл для ключей Gemini
 appsettings.json
 *.env
