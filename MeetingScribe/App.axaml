@@ -1,16 +1,35 @@
 ﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="MeetingScribe.App"
              xmlns:local="using:MeetingScribe"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:views="using:MeetingScribe.Views"
+             xmlns:converters="using:MeetingScribe.Converters"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="MeetingScribe.App"
              RequestedThemeVariant="Dark">
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <DataTemplate DataType="{x:Type vm:NewMeetingViewModel}">
+            <views:NewMeetingView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ArchiveViewModel}">
+            <views:ArchiveView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TeamViewModel}">
+            <views:TeamView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
     </Application.DataTemplates>
-  
+
+    <Application.Resources>
+        <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
-        <!-- Используем абсолютный путь к ресурсу -->
+        <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://MeetingScribe/Styles/LuminaTheme.axaml"/>
     </Application.Styles>
 </Application>

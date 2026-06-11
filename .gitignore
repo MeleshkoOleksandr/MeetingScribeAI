@@ -1,6 +1,9 @@
 ## --- Visual Studio & .NET ---
 [Bb]in/
 [Oo]bj/
+bin/
+obj/
+
 .vs/
 .vscode/
 *.user

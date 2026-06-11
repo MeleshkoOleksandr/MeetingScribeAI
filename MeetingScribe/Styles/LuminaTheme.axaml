@@ -1,37 +1,93 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <!-- Мы упакуем ресурсы в ResourceDictionary внутри Styles -->
-  <Styles.Resources>
-    <ResourceDictionary>
-      <!-- Цвета -->
-      <Color x:Key="SurfaceColor">#11140d</Color>
-      <Color x:Key="PrimaryColor">#b7e97e</Color>
-      <Color x:Key="OnPrimaryColor">#1e3700</Color>
-      <Color x:Key="OnSurfaceColor">#e2e4d8</Color>
-      <Color x:Key="OutlineColor">#43493a</Color>
+    <Styles.Resources>
+        <!-- Updated Palette from your mockup -->
+        <Color x:Key="SurfaceColor">#11140d</Color>
+        <Color x:Key="PanelColor">#1a1d16</Color>
+        <Color x:Key="PrimaryColor">#b7e97e</Color>     <!-- Lime Green -->
+        <Color x:Key="OnPrimaryColor">#1e3700</Color>   <!-- Dark Green for text -->
+        <Color x:Key="AccentBlue">#29B6F6</Color>       <!-- Sky Blue -->
+        <Color x:Key="OnSurfaceColor">#e2e4d8</Color>
+        <Color x:Key="OutlineColor">#2D2D2D</Color>
 
-      <!-- Кисти (Brushes) -->
-      <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-      <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-      <SolidColorBrush x:Key="OnPrimaryBrush" Color="{StaticResource OnPrimaryColor}"/>
-      <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
-      <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource OutlineColor}"/>
-    </ResourceDictionary>
-  </Styles.Resources>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+        <SolidColorBrush x:Key="OnPrimaryBrush" Color="{StaticResource OnPrimaryColor}"/>
+        <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
+        <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
+        <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource OutlineColor}"/>
+    </Styles.Resources>
 
-  <!-- Стили контролов -->
-  <Style Selector="Button.Primary">
-    <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-    <Setter Property="Foreground" Value="{StaticResource OnPrimaryBrush}"/>
-    <Setter Property="FontWeight" Value="Bold"/>
-    <Setter Property="Padding" Value="15,10"/>
-  </Style>
+    <!-- Global Button Reset -->
+    <Style Selector="Button">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
 
-  <Style Selector="TextBox">
-    <Setter Property="Background" Value="#1a1d15"/>
-    <Setter Property="Foreground" Value="{StaticResource OnSurfaceBrush}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource OutlineBrush}"/>
-    <Setter Property="BorderThickness" Value="1"/>
-  </Style>
+    <!-- 1. Primary Button (Green) -->
+    <Style Selector="Button.Primary">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource OnPrimaryBrush}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#c5f091"/> <!-- Lighter green on hover -->
+    </Style>
+
+    <!-- 2. Accent Button (Blue - used for New Meeting when not active) -->
+    <Style Selector="Button.Accent">
+        <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Button.Accent:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#4fc3f7"/>
+    </Style>
+
+    <!-- 3. Sidebar Menu Button (Transparent with hover) -->
+    <Style Selector="Button.Menu">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#c3c9b6"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Padding" Value="15,12"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    
+    <!-- Hover effect for menu -->
+    <Style Selector="Button.Menu:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#282b23"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <!-- Style for the "active" indicator (optional: adds a green stripe to the left) -->
+    <Style Selector="Button.Menu.Selected">
+        <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+    </Style>
+
+    <!-- TextBoxes for Dark Theme -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#1a1d15"/>
+        <Setter Property="Foreground" Value="{StaticResource OnSurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource OutlineBrush}"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource AccentBlueBrush}"/>
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
 </Styles>
