@@ -1,4 +1,4 @@
-﻿<Application xmlns="https://github.com/avaloniaui"
+<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:MeetingScribe"
              xmlns:vm="using:MeetingScribe.ViewModels"
@@ -23,13 +23,21 @@
         </DataTemplate>
     </Application.DataTemplates>
 
+    <!--    <Application.Resources>
+    <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+    </Application.Resources>-->
+
     <Application.Resources>
-        <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://MeetingScribe/Styles/LuminaTheme.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
-        <materialIcons:MaterialIconStyles />
-        <StyleInclude Source="avares://MeetingScribe/Styles/LuminaTheme.axaml"/>
+        <materialIcons:MaterialIconStyles/>
+        <StyleInclude Source="avares://MeetingScribe/Styles/LuminaStyles.axaml"/>
     </Application.Styles>
 </Application>

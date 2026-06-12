@@ -1,93 +1,57 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Styles.Resources>
-        <!-- Updated Palette from your mockup -->
-        <Color x:Key="SurfaceColor">#11140d</Color>
-        <Color x:Key="PanelColor">#1a1d16</Color>
-        <Color x:Key="PrimaryColor">#b7e97e</Color>     <!-- Lime Green -->
-        <Color x:Key="OnPrimaryColor">#1e3700</Color>   <!-- Dark Green for text -->
-        <Color x:Key="AccentBlue">#29B6F6</Color>       <!-- Sky Blue -->
-        <Color x:Key="OnSurfaceColor">#e2e4d8</Color>
-        <Color x:Key="OutlineColor">#2D2D2D</Color>
+    <!-- ══════ Colors ══════ -->
+    <Color x:Key="ColorBackground">#11140D</Color>
+    <Color x:Key="ColorSurface">#11140D</Color>
+    <Color x:Key="ColorSurfaceContainerLowest">#0C0F09</Color>
+    <Color x:Key="ColorSurfaceContainerLow">#1A1D15</Color>
+    <Color x:Key="ColorSurfaceContainer">#1E2119</Color>
+    <Color x:Key="ColorSurfaceContainerHigh">#282B23</Color>
+    <Color x:Key="ColorSurfaceContainerHighest">#33362E</Color>
+    <Color x:Key="ColorSurfaceBright">#373A32</Color>
+    <Color x:Key="ColorOnSurface">#E2E4D8</Color>
+    <Color x:Key="ColorOnSurfaceVariant">#C3C9B6</Color>
+    <Color x:Key="ColorOutline">#8D9382</Color>
+    <Color x:Key="ColorOutlineVariant">#43493A</Color>
+    <Color x:Key="ColorPrimary">#B7E97E</Color>
+    <Color x:Key="ColorOnPrimary">#1E3700</Color>
+    <Color x:Key="ColorPrimaryContainer">#9CCC65</Color>
+    <Color x:Key="ColorSecondary">#81CFFF</Color>
+    <Color x:Key="ColorOnSecondary">#00344B</Color>
+    <Color x:Key="ColorError">#FFB4AB</Color>
 
-        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
-        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="OnPrimaryBrush" Color="{StaticResource OnPrimaryColor}"/>
-        <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
-        <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
-        <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource OutlineColor}"/>
-    </Styles.Resources>
+    <!-- ══════ Brushes ══════ -->
+    <SolidColorBrush x:Key="BrushBackground"              Color="{StaticResource ColorBackground}"/>
+    <SolidColorBrush x:Key="BrushSurface"                 Color="{StaticResource ColorSurface}"/>
+    <SolidColorBrush x:Key="BrushSurfaceContainerLow"     Color="{StaticResource ColorSurfaceContainerLow}"/>
+    <SolidColorBrush x:Key="BrushSurfaceContainer"        Color="{StaticResource ColorSurfaceContainer}"/>
+    <SolidColorBrush x:Key="BrushSurfaceContainerHigh"    Color="{StaticResource ColorSurfaceContainerHigh}"/>
+    <SolidColorBrush x:Key="BrushSurfaceContainerHighest" Color="{StaticResource ColorSurfaceContainerHighest}"/>
+    <SolidColorBrush x:Key="BrushSurfaceBright"           Color="{StaticResource ColorSurfaceBright}"/>
+    <SolidColorBrush x:Key="BrushOnSurface"               Color="{StaticResource ColorOnSurface}"/>
+    <SolidColorBrush x:Key="BrushOnSurfaceVariant"        Color="{StaticResource ColorOnSurfaceVariant}"/>
+    <SolidColorBrush x:Key="BrushOutline"                 Color="{StaticResource ColorOutline}"/>
+    <SolidColorBrush x:Key="BrushOutlineVariant"          Color="{StaticResource ColorOutlineVariant}"/>
+    <SolidColorBrush x:Key="BrushPrimary"                 Color="{StaticResource ColorPrimary}"/>
+    <SolidColorBrush x:Key="BrushOnPrimary"               Color="{StaticResource ColorOnPrimary}"/>
+    <SolidColorBrush x:Key="BrushPrimaryContainer"        Color="{StaticResource ColorPrimaryContainer}"/>
+    <SolidColorBrush x:Key="BrushSecondary"               Color="{StaticResource ColorSecondary}"/>
+    <SolidColorBrush x:Key="BrushOnSecondary"             Color="{StaticResource ColorOnSecondary}"/>
+    <SolidColorBrush x:Key="BrushError"                   Color="{StaticResource ColorError}"/>
 
-    <!-- Global Button Reset -->
-    <Style Selector="Button">
-        <Setter Property="Transitions">
-            <Transitions>
-                <BrushTransition Property="Background" Duration="0:0:0.2"/>
-            </Transitions>
-        </Setter>
-    </Style>
+    <!-- ══════ Typography sizes ══════ -->
+    <x:Double x:Key="FontSizeDisplayLg">32</x:Double>
+    <x:Double x:Key="FontSizeHeadlineMd">24</x:Double>
+    <x:Double x:Key="FontSizeTitleSm">18</x:Double>
+    <x:Double x:Key="FontSizeBodyMd">14</x:Double>
+    <x:Double x:Key="FontSizeBodySm">13</x:Double>
+    <x:Double x:Key="FontSizeLabelCaps">11</x:Double>
 
-    <!-- 1. Primary Button (Green) -->
-    <Style Selector="Button.Primary">
-        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource OnPrimaryBrush}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Padding" Value="16,10"/>
-        <Setter Property="CornerRadius" Value="4"/>
-    </Style>
-    <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#c5f091"/> <!-- Lighter green on hover -->
-    </Style>
+    <!-- ══════ Corner radii ══════ -->
+    <CornerRadius x:Key="RadiusSm">2</CornerRadius>
+    <CornerRadius x:Key="RadiusMd">4</CornerRadius>
+    <CornerRadius x:Key="RadiusLg">8</CornerRadius>
+    <CornerRadius x:Key="RadiusFull">9999</CornerRadius>
 
-    <!-- 2. Accent Button (Blue - used for New Meeting when not active) -->
-    <Style Selector="Button.Accent">
-        <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Padding" Value="16,10"/>
-        <Setter Property="CornerRadius" Value="4"/>
-    </Style>
-    <Style Selector="Button.Accent:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#4fc3f7"/>
-    </Style>
-
-    <!-- 3. Sidebar Menu Button (Transparent with hover) -->
-    <Style Selector="Button.Menu">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="#c3c9b6"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="Padding" Value="15,12"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="0"/>
-    </Style>
-    
-    <!-- Hover effect for menu -->
-    <Style Selector="Button.Menu:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#282b23"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-
-    <!-- Style for the "active" indicator (optional: adds a green stripe to the left) -->
-    <Style Selector="Button.Menu.Selected">
-        <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="BorderThickness" Value="3,0,0,0"/>
-    </Style>
-
-    <!-- TextBoxes for Dark Theme -->
-    <Style Selector="TextBox">
-        <Setter Property="Background" Value="#1a1d15"/>
-        <Setter Property="Foreground" Value="{StaticResource OnSurfaceBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource OutlineBrush}"/>
-        <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="SelectionBrush" Value="{StaticResource AccentBlueBrush}"/>
-    </Style>
-    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-    </Style>
-
-</Styles>
+</ResourceDictionary>

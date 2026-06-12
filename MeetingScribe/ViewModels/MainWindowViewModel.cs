@@ -1,64 +1,43 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+using MeetingScribe.UILogic;
+using System.Collections.ObjectModel;
+
 
 namespace MeetingScribe.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    // The current view being displayed
     [ObservableProperty] private ViewModelBase _currentPage;
+    [ObservableProperty] private NavigationItem? _selectedMenuItem;
 
-    // Header title
-    [ObservableProperty] private string _currentPageTitle = "New Meeting";
-
-    // Sidebar state (expanded or collapsed)
-    [ObservableProperty] private bool _isSidebarExpanded = true;
-
-    // ViewModels (cached instances to keep state)
-    private readonly NewMeetingViewModel _newMeetingVm = new();
-    private readonly ArchiveViewModel _archiveVm = new();
-    private readonly TeamViewModel _teamVm = new();
-    private readonly SettingsViewModel _settingsVm = new();
+    public ObservableCollection<NavigationItem> MenuItems { get; } = new()
+    {
+        new NavigationItem { Label = "New Meeting", Icon = "PlusCircleOutline", Target = "New", Description = "Create new meeting" },
+        new NavigationItem { Label = "Meeting Archive", Icon = "ArchiveOutline", Target = "Archive", Description = "View history" },
+        new NavigationItem { Label = "Settings", Icon = "CogOutline", Target = "Settings", Description = "Configuration" },
+        new NavigationItem { Label = "Team", Icon = "AccountMultipleOutline", Target = "Team", Description = "Participant list" }
+    };
 
     public MainWindowViewModel()
     {
-        // Initial page
-        _currentPage = _newMeetingVm;
+        _currentPage = new NewMeetingViewModel();
+        SelectedMenuItem = MenuItems[0]; // Select first item by default
     }
 
-    /// <summary>
-    /// Logic for switching pages
-    /// </summary>
-    [RelayCommand]
-    private void Navigate(string target)
+    // Automatically switch page when SelectedMenuItem changes
+    partial void OnSelectedMenuItemChanged(NavigationItem? value)
     {
-        switch (target)
+        if (value == null) return;
+
+        CurrentPage = value.Target switch
         {
-            case "New":
-                CurrentPage = _newMeetingVm;
-                CurrentPageTitle = "New Meeting";
-                break;
-            case "Archive":
-                CurrentPage = _archiveVm;
-                CurrentPageTitle = "Meeting Archive";
-                break;
-            case "Team":
-                CurrentPage = _teamVm;
-                CurrentPageTitle = "Team";
-                break;
-            case "Settings":
-                CurrentPage = _settingsVm;
-                CurrentPageTitle = "Settings";
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Toggles sidebar width
-    /// </summary>
-    [RelayCommand]
-    private void ToggleSidebar()
-    {
-        IsSidebarExpanded = !IsSidebarExpanded;
+            "New" => new NewMeetingViewModel(),
+            "Archive" => new ArchiveViewModel(),
+            "Settings" => new SettingsViewModel(),
+            "Team" => new TeamViewModel(),
+            _ => CurrentPage
+        };
     }
 }

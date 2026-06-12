@@ -2,12 +2,190 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                     xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
              x:Class="MeetingScribe.Views.NewMeetingView">
-    <Border Background="{StaticResource PanelBrush}" CornerRadius="10" Margin="20">
-        <TextBlock Text="New Meeting Content Placeholder"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"
-                   Foreground="White"/>
-    </Border>
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                <Grid Margin="24" ColumnDefinitions="360,16,*">
+
+                    <!-- ══ LEFT CARD — Meeting Details ══ -->
+                    <Border Grid.Column="0" Classes="card" VerticalAlignment="Top">
+                        <StackPanel Spacing="16">
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="ClipboardTextOutline" Width="18" Height="18"
+                                                   Foreground="{StaticResource BrushPrimary}"/>
+                                <TextBlock Text="Meeting Details" Classes="card-title"/>
+                            </StackPanel>
+
+                            <!-- Meeting Name -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="MEETING NAME" Classes="label-caps"/>
+                                <TextBox Classes="lumina-input"
+                                         Text="Weekly Sync"
+                                         Watermark="Enter meeting name…"/>
+                            </StackPanel>
+
+                            <!-- Description -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
+                                <TextBox Classes="lumina-input"
+                                         Text="Discuss project updates and blockers..."
+                                         Watermark="Add a description…"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         MinHeight="180"
+                                         VerticalContentAlignment="Top"/>
+                            </StackPanel>
+
+                            <!-- Language -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="LANGUAGE" Classes="label-caps"/>
+                                <ComboBox Classes="lumina-combo"
+                                          SelectedIndex="0"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBoxItem>English (US)</ComboBoxItem>
+                                    <ComboBoxItem>English (UK)</ComboBoxItem>
+                                    <ComboBoxItem>Deutsch</ComboBoxItem>
+                                    <ComboBoxItem>Français</ComboBoxItem>
+                                    <ComboBoxItem>Español</ComboBoxItem>
+                                    <ComboBoxItem>Русский</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ══ RIGHT COLUMN ══ -->
+                    <StackPanel Grid.Column="2" Spacing="16">
+
+                        <!-- Meeting Topics card -->
+                        <Border Classes="card">
+                            <StackPanel Spacing="16">
+
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <icons:MaterialIcon Kind="FormatListBulletedSquare"
+                                                       Width="18" Height="18"
+                                                       Foreground="{StaticResource BrushPrimary}"/>
+                                    <TextBlock Text="Meeting Topics" Classes="card-title"/>
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="DISCUSSION POINTS" Classes="label-caps"/>
+                                    <TextBox Classes="lumina-input"
+                                             Watermark="Enter key topics to discuss..."
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             MinHeight="120"
+                                             VerticalContentAlignment="Top"/>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Participant List card -->
+                        <Border Classes="card">
+                            <StackPanel Spacing="16">
+
+                                <!-- Header -->
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
+                                        <icons:MaterialIcon Kind="AccountMultipleOutline"
+                                                           Width="18" Height="18"
+                                                           Foreground="{StaticResource BrushPrimary}"/>
+                                        <TextBlock Text="Participant List" Classes="card-title"/>
+                                    </StackPanel>
+                                    <Border DockPanel.Dock="Right" Classes="badge"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBlock Text="3 Added"/>
+                                    </Border>
+                                </DockPanel>
+
+                                <!-- Chips -->
+                                <WrapPanel Orientation="Horizontal">
+
+                                    <!-- Jane Doe -->
+                                    <Border Classes="chip" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Classes="avatar" Background="#3A6EA5">
+                                                <TextBlock Text="JD" FontSize="9" FontWeight="Bold"
+                                                           Foreground="White"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="Jane Doe"
+                                                       FontSize="{StaticResource FontSizeBodySm}"
+                                                       Foreground="{StaticResource BrushOnSurface}"
+                                                       VerticalAlignment="Center"/>
+                                            <Button Classes="btn-icon" Width="16" Height="16"
+                                                    Padding="1" VerticalAlignment="Center">
+                                                <icons:MaterialIcon Kind="Close" Width="10" Height="10"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Mark Smith -->
+                                    <Border Classes="chip" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Classes="avatar" Background="#5C6BC0">
+                                                <TextBlock Text="MS" FontSize="9" FontWeight="Bold"
+                                                           Foreground="White"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="Mark Smith"
+                                                       FontSize="{StaticResource FontSizeBodySm}"
+                                                       Foreground="{StaticResource BrushOnSurface}"
+                                                       VerticalAlignment="Center"/>
+                                            <Button Classes="btn-icon" Width="16" Height="16"
+                                                    Padding="1" VerticalAlignment="Center">
+                                                <icons:MaterialIcon Kind="Close" Width="10" Height="10"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Alex Lee -->
+                                    <Border Classes="chip" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Classes="avatar" Background="#2E7D32">
+                                                <TextBlock Text="AL" FontSize="9" FontWeight="Bold"
+                                                           Foreground="White"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="Alex Lee"
+                                                       FontSize="{StaticResource FontSizeBodySm}"
+                                                       Foreground="{StaticResource BrushOnSurface}"
+                                                       VerticalAlignment="Center"/>
+                                            <Button Classes="btn-icon" Width="16" Height="16"
+                                                    Padding="1" VerticalAlignment="Center">
+                                                <icons:MaterialIcon Kind="Close" Width="10" Height="10"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+
+                                </WrapPanel>
+
+                                <!-- Start Recording -->
+                                <Button Classes="btn-primary"
+                                        HorizontalAlignment="Stretch"
+                                        Height="50">
+                                    <StackPanel Orientation="Horizontal" Spacing="10"
+                                                HorizontalAlignment="Center">
+                                        <icons:MaterialIcon Kind="Microphone" Width="20" Height="20"
+                                                           Foreground="{StaticResource BrushOnPrimary}"/>
+                                        <TextBlock Text="Start Recording"
+                                                   FontSize="15" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource BrushOnPrimary}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+
+                </Grid>
+            </ScrollViewer>
 </UserControl>

@@ -1,91 +1,128 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MeetingScribe.ViewModels"
-        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="MeetingScribe.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel" 
-        Title="MeetingScribe"
-        Background="{StaticResource SurfaceBrush}">
+        xmlns:uilog="using:MeetingScribe.UILogic"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
 
-    <Grid ColumnDefinitions="Auto, *">
-        
-        <!-- Sidebar -->
-        <Border Grid.Column="0" 
-                Background="{StaticResource SurfaceBrush}"
-                BorderBrush="#2D2D2D" 
-                BorderThickness="0,0,1,0">
-            
-            <!-- We control Sidebar width using a simple binding or hardcoded values for now -->
-            <StackPanel Width="240"> <!-- Later we will make this dynamic -->
-                
-                <!-- Logo Area: Fixed with Border for Padding -->
-                <Border Padding="20">
+        x:Class="MeetingScribe.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+
+        Width="1280" Height="800"
+        MinWidth="900" MinHeight="600"
+
+        Background="{StaticResource BrushBackground}"
+        FontFamily="Inter,Segoe UI,sans-serif"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/Images/Logo_main.ico"
+        Title="MeetingScribe"
+        >
+
+    <Window.Resources>
+        <!-- Template for one menu item -->
+        <DataTemplate x:Key="MenuItemTemplate" x:DataType="uilog:NavigationItem">
+            <Grid Height="44" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!-- The Green Stripe (visible only when selected) -->
+                <Border Grid.Column="0"
+                        Classes="active-stripe"
+                        IsVisible="{Binding $parent[ListBoxItem].IsSelected}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="16,0">
+                    <icons:MaterialIcon Kind="{Binding Icon}" Width="18" Height="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ────────────────────────────────────
+        LEFT SIDEBAR
+        ──────────────────────────────────────── -->
+        <Border Grid.Column="0" Classes="sidebar">
+            <DockPanel>
+                <!-- Logo Area -->
+                <Border DockPanel.Dock="Top" Classes="sidebar-header">
                     <Grid ColumnDefinitions="Auto, *">
-                        <Image Source="/Assets/Images/Logo_main.png" Width="32" Height="32"/>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Meeting" Foreground="White" FontWeight="Bold" FontSize="14"/>
-                            <TextBlock Text="Scribe" Foreground="{StaticResource PrimaryBrush}" FontSize="14"/>
+                        <Image Source="/Assets/Images/Logo_main.png" Width="80" Height="50"/>
+                        <StackPanel Grid.Column="1" Margin="0,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Meeting" Foreground= "{StaticResource BrushPrimary}" Classes="title-sm"/>
+                            <TextBlock Text="Scribe" Foreground="White" FontSize="14"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
+                <Border DockPanel.Dock="Top" Classes="divider-h" Margin="15,0"/>
+
                 <!-- Navigation Menu -->
-                <StackPanel Margin="0,20,0,0">
-                    
-                    <!-- New Meeting Button (Blue highlight when not selected) -->
-                    <Button Classes="Menu" 
-                            Command="{Binding NavigateCommand}" 
-                            CommandParameter="New"
-                            Foreground="{StaticResource AccentBlueBrush}">
-                        <StackPanel Orientation="Horizontal" Spacing="15">
-                            <PathIcon Data="{StaticResource AddIcon}"/>
-                            <TextBlock Text="New Meeting"/>
-                        </StackPanel>
-                    </Button>
+                <ListBox Background="Transparent"
+                         BorderThickness="0"
+                         Padding="0,8"
+                         ItemsSource="{Binding MenuItems}"
+                         SelectedItem="{Binding SelectedMenuItem}"
+                         ItemTemplate="{StaticResource MenuItemTemplate}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
+                        <!-- Selection styles -->
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+                        </Style>
+                    </ListBox.Styles>
+                </ListBox>
 
-                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Archive">
-                        <StackPanel Orientation="Horizontal" Spacing="15">
-                            <PathIcon Data="{StaticResource ArchiveIcon}"/>
-                            <TextBlock Text="Meeting Archive"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Team">
-                        <StackPanel Orientation="Horizontal" Spacing="15">
-                            <PathIcon Data="{StaticResource TeamIcon}"/>
-                            <TextBlock Text="Team"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Classes="Menu" Command="{Binding NavigateCommand}" CommandParameter="Settings">
-                        <StackPanel Orientation="Horizontal" Spacing="15">
-                            <PathIcon Data="{StaticResource SettingsIcon}"/>
-                            <TextBlock Text="Settings"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
+                <!--<Border DockPanel.Dock="Bottom" Classes="divider-h" Margin="15,0"/>-->
+            </DockPanel>
         </Border>
 
-        <!-- Main Workspace -->
-        <Grid Grid.Column="1" RowDefinitions="Auto, *">
-            
-            <!-- Header (Current Page Title) -->
-            <Border Grid.Row="0" Height="60" Padding="24,0">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="30">
-                    <TextBlock Text="{Binding CurrentPageTitle}" 
-                               FontSize="20" 
-                               FontWeight="Bold" 
-                               Foreground="{StaticResource PrimaryBrush}"/>
-                    <TextBlock Text="Analytics" 
-                               FontSize="18" 
-                               Foreground="Gray" 
-                               Cursor="Hand"/>
-                </StackPanel>
+        <!-- ────────────────────────────────────
+        MAIN CONTENT
+        ──────────────────────────────────────── -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- TOP BAR -->
+            <Border Grid.Row="0" Classes="top-bar">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <icons:MaterialIcon Kind="{Binding SelectedMenuItem.Icon}" Width="18" Height="18"
+                                            Foreground="{StaticResource BrushPrimary}"/>
+                        <TextBlock Text="{Binding SelectedMenuItem.Label}" Classes="title-sm" VerticalAlignment="Center"/>
+                        <Border Classes="divider-v" Height="16" />
+                        <TextBlock Text="{Binding SelectedMenuItem.Description}" Classes="body-sm text-muted" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Right side icons (Notifications/Help) from your mockup -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <Button Classes="btn-icon">
+                            <icons:MaterialIcon Kind="BellOutline" Width="18" Height="18"/>
+                        </Button>
+                        <Button Classes="btn-icon">
+                            <icons:MaterialIcon Kind="HelpCircleOutline" Width="18" Height="18"/>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
             </Border>
 
             <!-- Dynamic Content Area -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentPage}"/>
+
         </Grid>
+
     </Grid>
+
+
 </Window>
