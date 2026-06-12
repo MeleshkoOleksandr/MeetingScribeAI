@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using System;
 
 namespace MeetingScribe.Views
 {
@@ -16,6 +17,12 @@ namespace MeetingScribe.Views
             {
                 this.BeginMoveDrag(e);
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Environment.Exit(0);
         }
     }
 }
