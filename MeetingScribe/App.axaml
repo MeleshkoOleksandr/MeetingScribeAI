@@ -3,7 +3,7 @@
              xmlns:local="using:MeetingScribe"
              xmlns:vm="using:MeetingScribe.ViewModels"
              xmlns:views="using:MeetingScribe.Views"
-             xmlns:converters="using:MeetingScribe.Converters"
+             xmlns:conv="using:MeetingScribe.UILogic.Converters"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="MeetingScribe.App"
              RequestedThemeVariant="Dark">
@@ -23,15 +23,14 @@
         </DataTemplate>
     </Application.DataTemplates>
 
-    <!--    <Application.Resources>
-    <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
-    </Application.Resources>-->
-
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://MeetingScribe/Styles/LuminaTheme.axaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!--  Converters  -->
+            <conv:SidebarIconConverter x:Key="SidebarIconConverter"/>
+            <conv:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

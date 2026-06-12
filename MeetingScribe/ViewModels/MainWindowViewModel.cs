@@ -11,6 +11,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     [ObservableProperty] private ViewModelBase _currentPage;
     [ObservableProperty] private NavigationItem? _selectedMenuItem;
+    [ObservableProperty] private bool _isSidebarExpanded = true;
 
     public ObservableCollection<NavigationItem> MenuItems { get; } = new()
     {
@@ -40,4 +41,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _ => CurrentPage
         };
     }
+
+    [RelayCommand]
+    private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
 }

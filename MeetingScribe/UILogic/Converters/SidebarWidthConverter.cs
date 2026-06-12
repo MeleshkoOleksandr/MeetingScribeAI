@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace MeetingScribe.Converters;
+namespace MeetingScribe.UILogic.Converters;
 
 public class SidebarWidthConverter : IValueConverter
 {

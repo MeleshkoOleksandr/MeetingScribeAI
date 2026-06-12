@@ -27,51 +27,79 @@
     <Window.Resources>
         <!-- Template for one menu item -->
         <DataTemplate x:Key="MenuItemTemplate" x:DataType="uilog:NavigationItem">
-            <Grid Height="44" Background="Transparent">
+            <Grid Height="48" Background="Transparent" ToolTip.Tip="{Binding Label}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="48"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <!-- The Green Stripe (visible only when selected) -->
-                <Border Grid.Column="0"
-                        Classes="active-stripe"
+                <Border Grid.Column="0" HorizontalAlignment="Left"
+                        Width="3" Height="24" CornerRadius="0,2,2,0"
+                        Background="{StaticResource BrushPrimary}"
                         IsVisible="{Binding $parent[ListBoxItem].IsSelected}"/>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="16,0">
-                    <icons:MaterialIcon Kind="{Binding Icon}" Width="18" Height="18" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
-                </StackPanel>
+                <!-- Icon -->
+                <icons:MaterialIcon Grid.Column="0" Kind="{Binding Icon}"
+                                    Width="22" Height="22"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- The text is hidden via a binding to IsSidebarExpanded -->
+                <TextBlock Grid.Column="1" Text="{Binding Label}"
+                           Margin="8,0,0,0" VerticalAlignment="Center"
+                           IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsSidebarExpanded}"/>
+
             </Grid>
         </DataTemplate>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ────────────────────────────────────
         LEFT SIDEBAR
         ──────────────────────────────────────── -->
-        <Border Grid.Column="0" Classes="sidebar"  PointerPressed="TitleBar_PointerPressed">
-            <DockPanel>
-                <!-- Logo Area -->
-                <Border DockPanel.Dock="Top" Classes="sidebar-header">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <Image Source="/Assets/Images/Logo_main.png" Width="80" Height="50"/>
-                        <StackPanel Grid.Column="1" Margin="0,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Meeting" Foreground= "{StaticResource BrushPrimary}" Classes="title-sm"/>
-                            <TextBlock Text="Scribe" Foreground="White" FontSize="14"/>
+        <Border Grid.Column="0" Classes="sidebar"
+                PointerPressed="TitleBar_PointerPressed"
+                Width="{Binding IsSidebarExpanded, Converter={StaticResource SidebarWidthConverter}}">
+            <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
+                <!-- AREA LOGO & TOGGLE -->
+                <Border Grid.Row="0" Height="70">
+                    <Grid>
+                        <!-- MAIN TOGGLE BUTTON (≡) -->
+                        <Button Command="{Binding ToggleSidebarCommand}"
+                                Classes="btn-icon"
+                                Width="48" Height="48"
+                                HorizontalAlignment="Left"
+                                Margin="8,0,0,0"
+                                Background="Transparent">
+                            <!-- The icon changes automatically via the converter -->
+                            <icons:MaterialIcon Kind="{Binding IsSidebarExpanded, Converter={StaticResource SidebarIconConverter}}"
+                                                Width="30" Height="30"
+                                                Foreground="{StaticResource BrushPrimary}"/>
+                        </Button>
+                        <!-- LOGO + TEXT GROUP (Visible only when expanded) -->
+                        <StackPanel Orientation="Horizontal"
+                                    IsVisible="{Binding IsSidebarExpanded}"
+                                    Margin="55,0,0,0"
+                                    VerticalAlignment="Center">
+                            <!-- Logo -->
+                            <Image Source="/Assets/Images/Logo_main.png"
+                                   Width="60" Height="40"
+                                   VerticalAlignment="Center"/>
+                            <!-- Text -->
+                            <StackPanel Margin="1,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Meeting" Foreground="{StaticResource BrushPrimary}" FontWeight="Bold" FontSize="14"/>
+                                <TextBlock Text="Scribe" Foreground="White" FontSize="12"/>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
-
-                <Border DockPanel.Dock="Top" Classes="divider-h" Margin="15,0"/>
-
+                <!-- TOP DIVIDER -->
+                <Border Grid.Row="3" Classes="divider-h" Margin="15,50"/>
                 <!-- Navigation Menu -->
-                <ListBox Background="Transparent"
-                         BorderThickness="0"
-                         Padding="0,8"
+                <ListBox Grid.Row="2"
+                         Background="Transparent" BorderThickness="0"
                          ItemsSource="{Binding MenuItems}"
                          SelectedItem="{Binding SelectedMenuItem}"
                          ItemTemplate="{StaticResource MenuItemTemplate}">
@@ -87,9 +115,10 @@
                         </Style>
                     </ListBox.Styles>
                 </ListBox>
-
-                <!--<Border DockPanel.Dock="Bottom" Classes="divider-h" Margin="15,0"/>-->
-            </DockPanel>
+                <!-- BOTTOM DIVIDER -->
+                <Border Grid.Row="3" Classes="divider-h" Margin="15,50"/>
+                <!-- OPTIONAL BOTTOM CONTENT-->
+            </Grid>
         </Border>
 
         <!-- ────────────────────────────────────
