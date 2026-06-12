@@ -3,19 +3,26 @@
         xmlns:vm="using:MeetingScribe.ViewModels"
         xmlns:uilog="using:MeetingScribe.UILogic"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-
         x:Class="MeetingScribe.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
 
         Width="1280" Height="800"
-        MinWidth="900" MinHeight="800"
+        MinWidth="800" MinHeight="750"
 
-        Background="{StaticResource BrushBackground}"
+        Title="MeetingScribe"
+        Icon="/Assets/Images/Logo_main.ico"
+        WindowDecorations="Full"
+        ExtendClientAreaToDecorationsHint="True"
+
         FontFamily="Inter,Segoe UI,sans-serif"
         WindowStartupLocation="CenterScreen"
-        Icon="/Assets/Images/Logo_main.ico"
-        Title="MeetingScribe"
         >
+
+    <Window.Styles>
+        <Style Selector="WindowDrawnDecorations TextBlock">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+    </Window.Styles>
 
     <Window.Resources>
         <!-- Template for one menu item -->
@@ -46,7 +53,7 @@
         <!-- ────────────────────────────────────
         LEFT SIDEBAR
         ──────────────────────────────────────── -->
-        <Border Grid.Column="0" Classes="sidebar">
+        <Border Grid.Column="0" Classes="sidebar"  PointerPressed="TitleBar_PointerPressed">
             <DockPanel>
                 <!-- Logo Area -->
                 <Border DockPanel.Dock="Top" Classes="sidebar-header">
@@ -95,7 +102,7 @@
             </Grid.RowDefinitions>
 
             <!-- TOP BAR -->
-            <Border Grid.Row="0" Classes="top-bar">
+            <Border Grid.Row="0" Classes="top-bar" PointerPressed="TitleBar_PointerPressed">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <icons:MaterialIcon Kind="{Binding SelectedMenuItem.Icon}" Width="18" Height="18"
