@@ -21,7 +21,7 @@
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input" Text="Discuss project updates and blockers..." Watermark="Add a description…" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                        <TextBox Classes="lumina-input" Text="Discuss project updates..." Watermark="Add a description…" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="LANGUAGE" Classes="label-caps"/>
@@ -62,42 +62,64 @@
                             <TextBlock Text="3 Added"/>
                         </Border>
                     </DockPanel>
-                    <WrapPanel Orientation="Horizontal">
+                    <WrapPanel Orientation="Horizontal" >
 
-                        <Border Classes="chip" Margin="0,0,8,0">
-                            <TextBlock Text="Jane Doe" Margin="5"/>
-                        </Border>
-
-                        <!-- Jane Doe -->
-                        <Border Classes="chip" Margin="0,0,8,8">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Border Classes="chip" >
+                            <StackPanel Orientation="Horizontal" Spacing="3">
                                 <Border Classes="avatar" Background="#3A6EA5">
-                                    <TextBlock Text="JD" FontSize="9" FontWeight="Bold"
-                                               Foreground="White"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="AM" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <TextBlock Text="Jane Doe"
-                                           FontSize="{StaticResource FontSizeBodySm}"
-                                           Foreground="{StaticResource BrushOnSurface}"
-                                           VerticalAlignment="Center"/>
                                 <Button Classes="btn-icon" Width="16" Height="16"
                                         Padding="1" VerticalAlignment="Center">
-                                    <icons:MaterialIcon Kind="Close" Width="10" Height="10"/>
+                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
                                 </Button>
                             </StackPanel>
-
                         </Border>
+
+                        <Border Classes="chip" >
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <Border Classes="avatar" Background="Green">
+                                    <TextBlock Text="LD" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button Classes="btn-icon" Width="16" Height="16"
+                                        Padding="1" VerticalAlignment="Center">
+                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="chip" Margin="3,3,3,3">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <Border Classes="avatar" Background="IndianRed">
+                                    <TextBlock Text="FK" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button Classes="btn-icon" Width="16" Height="16"
+                                        Padding="1" VerticalAlignment="Center">
+                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
                     </WrapPanel>
                 </StackPanel>
             </Border>
         </Grid>
 
-        <Button Grid.Row="1" Classes="btn-primary" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0">
-            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                <icons:MaterialIcon Kind="Microphone" Width="20" Height="20" Foreground="{StaticResource BrushOnPrimary}"/>
-                <TextBlock Text="Start Recording" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource BrushOnPrimary}" VerticalAlignment="Center"/>
-            </StackPanel>
-        </Button>
+        <Grid Grid.Row="1" ColumnDefinitions="2*, 1*" ColumnSpacing="10">
+            <Button Grid.Column="0" Classes="btn-primary" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <icons:MaterialIcon Kind="Microphone" Width="20" Height="20" Foreground="{StaticResource BrushOnPrimary}"/>
+                    <TextBlock Text="Start Recording" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource BrushOnPrimary}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button Grid.Column="1" Classes="btn-accent" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <icons:MaterialIcon Kind="Waveform" Width="20" Height="20" Foreground="{StaticResource ColorOnSecondary}"/>
+                    <TextBlock Text="Load from file" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource ColorOnSecondary}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+
     </Grid>
 </UserControl>
