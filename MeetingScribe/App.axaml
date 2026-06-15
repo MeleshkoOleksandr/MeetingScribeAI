@@ -21,6 +21,9 @@
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <views:SettingsView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ActiveMeetingViewModel}">
+            <views:ActiveMeetingView/>
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Resources>

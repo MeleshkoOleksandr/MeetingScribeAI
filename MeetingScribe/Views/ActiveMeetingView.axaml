@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="MeetingScribe.Views.ActiveMeetingView"
+             x:DataType="vm:ActiveMeetingViewModel">
+    
+    <Grid RowDefinitions="Auto, *, Auto">
+        
+        <!-- HEADER -->
+        <Border Grid.Row="0" Padding="24,20" BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="15">
+                    <Ellipse Width="10" Height="10" Fill="#FF5252"/> <!-- Live Dot -->
+                    <TextBlock Text="{Binding MeetingName}" FontSize="20" FontWeight="Bold"/>
+                    <Border Background="{StaticResource BrushSurfaceContainerHigh}" CornerRadius="20" Padding="12,4">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                             <materialIcons:MaterialIcon Kind="Translate" Width="14" Foreground="{StaticResource BrushSecondary}"/>
+                             <TextBlock Text="English (US)" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="10">
+                    <!-- Avatars placeholder -->
+                    <materialIcons:MaterialIcon Kind="DotsVertical" Foreground="Gray"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- TRANSCRIPTION AREA -->
+        <ScrollViewer Grid.Row="1" Padding="40,30">
+            <ItemsControl ItemsSource="{Binding TranscriptLines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="100, *" Margin="0,0,0,25">
+                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Text}" 
+                                       TextWrapping="Wrap" FontSize="16" LineHeight="24"
+                                       Foreground="{Binding IsAiAnalyzing, Converter={StaticResource AiTextBrushConverter}}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>

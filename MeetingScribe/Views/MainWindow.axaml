@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MeetingScribe.ViewModels"
         xmlns:uilog="using:MeetingScribe.UILogic"
+        xmlns:controls="using:MeetingScribe.Views.Controls"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="MeetingScribe.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -96,7 +97,8 @@
                     </Grid>
                 </Border>
                 <!-- TOP DIVIDER -->
-                <Border Grid.Row="3" Classes="divider-h" Margin="15,50"/>
+                <Border Grid.Row="1" Classes="divider-h" 
+                Margin="0,10" HorizontalAlignment="Center"/>
                 <!-- Navigation Menu -->
                 <ListBox Grid.Row="2"
                          Background="Transparent" BorderThickness="0"
@@ -153,8 +155,12 @@
                 </DockPanel>
             </Border>
 
-            <!-- Dynamic Content Area -->
-            <ContentControl Grid.Row="1" Content="{Binding CurrentPage}"/>
+            <Grid Grid.Row="1" RowDefinitions="*, Auto">
+                <!--Dynamic Content Area - Main App Info-->
+                <ContentControl Grid.Row="0" Content="{Binding CurrentPage}" />
+                <!--Live recording meeting control -->
+                <controls:AudioBottomBar Grid.Row="1" IsVisible="{Binding IsRecording}" />
+            </Grid>
 
         </Grid>
 

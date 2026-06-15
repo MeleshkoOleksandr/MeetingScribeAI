@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="MeetingScribe.Views.Controls.AudioBottomBar"
+             x:DataType="vm:MainWindowViewModel"> <!-- Мы привяжем его к главной VM -->
+
+    <Border Height="80" Background="{StaticResource BrushSurfaceContainerLow}" 
+            BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0" Padding="24,0">
+        <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto">
+            
+            <!-- 1. Таймер (Elapsed Time) -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="120">
+                <TextBlock Text="ELAPSED TIME" Classes="label-caps" Opacity="0.5"/>
+                <TextBlock Text="{Binding ElapsedTime}" FontSize="24" FontWeight="Bold" Foreground="White"/>
+            </StackPanel>
+
+            <!-- 2. Схематичная волна (Waveform) -->
+            <Canvas Grid.Column="1" Margin="30,20" Background="#0C0F09" ClipToBounds="True">
+                <!-- Здесь позже будет наш кастомный отрисовщик волны -->
+                <TextBlock Text="Audio Stream Active..." Foreground="{StaticResource BrushPrimary}" 
+                           FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.3"/>
+            </Canvas>
+
+            <!-- 3. Основные кнопки управления -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Classes="btn-icon" Width="44" Height="44" BorderThickness="1" BorderBrush="{StaticResource BrushOutlineVariant}">
+                    <materialIcons:MaterialIcon Kind="Pause" Width="20"/>
+                </Button>
+                
+                <Button Classes="btn-stop" Command="{Binding StopRecordingCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <materialIcons:MaterialIcon Kind="Stop" Width="18"/>
+                        <TextBlock Text="Stop Recording" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <!-- 4. Индикатор микрофона -->
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="24,0" Spacing="10" VerticalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="Microphone" Foreground="{StaticResource BrushOnSurfaceVariant}" Width="18"/>
+                <ProgressBar Value="35" Width="80" Height="4" Foreground="{StaticResource BrushSecondary}" Background="#222"/>
+            </StackPanel>
+
+            <!-- 5. Кнопка Маркера -->
+            <Button Grid.Column="4" Classes="btn-secondary" Padding="12,6">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                     <materialIcons:MaterialIcon Kind="BookmarkPlusOutline" Width="16"/>
+                     <TextBlock Text="Marker" FontSize="13"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>
