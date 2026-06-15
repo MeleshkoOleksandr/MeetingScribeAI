@@ -17,7 +17,7 @@ obj/
 
 ## --- AI Models ---
 *.bin
-*.onnx
+## *.onnx
 *.mlmodel
 
 ## --- Audio & Transcripts ---
