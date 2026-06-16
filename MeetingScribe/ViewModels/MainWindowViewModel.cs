@@ -17,19 +17,37 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // Navigation state
     [ObservableProperty] private ViewModelBase _currentPage;
-    [ObservableProperty] private NavigationItem? _selectedMenuItem;
     [ObservableProperty] private bool _isSidebarExpanded = true;
+
+    // We use a custom property for SelectedMenuItem to prevent unwanted null assignment from UI.
+    private NavigationItem? _selectedMenuItem;
+    public NavigationItem? SelectedMenuItem
+    {
+        get => _selectedMenuItem;
+        set
+        {
+            // Ignore null if we already have a selection to prevent multi-list conflicts
+            if (value == null && _selectedMenuItem != null) return;
+
+            if (SetProperty(ref _selectedMenuItem, value))
+            {
+                // Call the regular method instead of a partial one
+                HandleNavigation(value);
+            }
+        }
+    }
 
     // Audio recording state
     [ObservableProperty] private bool _isRecording;
     [ObservableProperty] private string _elapsedTime = "00:00:00";
 
+    // List of pages used in app (static and temporary) and there methods 
+    public PageList PageList { get; } = new();
+
 
     // -- ══════ Navigation  ══════ --//
 
-    public PageList PageList { get; } = new();
-
-    partial void OnSelectedMenuItemChanged(NavigationItem? value)
+    private void HandleNavigation(NavigationItem? value)
     {
         if (value == null) return;
         CurrentPage = value.Page;
