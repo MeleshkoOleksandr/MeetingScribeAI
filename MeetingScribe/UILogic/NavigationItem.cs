@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MeetingScribe.ViewModels;
 
 namespace MeetingScribe.UILogic;
 
@@ -9,4 +10,5 @@ public partial class NavigationItem : ObservableObject
     public PageNames Target { get; set; } 
     public string Description { get; set; } = "";
     public bool IsStartUp { get; set; } = false;
+    public required ViewModelBase Page { get; set; }
 }

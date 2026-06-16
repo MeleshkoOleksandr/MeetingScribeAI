@@ -35,9 +35,10 @@
                     <DataTemplate>
                         <Grid ColumnDefinitions="100, *" Margin="0,0,0,25">
                             <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
-                            <TextBlock Grid.Column="1" Text="{Binding Text}" 
+                            <!--<TextBlock Grid.Column="1" Text="{Binding Text}" 
                                        TextWrapping="Wrap" FontSize="16" LineHeight="24"
-                                       Foreground="{Binding IsAiAnalyzing, Converter={StaticResource AiTextBrushConverter}}"/>
+                                       Foreground="{Binding IsAiAnalyzing, Converter={StaticResource AiTextBrushConverter}}"
+                                       />-->
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

@@ -7,8 +7,8 @@
         x:Class="MeetingScribe.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
 
-        Width="1280" Height="800"
-        MinWidth="800" MinHeight="750"
+        Width="1280" Height="850"
+        MinWidth="1000" MinHeight="820"
 
         Title="MeetingScribe"
         Icon="/Assets/Images/Logo_main.ico"
@@ -61,11 +61,10 @@
         LEFT SIDEBAR
         ──────────────────────────────────────── -->
         <Border Grid.Column="0" Classes="sidebar"
-                PointerPressed="TitleBar_PointerPressed"
                 Width="{Binding IsSidebarExpanded, Converter={StaticResource SidebarWidthConverter}}">
-            <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, 90">
                 <!-- AREA LOGO & TOGGLE -->
-                <Border Grid.Row="0" Height="70">
+                <Border Grid.Row="0" Height="70" PointerPressed="TitleBar_PointerPressed">
                     <Grid>
                         <!-- MAIN TOGGLE BUTTON (≡) -->
                         <Button Command="{Binding ToggleSidebarCommand}"
@@ -97,12 +96,11 @@
                     </Grid>
                 </Border>
                 <!-- TOP DIVIDER -->
-                <Border Grid.Row="1" Classes="divider-h" 
-                Margin="0,10" HorizontalAlignment="Center"/>
+                <Border Grid.Row="1" Background="{StaticResource BrushOutlineVariant}"  Height="1" Margin="15,10" Opacity="0.6"/>
                 <!-- Navigation Menu -->
-                <ListBox Grid.Row="2"
-                         Background="Transparent" BorderThickness="0"
-                         ItemsSource="{Binding MenuItems}"
+                <!-- Main ListBox (Static Items) -->
+                <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0"
+                         ItemsSource="{Binding PageList.MenuItems}"
                          SelectedItem="{Binding SelectedMenuItem}"
                          ItemTemplate="{StaticResource MenuItemTemplate}">
                     <ListBox.Styles>
@@ -110,7 +108,28 @@
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Background" Value="Transparent"/>
                         </Style>
-                        <!-- Selection styles -->
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+                        </Style>
+                    </ListBox.Styles>
+                </ListBox>
+
+                <!--  Dynamic Divider (Visible only if TemporaryItems is not empty) -->
+                <Border Grid.Row="3" Background="{StaticResource BrushOutlineVariant}"  Height="1" Margin="15,10" Opacity="0.6"
+                        IsVisible="{Binding !!PageList.TemporaryItems.Count}"/>
+
+                <!--  Temporary ListBox (Active Meetings / Recordings) -->
+                <ListBox Grid.Row="4" Background="Transparent" BorderThickness="0"
+                         ItemsSource="{Binding PageList.TemporaryItems}"
+                         SelectedItem="{Binding SelectedMenuItem}"
+                         ItemTemplate="{StaticResource MenuItemTemplate}">
+                    <!-- Styles same as main ListBox -->
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
                         <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
                             <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
@@ -118,7 +137,7 @@
                     </ListBox.Styles>
                 </ListBox>
                 <!-- BOTTOM DIVIDER -->
-                <Border Grid.Row="3" Classes="divider-h" Margin="15,50"/>
+                <Border Grid.Row="5" Classes="divider-h" Margin="15,10" Opacity="0.6"/>
                 <!-- OPTIONAL BOTTOM CONTENT-->
             </Grid>
         </Border>

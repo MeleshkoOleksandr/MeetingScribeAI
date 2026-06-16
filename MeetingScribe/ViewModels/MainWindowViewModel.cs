@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MeetingScribe.UILogic;
+using MeetingScribe.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +13,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    //  -- ══════ Fields & Properties  ══════ --//
+
     // Navigation state
     [ObservableProperty] private ViewModelBase _currentPage;
     [ObservableProperty] private NavigationItem? _selectedMenuItem;
@@ -23,66 +26,25 @@ public partial class MainWindowViewModel : ViewModelBase
 
 
     // -- ══════ Navigation  ══════ --//
-    public List<NavigationItem> AllPages { get; } = new()
-    {
-        // Start Pages
-        new NavigationItem { Label = "New Meeting", Icon = "PlusCircleOutline", Target = PageNames.New, Description = "Create new meeting", IsStartUp = true },
-        new NavigationItem { Label = "Meeting Archive", Icon = "ArchiveOutline", Target = PageNames.Archive, Description = "View history" , IsStartUp = true},
-        new NavigationItem { Label = "Settings", Icon = "CogOutline", Target = PageNames.Settings, Description = "Configuration", IsStartUp = true },
-        new NavigationItem { Label = "Team", Icon = "AccountMultipleOutline", Target = PageNames.Team, Description = "Participant list", IsStartUp = true },
-        // Other
-        new NavigationItem { Label = "Meeting Recording", Icon = "Waveform", Target = PageNames.Recording, Description = "Meeting name", IsStartUp = false }
-    };
 
-    // Menu items for navigation
-    public ObservableCollection<NavigationItem> MenuItems => new(AllPages.Where(p => p.IsStartUp));
+    public PageList PageList { get; } = new();
 
-    // Automatically switch page when SelectedMenuItem changes
     partial void OnSelectedMenuItemChanged(NavigationItem? value)
     {
         if (value == null) return;
-        Navigate(value.Target);
+        CurrentPage = value.Page;
     }
 
     // Logic for programmatic navigation
-    private void Navigate(PageNames targetPage)
+    private void Navigate(NavigationItem page)
     {
-        var navItem = AllPages.FirstOrDefault(p => p.Target == targetPage);
-        if (navItem == null) return;
-
-        // Update the ViewModel
-        CurrentPage = targetPage switch
-        {
-            PageNames.New => new NewMeetingViewModel(),
-            PageNames.Archive => new ArchiveViewModel(),
-            PageNames.Settings => new SettingsViewModel(),
-            PageNames.Team => new TeamViewModel(),
-            PageNames.Recording => new ActiveMeetingViewModel(), // Our live page
-            _ => CurrentPage
-        };
-
-        // Sync Sidebar selection (important for UI highlight)
-        SelectedMenuItem = navItem;
+        SelectedMenuItem = page;
     }
 
-
-    // Triggered automatically by CommunityToolkit when IsRecording changes
-    partial void OnIsRecordingChanged(bool value)
+    public void Navigate(PageNames target)
     {
-        var recordingItem = AllPages.First(p => p.Target == PageNames.Recording);
-
-        if (value) // Recording started
-        {
-            if (!MenuItems.Contains(recordingItem))
-                MenuItems.Add(recordingItem);
-
-            Navigate(PageNames.Recording);
-        }
-        else // Recording stopped
-        {
-            MenuItems.Remove(recordingItem);
-            Navigate(PageNames.Archive); // Go to archive after stop
-        }
+        var item = PageList.GetByTarget(target);
+        if (item != null) SelectedMenuItem = item;
     }
 
     [RelayCommand]
@@ -90,14 +52,50 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // -- ══════ Recording  ══════ --//
 
+    // Logic for Recording Trigger
+    partial void OnIsRecordingChanged(bool value)
+    {
+        //var recordingItem = AllPages.First(p => p.Target == PageNames.Recording);
+
+        if (value)
+        {
+            //if (!TemporaryItems.Contains(recordingItem))
+            //    TemporaryItems.Add(recordingItem);
+
+            // Navigate(PageNames.Recording);
+
+            StartRecording();
+        }
+        else
+        {
+            // TemporaryItems.Remove(recordingItem);
+            //Navigate(PageNames.New); // Go back after stop
+
+            StopRecording();
+        }
+    }
+
     [RelayCommand]
     private void StartRecording()
     {
-        IsRecording = true;
-        // Переключаемся на страницу Live-транскрипции
-        // Navigate("ActiveMeeting");
-    }
+        // Проверяем, нет ли уже такой страницы в списке
+        var recordingPage = PageList.GetByTarget(PageNames.Recording);
 
+        if (recordingPage == null)
+        {
+            recordingPage = new NavigationItem
+            {
+                Label = "Live Recording",
+                Icon = "Waveform",
+                Target = PageNames.Recording,
+                Page = new ActiveMeetingViewModel() // Создаем свежую страницу
+            };
+            PageList.AddTemporaryItem(recordingPage);
+        }
+
+        IsRecording = true;
+        Navigate(recordingPage);
+    }
 
 
     [RelayCommand]
@@ -112,7 +110,20 @@ public partial class MainWindowViewModel : ViewModelBase
     // -- ══════ Constructor  ══════ --//
     public MainWindowViewModel()
     {
-        _currentPage = new NewMeetingViewModel();
-        SelectedMenuItem = MenuItems[0]; // Select first item by default
+        _currentPage = PageList.startPage;
+
+        NavigationItem newRecording = new NavigationItem
+        {
+            Label = "Meeting Recording",
+            Icon = "Waveform",
+            Target = PageNames.Recording,
+            Description = "Meeting name",
+            IsStartUp = false,
+            Page = new ActiveMeetingViewModel()
+        };
+
+        PageList.AddTemporaryItem(newRecording);
+        Navigate(newRecording);
+
     }
 }
