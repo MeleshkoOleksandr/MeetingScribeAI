@@ -2,12 +2,80 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             x:DataType="vm:SettingsViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.SettingsView">
-   <Border Background="{StaticResource PanelBrush}" CornerRadius="10" Margin="20">
-        <TextBlock Text="SettingsView Content Placeholder" 
-                   VerticalAlignment="Center" 
-                   HorizontalAlignment="Center" 
-                   Foreground="White"/>
-    </Border>
+    <ScrollViewer Padding="10">
+        <StackPanel Spacing="10">
+
+            <!-- Card 1: General Settings -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <icons:MaterialIcon Kind="Cog" Foreground="{StaticResource BrushPrimary}"/>
+                        <TextBlock Text="General Settings" Classes="card-title"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="INTERFACE LANGUAGE" Classes="label-caps"/>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding Settings.TranscriptionLanguage}">
+                            <ComboBoxItem >Italiano</ComboBoxItem>
+                            <ComboBoxItem >English</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Speech Recognition Engine -->
+            <Border Classes="card">
+                <StackPanel Spacing="1">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <icons:MaterialIcon Kind="MicrophoneSettings" Foreground="{StaticResource BrushPrimary}"/>
+                        <TextBlock Text="Speech Recognition" Classes="card-title"/>
+                    </StackPanel>
+
+                    <!-- VAD Threshold -->
+                    <StackPanel Spacing="1" Margin="0,10,0,0" >
+                        <TextBlock Text="{Binding Settings.SpeechThreshold, StringFormat='VAD SENSITIVITY: \{0:F2\}'}"
+                                   Classes="label-caps"/>
+                        <Slider Value="{Binding Settings.SpeechThreshold}" Minimum="0.1" Maximum="0.9"
+                                IsSnapToTickEnabled="True" TickFrequency="0.05"  VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Silence Timeout-->
+                    <StackPanel Spacing="1">
+                        <TextBlock Text="{Binding Settings.SilenceTimeoutMs, StringFormat='PAUSE DURATION: \{0:D3\}'}"
+                                   Classes="label-caps"/>
+                        <Slider Value="{Binding Settings.SilenceTimeoutMs}" Minimum="100" Maximum="2000"
+                                IsSnapToTickEnabled="True" TickFrequency="10" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Audio Gain -->
+                    <StackPanel Spacing="1">
+                        <TextBlock Text="{Binding Settings.AudioGain, StringFormat='MIC BOOST (Gain): \{0:F1\}'}"
+                                   Classes="label-caps"/>
+                        <Slider Value="{Binding Settings.AudioGain}" Minimum="1.0" Maximum="10.0"
+                                IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Model Selection -->
+                    <StackPanel Spacing="1">
+                        <TextBlock Text="WHISPER MODEL" Classes="label-caps"/>
+                        <ComboBox ItemsSource="{Binding AvailableModels}"
+                                  SelectedItem="{Binding SelectedModelItem}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

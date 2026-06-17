@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- ══════════════════════════════════════════
     WINDOW
@@ -317,6 +318,48 @@
     <Style Selector="ScrollBar /template/ Thumb">
         <Setter Property="Background"   Value="{StaticResource BrushSurfaceBright}"/>
         <Setter Property="CornerRadius" Value="{StaticResource RadiusFull}"/>
+    </Style>
+
+    <!-- ══════════════════════════════════════════
+    Slider
+    ══════════════════════════════════════════ -->
+    <Style Selector="Slider">
+        <Style.Resources>
+            <!-- Colors in their normal state -->
+            <SolidColorBrush x:Key="SliderTrackValueFill" Color="{StaticResource ColorPrimary}" />        <!-- Left -->
+            <SolidColorBrush x:Key="SliderTrackFill" Color="{StaticResource ColorSurfaceContainerHigh}" /> <!-- Right -->
+            <SolidColorBrush x:Key="SliderThumbBackground" Color="{StaticResource ColorPrimary}" />       <!-- circle -->
+            <!-- Hover colors (PointerOver) -->
+            <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="{StaticResource ColorPrimary}" />
+            <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#9ccc65" />
+            <!-- Colors when pressed/moved (Pressed) -->
+            <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="{StaticResource ColorPrimary}" />
+            <SolidColorBrush x:Key="SliderTrackFillPressed" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{StaticResource ColorPrimary}" />
+        </Style.Resources>
+
+        <!-- GEOMETRY (Track Thickness and Circle Size) -->
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Padding" Value="0,4"/> <!-- minimum padding -->
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Slider /template/ Grid#SliderContainer">
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <!-- An extra safety net for the circle (sometimes resources aren't picked up) -->
+    <Style Selector="Slider /template/ Thumb">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Slider:pointerover /template/ Thumb">
+        <Setter Property="Background" Value="#9ccc65" />
+    </Style>
+    <Style Selector="Slider:pressed /template/ Thumb">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}" />
     </Style>
 
 </Styles>
