@@ -1,0 +1,34 @@
+[
+    {
+        "Code": "it",
+        "Name": "Italian"
+    },
+    {
+        "Code": "en",
+        "Name": "English"
+    },
+    {
+        "Code": "de",
+        "Name": "Deutsch"
+    },
+    {
+        "Code": "fr",
+        "Name": "Français"
+    },
+    {
+        "Code": "es",
+        "Name": "Spanish"
+    },
+    {
+        "Code": "ua",
+        "Name": "Ukrainian"
+    },
+    {
+        "Code": "ru",
+        "Name": "Russian"
+    },
+    {
+        "Code": "auto",
+        "Name": "Auto Detect"
+    }
+]

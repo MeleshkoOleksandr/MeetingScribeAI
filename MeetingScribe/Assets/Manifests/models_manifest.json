@@ -1,0 +1,22 @@
+[
+    {
+        "Name": "Base",
+        "FileName": "ggml-base.bin"
+    },
+    {
+        "Name": "Small",
+        "FileName": "ggml-small.bin"
+    },
+    {
+        "Name": "Medium",
+        "FileName": "ggml-medium.bin"
+    },
+    {
+        "Name": "Large Turbo (Accurate)",
+        "FileName": "ggml-large-v3-turbo.bin"
+    },
+    {
+        "Name": "Large Turbo q8 (Fast)",
+        "FileName": "ggml-large-v3-turbo-q8_0.bin"
+    }
+]
