@@ -28,26 +28,16 @@ public partial class SettingsViewModel : ViewModelBase
         {
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "models_manifest.json");
 
-            if (!File.Exists(path))
-            {
-                // Если файла нет, создаем дефолтный список, чтобы UI не был пустым
-                AvailableModels = new ObservableCollection<ModelManifest> {
-                new ModelManifest { Name = "Default (No manifest found)", FileName = "default.bin" }
-            };
-                return;
-            }
-
+            if (!File.Exists(path)) return;
+           
             var json = File.ReadAllText(path);
             var models = JsonSerializer.Deserialize<List<ModelManifest>>(json);
 
             if (models != null)
             {
                 AvailableModels = new ObservableCollection<ModelManifest>(models);
-
-                // 2. Важно: Ищем модель в списке, сравнивая FileName
-                // Мы должны найти ТОТ ЖЕ объект, который лежит в коллекции AvailableModels
-                SelectedModelItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedModel)
-                                   ?? AvailableModels.FirstOrDefault();
+                // Search for a model in the list by comparing FileName
+                SelectedModelItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedModel) ?? AvailableModels.FirstOrDefault();
             }
         }
         catch (Exception ex)

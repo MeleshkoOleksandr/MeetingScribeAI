@@ -1,3 +1,4 @@
+using MeetingScribe.UILogic;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -40,11 +41,18 @@ public class TranscriptionService : IDisposable
     // --- Constants ---
     private const int SampleRate = 16000;
 
-    private const string Language = "it"; // Change to "it", "ru" or "auto" as needed
-    private const float SpeechThreshold = 0.3f;    // VAD sensitivity (0.0 to 1.0)
-    private const int SilenceTimeoutMs = 600;     // Pause duration to trigger transcription
-    private const float AudioGain = 5.0f;          // Boost for quiet microphones
+    //private const string Language = "it"; // Change to "it", "ru" or "auto" as needed
+    //private const float SpeechThreshold = 0.3f;    // VAD sensitivity (0.0 to 1.0)
+    //private const int SilenceTimeoutMs = 600;     // Pause duration to trigger transcription
+    //private const float AudioGain = 5.0f;          // Boost for quiet microphones
 
+    // --- Properties ---
+    public string? CurrentMeetingFolder { get; set; }
+    public AppSettings ActiveSettings { get; set; } = new();
+
+    // Allow MainWindowViewModel to listen for raw audio to save the FULL record
+    public event Action<float[]>? RawAudioCaptured;
+ 
     /// <summary>
     /// Loads AI models and initializes engines.
     /// </summary>
@@ -62,7 +70,7 @@ public class TranscriptionService : IDisposable
             // Initialize Whisper Factory and Processor
             _whisperFactory = WhisperFactory.FromPath(whisperModelPath);
             _whisperProcessor = _whisperFactory.CreateBuilder()
-                .WithLanguage(Language) // Change to "it", "ru" or "auto" as needed
+                .WithLanguage(ActiveSettings.TranscriptionLanguage) // Change to "it", "ru" or "auto" as needed
                 .WithThreads(2)
                 .Build();
 
@@ -159,7 +167,7 @@ public class TranscriptionService : IDisposable
                 // Run VAD Engine
                 float prob = _vadDetector?.IsSpeechProbability(samples) ?? 0f;
 
-                if (prob > SpeechThreshold)
+                if (prob > ActiveSettings.SpeechThreshold)
                 {
                     if (!_isSpeakingNow) _isSpeakingNow = true;
                     _silenceSamplesCount = 0;
@@ -173,7 +181,7 @@ public class TranscriptionService : IDisposable
 
                     double silenceMs = (_silenceSamplesCount / (double)SampleRate) * 1000;
 
-                    if (silenceMs >= SilenceTimeoutMs)
+                    if (silenceMs >= ActiveSettings.SilenceTimeoutMs)
                     {
                         // Phrase finished -> Send to Whisper
                         _isSpeakingNow = false;
@@ -204,6 +212,9 @@ public class TranscriptionService : IDisposable
     private async Task TranscribeAsync(float[] audioData, CancellationToken token)
     {
         if (_whisperProcessor == null) return;
+
+        // --- Debug --- Save recording chunks
+        SaveDebugSegment(audioData);
 
         // Ensure only one transcription runs at a time on the GPU/CPU
         await _whisperSemaphore.WaitAsync(token);
@@ -239,11 +250,25 @@ public class TranscriptionService : IDisposable
         for (int i = 0; i < sampleCount; i++)
         {
             short sample = BitConverter.ToInt16(buffer, i * 2);
-            float normalized = sample / 32768.0f;
-            float boosted = normalized * AudioGain;
+            // Use ActiveSettings.AudioGain here
+            float boosted = (sample / 32768.0f) * ActiveSettings.AudioGain;
             samples[i] = Math.Clamp(boosted, -1.0f, 1.0f);
         }
+        // Push to anyone listening for the full recording
+        RawAudioCaptured?.Invoke(samples);
         return samples;
+    }
+
+    private void SaveDebugSegment(float[] samples)
+    {
+        if (string.IsNullOrEmpty(CurrentMeetingFolder)) return;
+
+        string debugDir = Path.Combine(CurrentMeetingFolder, "DebugChunks");
+        Directory.CreateDirectory(debugDir); // Ensure exists
+
+        string fileName = $"{DateTime.Now:HH-mm-ss-fff}.wav";
+        using var writer = new WaveFileWriter(Path.Combine(debugDir, fileName), new WaveFormat(16000, 16, 1));
+        writer.WriteSamples(samples, 0, samples.Length);
     }
 
     public void Dispose()

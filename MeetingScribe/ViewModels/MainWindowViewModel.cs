@@ -1,15 +1,16 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
-using MeetingScribe.Views;
+using NAudio.Wave;
+
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -43,7 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     //   ---   Audio recording and speech recognition state
-
     private readonly TranscriptionService _transcriptionService = new();
     private DispatcherTimer? _timer;
     private DateTime _startTime;
@@ -52,6 +52,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _elapsedTime = "00:00:00";
     [ObservableProperty] private bool _isRecording;
     [ObservableProperty] private bool _isPaused;
+
+    //   ---   Meeting archive state
+    private string _currentMeetingFolderPath = "";
+    private WaveFileWriter? _fullAudioWriter;
 
 
     // -- ══════ Navigation  ══════ --//
@@ -77,56 +81,81 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
 
-    // -- ══════ Recording  ══════ --//
+    // -- ══════ Meetings functions & Recording  ══════ --//
 
     // Command triggered by the "Start Recording" button in NewMeetingView
     [RelayCommand]
     private async Task StartMeeting()
     {
-        // 1. Check if we are currently on the New Meeting setup page
+        // Check if we are currently on the New Meeting setup page
         if (CurrentPage is not NewMeetingViewModel setupPage) return;
 
         try
         {
-            // 2. Extract session data (Name, Description, Language) from the form
+            //  Get Settings from the Settings Page
+            var settingsItem = PageList.GetByTarget(PageNames.Settings);
+            var settingsVm = settingsItem?.Page as SettingsViewModel;
             _currentSession = setupPage.GetSessionData();
 
-            // 3. Prepare AI Model Paths
-            // Ensure these folders and files exist in your Output directory!
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string whisperPath = Path.Combine(baseDir, "Assets", "WhisperModels", "ggml-large-v3-turbo.bin");
-            string vadPath = Path.Combine(baseDir, "Assets", "Models", "silero_vad.onnx");
+            //  Setup Session & Folder
+            var activeSettings = settingsVm?.Settings ?? new AppSettings();
+            activeSettings.TranscriptionLanguage = _currentSession.Language;
+            string datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            string folderName = _currentSession.Name;
+            string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
+            string sessionFolder = Path.Combine(archiveRoot, folderName);
+            if (!Directory.Exists(sessionFolder)) Directory.CreateDirectory(sessionFolder);
 
-            // 4. Initialize Whisper and VAD engines
+            // Configure Service
+            _transcriptionService.ActiveSettings = activeSettings;
+            _transcriptionService.CurrentMeetingFolder = sessionFolder;
+
+            // Full Audio Recording Setup
+            string fullAudioPath = Path.Combine(sessionFolder, "full_audio.wav");
+            var audioWriter = new WaveFileWriter(fullAudioPath, new WaveFormat(16000, 16, 1));
+            _transcriptionService.RawAudioCaptured += (samples) => audioWriter.WriteSamples(samples, 0, samples.Length);
+
+            // Prepare AI Model Paths
+            // Ensure these folders and files exist in your Output directory!
+            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", activeSettings.SelectedModel);
+            string vadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Models", "silero_vad.onnx");
+
+            // Initialize Whisper and VAD engines
             // This might take a few seconds depending on GPU/CPU speed
             await _transcriptionService.InitializeAsync(whisperPath, vadPath);
 
-            // 5. Create the Live Page (ActiveMeetingViewModel)
-            var activeVm = new ActiveMeetingViewModel(_currentSession.Name);
+            // Prepare Folders
+            PrepareMeetingFolder(_currentSession.Name);
+            // Initialize Full Audio Recording
+            string audioPath = Path.Combine(_currentMeetingFolderPath, "full_record.wav");
+            _fullAudioWriter = new WaveFileWriter(audioPath, new WaveFormat(16000, 16, 1));
 
-            // 6. Create a Temporary Navigation Item for the Sidebar
+            // Create the Live Page (ActiveMeetingViewModel)
+            var activeVm = new ActiveMeetingViewModel(_currentSession.Name);
+            // Create a Temporary Navigation Item for the Sidebar
             var liveNavItem = new NavigationItem
             {
-                Label = "Recording...",
+                Label = "Meeting Recording",
                 Icon = "Waveform",
                 Target = PageNames.Recording,
-                Page = activeVm,
-                IsStartUp = false
+                Description = _currentSession.Name,
+                IsStartUp = false,
+                Page = activeVm
             };
 
-            // 7. Add to the dynamic sidebar list and navigate to it
+            // Add to the dynamic sidebar list and navigate to it
             PageList.AddTemporaryItem(liveNavItem);
             Navigate(liveNavItem);
 
-            // 8. Subscribe to transcription events
+            // Subscribe to transcription events
             // We use a separate method to handle incoming text segments
             _transcriptionService.TranscriptionUpdated -= OnNewTextReceived; // Clean up old subs
             _transcriptionService.TranscriptionUpdated += OnNewTextReceived;
 
-            // 9. Start the Audio Engine and VAD loop
+            // Start the Audio Engine and VAD loop
             _transcriptionService.Start();
 
-            // 10. Start the Elapsed Time timer
+            // Start the Elapsed Time timer
             _startTime = DateTime.Now;
             _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _timer.Tick += (s, e) =>
@@ -136,14 +165,13 @@ public partial class MainWindowViewModel : ViewModelBase
             };
             _timer.Start();
 
-            // 11. Trigger UI state (Shows the Bottom Control Bar)
+            // Trigger UI state (Shows the Bottom Control Bar)
             IsRecording = true;
             IsPaused = false;
         }
         catch (Exception ex)
         {
             // Log or show error (e.g., if models are missing or GPU failed)
-            // You can add a 'StatusText' property to show this on UI
             System.Diagnostics.Debug.WriteLine($"Error starting meeting: {ex.Message}");
         }
     }
@@ -163,22 +191,45 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void StopMeeting()
     {
+        // Stop the transcription and audio recording
+        IsRecording = false;
         _transcriptionService.Stop();
         _timer?.Stop();
-        IsRecording = false;
+        _fullAudioWriter?.Dispose();
+        _fullAudioWriter = null;
 
+        // Finalize the session data and save it as JSON in the meeting folder
         if (_currentSession != null && CurrentPage is ActiveMeetingViewModel activeVm)
         {
             // Save the transcript to the session object
             _currentSession.FullTranscript = activeVm.TranscriptLines.ToList();
             _currentSession.Duration = DateTime.Now - _startTime;
+
+            // Save Session as JSON
+            string jsonPath = Path.Combine(_currentMeetingFolderPath, "session_data.json");
+            string json = JsonSerializer.Serialize(_currentSession, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(jsonPath, json);
         }
 
         // Clean up UI
         var recordingItem = PageList.GetByTarget(PageNames.Recording);
         if (recordingItem != null) PageList.RemoveTemporaryItem(recordingItem);
 
+        //  Change later for a post-meeting review page instead of going back to archive directly
         Navigate(PageNames.Archive);
+    }
+
+    private void PrepareMeetingFolder(string meetingName)
+    {
+        // 1. Format date: [24-05-20] - Name
+        string datePrefix = DateTime.Now.ToString("yy-MM-dd");
+        string folderName = $"[{datePrefix}] - {meetingName}";
+
+        _currentMeetingFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive", folderName);
+
+        // Create directory if not exists
+        if (!Directory.Exists(_currentMeetingFolderPath))
+            Directory.CreateDirectory(_currentMeetingFolderPath);
     }
 
     [RelayCommand]
@@ -189,23 +240,10 @@ public partial class MainWindowViewModel : ViewModelBase
         else _transcriptionService.Start();
     }
 
-    // -- ══════ Constructor  ══════ --//
+
+     // -- ══════ Constructor  ══════ --//
     public MainWindowViewModel()
     {
         _currentPage = PageList.startPage;
-
-        //NavigationItem newRecording = new NavigationItem
-        //{
-        //    Label = "Meeting Recording",
-        //    Icon = "Waveform",
-        //    Target = PageNames.Recording,
-        //    Description = "Meeting name",
-        //    IsStartUp = false,
-        //    Page = new ActiveMeetingViewModel()
-        //};
-
-        //PageList.AddTemporaryItem(newRecording);
-        //Navigate(newRecording);
-
     }
 }
