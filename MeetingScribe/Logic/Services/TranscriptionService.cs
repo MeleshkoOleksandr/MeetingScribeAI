@@ -39,9 +39,11 @@ public class TranscriptionService : IDisposable
 
     // --- Constants ---
     private const int SampleRate = 16000;
+
+    private const string Language = "it"; // Change to "it", "ru" or "auto" as needed
     private const float SpeechThreshold = 0.3f;    // VAD sensitivity (0.0 to 1.0)
     private const int SilenceTimeoutMs = 600;     // Pause duration to trigger transcription
-    private const float AudioGain = 3.5f;          // Boost for quiet microphones
+    private const float AudioGain = 5.0f;          // Boost for quiet microphones
 
     /// <summary>
     /// Loads AI models and initializes engines.
@@ -60,8 +62,8 @@ public class TranscriptionService : IDisposable
             // Initialize Whisper Factory and Processor
             _whisperFactory = WhisperFactory.FromPath(whisperModelPath);
             _whisperProcessor = _whisperFactory.CreateBuilder()
-                .WithLanguage("en") // Change to "it", "ru" or "auto" as needed
-                .WithThreads(Environment.ProcessorCount)
+                .WithLanguage(Language) // Change to "it", "ru" or "auto" as needed
+                .WithThreads(2)
                 .Build();
 
             // Initialize Voice Activity Detector
@@ -194,6 +196,8 @@ public class TranscriptionService : IDisposable
         catch (OperationCanceledException) { /* Normal exit */ }
     }
 
+    StringBuilder test = new StringBuilder();
+
     /// <summary>
     /// Sends a detected speech segment to the Whisper engine.
     /// </summary>
@@ -216,6 +220,7 @@ public class TranscriptionService : IDisposable
             if (!string.IsNullOrWhiteSpace(finalResult))
             {
                 TranscriptionUpdated?.Invoke(finalResult);
+                 test.Append(finalResult + " -+-  ");
             }
         }
         finally

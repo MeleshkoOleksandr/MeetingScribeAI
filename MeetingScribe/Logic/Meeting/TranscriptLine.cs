@@ -1,4 +1,4 @@
-namespace MeetingScribe.UILogic;
+namespace MeetingScribe.Logic.Meeting;
 
 public class TranscriptLine
 {

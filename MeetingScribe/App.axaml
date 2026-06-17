@@ -34,6 +34,7 @@
             <!--  Converters  -->
             <conv:SidebarIconConverter x:Key="SidebarIconConverter"/>
             <conv:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+            <conv:PauseIconConverter x:Key="PauseIconConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

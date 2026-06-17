@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MeetingScribe.ViewModels"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
              x:Class="MeetingScribe.Views.NewMeetingView">
@@ -106,7 +107,8 @@
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="2*, 1*" ColumnSpacing="10">
-            <Button Grid.Column="0" Classes="btn-primary" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0">
+            <Button Grid.Column="0" Classes="btn-primary" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0"
+                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartMeetingCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <icons:MaterialIcon Kind="Microphone" Width="20" Height="20" Foreground="{StaticResource BrushOnPrimary}"/>
                     <TextBlock Text="Start Recording" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource BrushOnPrimary}" VerticalAlignment="Center"/>
