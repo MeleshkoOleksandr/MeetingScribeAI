@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:MeetingScribe.ViewModels"
+             x:DataType="vm:NewMeetingViewModel"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
              x:Class="MeetingScribe.Views.NewMeetingView">
@@ -18,17 +19,24 @@
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="MEETING NAME" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input" Text="Weekly Sync" Watermark="Enter meeting name…"/>
+                        <TextBox Classes="lumina-input"  PlaceholderText="Enter meeting name…"  Text="{Binding MeetingName}"/>
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input" Text="Discuss project updates..." Watermark="Add a description…" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                        <TextBox Classes="lumina-input" PlaceholderText="Add a description…" Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="LANGUAGE" Classes="label-caps"/>
-                        <ComboBox Classes="lumina-combo" SelectedIndex="0" HorizontalAlignment="Stretch">
-                            <ComboBoxItem>Italiano</ComboBoxItem>
-                            <ComboBoxItem>English</ComboBoxItem>
+                        <ComboBox Classes="lumina-combo"
+                                  HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding Languages}"
+                                  SelectedItem="{Binding SelectedLanguage}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>
@@ -41,14 +49,14 @@
                             <icons:MaterialIcon Kind="FormatListBulletedSquare" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
                             <TextBlock Text="Meeting Topics" Classes="card-title"/>
                         </StackPanel>
-                        <TextBlock Text="DISCUSSION POINTS" Classes="label-caps"/>
                     </StackPanel>
 
                     <TextBox Grid.Row="1" Classes="lumina-input"
-                             Watermark="Enter key topics to discuss..."
+                             PlaceholderText="Enter key topics to discuss..."
                              AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalAlignment="Stretch"
-                             VerticalContentAlignment="Top"/>
+                             VerticalContentAlignment="Top"
+                             Text="{Binding MeetingTopics}"/>
                 </Grid>
             </Border>
 

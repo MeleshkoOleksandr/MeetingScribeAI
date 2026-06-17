@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
+    <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-base.bin" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-large-v3-turbo-q8_0.bin" />
@@ -33,6 +35,15 @@
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Whisper.net" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Cuda12.Windows" Version="1.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\Manifests\languages_manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Manifests\models_manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
