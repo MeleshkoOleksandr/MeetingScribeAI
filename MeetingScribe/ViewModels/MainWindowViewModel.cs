@@ -113,19 +113,19 @@ public partial class MainWindowViewModel : ViewModelBase
             // Prepare Folders
             string folderName = _currentSession.Name;
             string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
-            string sessionFolder = Path.Combine(archiveRoot, folderName);
-            if (!Directory.Exists(sessionFolder)) Directory.CreateDirectory(sessionFolder);
+            _currentMeetingFolderPath = Path.Combine(archiveRoot, folderName);
+            if (!Directory.Exists(_currentMeetingFolderPath)) Directory.CreateDirectory(_currentMeetingFolderPath);
 
             // Configure Service
             _transcriptionService.ActiveSettings = CurrentSettings;
-            _transcriptionService.CurrentMeetingFolder = sessionFolder;
+            _transcriptionService.CurrentMeetingFolder = _currentMeetingFolderPath;
 
             // Initialize Full Audio Recording
-            string fullAudioPath = Path.Combine(sessionFolder, "full_record.wav");
+            string fullAudioPath = Path.Combine(_currentMeetingFolderPath, "full_record.wav");
             _fullAudioWriter = new WaveFileWriter(fullAudioPath, new WaveFormat(16000, 16, 1));
             _transcriptionService.RawAudioCaptured += (samples) => _fullAudioWriter.WriteSamples(samples, 0, samples.Length);
             // Gained audio recording
-            string boostedAudioPath = Path.Combine(sessionFolder, "boosted_record.wav");
+            string boostedAudioPath = Path.Combine(_currentMeetingFolderPath, "boosted_record.wav");
             _boostedAudioWriter = new WaveFileWriter(boostedAudioPath, new WaveFormat(16000, 16, 1));
             _transcriptionService.BoostedAudioCaptured += (samples) => _boostedAudioWriter.WriteSamples(samples, 0, samples.Length);
 

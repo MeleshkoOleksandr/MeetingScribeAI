@@ -15,7 +15,9 @@ public partial class SettingsViewModel : ViewModelBase
     // --- Observables ---
     [ObservableProperty] private AppSettings _settings = new();
     [ObservableProperty] private ObservableCollection<ModelManifest> _availableModels = new();
+    //[ObservableProperty] private ObservableCollection<ModelManifest> _availableModelsPost = new();
     [ObservableProperty] private ModelManifest? _selectedModelItem;
+    [ObservableProperty] private ModelManifest? _selectedModelAccItem;
 
     public SettingsViewModel()
     {
@@ -36,8 +38,10 @@ public partial class SettingsViewModel : ViewModelBase
             if (models != null)
             {
                 AvailableModels = new ObservableCollection<ModelManifest>(models);
+               // AvailableModelsPost = new ObservableCollection<ModelManifest>(models);
                 // Search for a model in the list by comparing FileName
                 SelectedModelItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedModel) ?? AvailableModels.FirstOrDefault();
+                SelectedModelAccItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedAccModel) ?? AvailableModels.FirstOrDefault();
             }
         }
         catch (Exception ex)
@@ -50,5 +54,10 @@ public partial class SettingsViewModel : ViewModelBase
     partial void OnSelectedModelItemChanged(ModelManifest? value)
     {
         if (value != null) Settings.SelectedModel = value.FileName;
+    }
+
+    partial void OnSelectedModelAccItemChanged(ModelManifest? value)
+    {
+        if (value != null) Settings.SelectedAccModel = value.FileName;
     }
 }
