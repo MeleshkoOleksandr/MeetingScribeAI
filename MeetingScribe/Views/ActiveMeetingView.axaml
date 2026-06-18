@@ -16,7 +16,7 @@
                     <Border Background="{StaticResource BrushSurfaceContainerHigh}" CornerRadius="20" Padding="12,4">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <materialIcons:MaterialIcon Kind="Translate" Width="14" Foreground="{StaticResource BrushSecondary}"/>
-                            <TextBlock Text="English (US)" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MeetingLang}" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -29,15 +29,27 @@
         </Border>
 
         <!-- TRANSCRIPTION AREA -->
-        <ScrollViewer Grid.Row="1" Padding="40,30">
+        <ScrollViewer Name="TranscriptScrollViewer" Grid.Row="1" Padding="40,30">
             <ItemsControl ItemsSource="{Binding TranscriptLines}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnDefinitions="100, *" Margin="0,0,0,25">
-                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
+
+                            <!-- timecode -->
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Timestamp}"
+                                       Classes="timestamp"
+                                       VerticalAlignment="Top"
+                                       Margin="0,4,0,0"/>
+
+                            <!-- main text -->
                             <TextBlock Grid.Column="1"
                                        Text="{Binding Text}"
-                                       Foreground="White" />
+                                       TextWrapping="Wrap"
+                                       FontSize="16"
+                                       LineHeight="26"
+                                       Foreground="White"
+                                       VerticalAlignment="Top"/>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

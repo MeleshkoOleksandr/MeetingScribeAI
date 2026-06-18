@@ -139,7 +139,7 @@ public partial class MainWindowViewModel : ViewModelBase
             await _transcriptionService.InitializeAsync(whisperPath, vadPath);
 
             // Create the Live Page (ActiveMeetingViewModel)
-            var activeVm = new ActiveMeetingViewModel(_currentSession.Name);
+            var activeVm = new ActiveMeetingViewModel(_currentSession.Name, _currentSession.Language);
             // Create a Temporary Navigation Item for the Sidebar
             var liveNavItem = new NavigationItem
             {
@@ -257,7 +257,7 @@ public partial class MainWindowViewModel : ViewModelBase
      // -- ══════ Constructor  ══════ --//
     public MainWindowViewModel()
     {
-        _currentPage = PageList.startPage;
+        Navigate(PageNames.New);
         SetupTranscriptionStreaming();
     }
 }

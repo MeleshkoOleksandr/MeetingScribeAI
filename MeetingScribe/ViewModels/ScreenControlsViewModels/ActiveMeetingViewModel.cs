@@ -9,11 +9,13 @@ namespace MeetingScribe.ViewModels;
 public partial class ActiveMeetingViewModel : ViewModelBase
 {
     [ObservableProperty] private string _meetingName;
+    [ObservableProperty] private string _meetingLang;
     public ObservableCollection<TranscriptLine> TranscriptLines { get; } = new();
 
-    public ActiveMeetingViewModel(string name)
+    public ActiveMeetingViewModel(string name, string meetingLang)
     {
         MeetingName = name;
+        MeetingLang = meetingLang;
     }
 
     public void AddLine(string time, string text)

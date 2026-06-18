@@ -61,7 +61,7 @@
                                       Background="#222"/>
                      </StackPanel>
 
-                     <!-- Кнопка Маркера -->
+                     <!-- Marker Button -->
                      <Button Grid.Column="4" Classes="btn-secondary" Padding="12,6">
                          <StackPanel Orientation="Horizontal" Spacing="6">
                              <icons:MaterialIcon Kind="BookmarkPlusOutline" Width="16"/>
