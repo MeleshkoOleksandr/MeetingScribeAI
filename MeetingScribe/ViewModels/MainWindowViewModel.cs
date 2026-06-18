@@ -8,6 +8,7 @@ using MeetingScribe.UILogic;
 using NAudio.Wave;
 
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -20,7 +21,11 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     //  -- ══════ Fields & Properties  ══════ --//
 
-    //   ---   Navigation state 
+
+    // Link to settings (from the PageList object)
+    public AppSettings CurrentSettings => ((SettingsViewModel)PageList.GetByTarget(PageNames.Settings).Page).Settings;
+
+    //            ---   Navigation state 
     public PageList PageList { get; } = new();     // List of pages used in app (static and temporary) and there methods 
     [ObservableProperty] private ViewModelBase _currentPage;
     [ObservableProperty] private bool _isSidebarExpanded = true;
@@ -43,7 +48,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    //   ---   Audio recording and speech recognition state
+    //          ---   Audio recording and speech recognition state
     private readonly TranscriptionService _transcriptionService = new();
     private DispatcherTimer? _timer;
     private DateTime _startTime;
@@ -53,10 +58,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isRecording;
     [ObservableProperty] private bool _isPaused;
 
-    //   ---   Meeting archive state
+    //   ---   Meeting recording state
     private string _currentMeetingFolderPath = "";
     private WaveFileWriter? _fullAudioWriter;
     private WaveFileWriter? _boostedAudioWriter;
+    // Current volume level (0–100)
+    [ObservableProperty] private double _volumeLevel;
+    // Data to illustrate the wave
+    public ObservableCollection<double> WaveformHistory { get; } = new();
+
 
 
     // -- ══════ Navigation  ══════ --//
@@ -98,9 +108,8 @@ public partial class MainWindowViewModel : ViewModelBase
             var settingsVm = settingsItem?.Page as SettingsViewModel;
             _currentSession = setupPage.GetSessionData();
 
-            //  Setup Session & Folder
-            var activeSettings = settingsVm?.Settings ?? new AppSettings();
-            activeSettings.TranscriptionLanguage = _currentSession.Language;
+            // Changing settings
+            CurrentSettings.TranscriptionLanguage = _currentSession.Language;
             // Prepare Folders
             string folderName = _currentSession.Name;
             string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
@@ -108,7 +117,7 @@ public partial class MainWindowViewModel : ViewModelBase
             if (!Directory.Exists(sessionFolder)) Directory.CreateDirectory(sessionFolder);
 
             // Configure Service
-            _transcriptionService.ActiveSettings = activeSettings;
+            _transcriptionService.ActiveSettings = CurrentSettings;
             _transcriptionService.CurrentMeetingFolder = sessionFolder;
 
             // Initialize Full Audio Recording
@@ -122,7 +131,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
             // Prepare AI Model Paths
             // Ensure these folders and files exist in your Output directory!
-            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", activeSettings.SelectedModel);
+            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedModel);
             string vadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Models", "silero_vad.onnx");
 
             // Initialize Whisper and VAD engines
@@ -220,6 +229,22 @@ public partial class MainWindowViewModel : ViewModelBase
         Navigate(PageNames.Archive);
     }
 
+    private void SetupTranscriptionStreaming()
+    {
+        _transcriptionService.VolumeLevelChanged += (level) =>
+        {
+            // Updating the microphone scale
+            VolumeLevel = level * 100;
+
+            // Update the wave (add a new value to the history)
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                WaveformHistory.Add(level);
+                if (WaveformHistory.Count > 50) WaveformHistory.RemoveAt(0);
+            });
+        };
+    }
+
     [RelayCommand]
     private void TogglePause()
     {
@@ -233,5 +258,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _currentPage = PageList.startPage;
+        SetupTranscriptionStreaming();
     }
 }

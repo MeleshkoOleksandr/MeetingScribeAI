@@ -40,12 +40,6 @@ public class TranscriptionService : IDisposable
 
     // --- Constants ---
     private const int SampleRate = 16000;
-
-    //private const string Language = "it"; // Change to "it", "ru" or "auto" as needed
-    //private const float SpeechThreshold = 0.3f;    // VAD sensitivity (0.0 to 1.0)
-    //private const int SilenceTimeoutMs = 600;     // Pause duration to trigger transcription
-    //private const float AudioGain = 5.0f;          // Boost for quiet microphones
-
     // --- Properties ---
     public string? CurrentMeetingFolder { get; set; }
     public AppSettings ActiveSettings { get; set; } = new();
@@ -53,6 +47,8 @@ public class TranscriptionService : IDisposable
     // Allow MainWindowViewModel to listen for raw audio to save the FULL record
     public event Action<float[]>? RawAudioCaptured;
     public event Action<float[]>? BoostedAudioCaptured;
+    // Event for UI to show the volume meter (0.0 to 1.0)
+    public event Action<float>? VolumeLevelChanged;
 
     /// <summary>
     /// Loads AI models and initializes engines.
@@ -214,8 +210,8 @@ public class TranscriptionService : IDisposable
     {
         if (_whisperProcessor == null) return;
 
-        // --- Debug --- Save recording chunks
-        SaveDebugSegment(audioData);
+        // --- Debug Only --- Save recording chunks
+        //SaveDebugSegment(audioData);
 
         // Ensure only one transcription runs at a time on the GPU/CPU
         await _whisperSemaphore.WaitAsync(token);
@@ -249,6 +245,7 @@ public class TranscriptionService : IDisposable
         int sampleCount = buffer.Length / 2;
         float[] rawSamples = new float[sampleCount];
         float[] boostedSamples = new float[sampleCount];
+        float maxAbs = 0;
 
         for (int i = 0; i < sampleCount; i++)
         {
@@ -265,10 +262,17 @@ public class TranscriptionService : IDisposable
             else boosted = boosted - (float)Math.Pow(boosted, 3) / 3; // Soften the peaks
 
             boostedSamples[i] = Math.Clamp(boosted, -1.0f, 1.0f);
+
+            // Track peak for the meter
+            float abs = Math.Abs(boostedSamples[i]);
+            if (abs > maxAbs) maxAbs = abs;
         }
         // Record to file the raw and boosted audio for the full meeting
         RawAudioCaptured?.Invoke(rawSamples);
         BoostedAudioCaptured?.Invoke(boostedSamples);
+
+        // Raise event with the peak level
+        VolumeLevelChanged?.Invoke(maxAbs);
 
         return boostedSamples;
     }
