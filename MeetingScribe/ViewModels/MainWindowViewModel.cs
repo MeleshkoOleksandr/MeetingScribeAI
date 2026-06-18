@@ -56,6 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase
     //   ---   Meeting archive state
     private string _currentMeetingFolderPath = "";
     private WaveFileWriter? _fullAudioWriter;
+    private WaveFileWriter? _boostedAudioWriter;
 
 
     // -- ══════ Navigation  ══════ --//
@@ -100,7 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
             //  Setup Session & Folder
             var activeSettings = settingsVm?.Settings ?? new AppSettings();
             activeSettings.TranscriptionLanguage = _currentSession.Language;
-            string datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            // Prepare Folders
             string folderName = _currentSession.Name;
             string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
             string sessionFolder = Path.Combine(archiveRoot, folderName);
@@ -110,10 +111,14 @@ public partial class MainWindowViewModel : ViewModelBase
             _transcriptionService.ActiveSettings = activeSettings;
             _transcriptionService.CurrentMeetingFolder = sessionFolder;
 
-            // Full Audio Recording Setup
-            string fullAudioPath = Path.Combine(sessionFolder, "full_audio.wav");
-            var audioWriter = new WaveFileWriter(fullAudioPath, new WaveFormat(16000, 16, 1));
-            _transcriptionService.RawAudioCaptured += (samples) => audioWriter.WriteSamples(samples, 0, samples.Length);
+            // Initialize Full Audio Recording
+            string fullAudioPath = Path.Combine(sessionFolder, "full_record.wav");
+            _fullAudioWriter = new WaveFileWriter(fullAudioPath, new WaveFormat(16000, 16, 1));
+            _transcriptionService.RawAudioCaptured += (samples) => _fullAudioWriter.WriteSamples(samples, 0, samples.Length);
+            // Gained audio recording
+            string boostedAudioPath = Path.Combine(sessionFolder, "boosted_record.wav");
+            _boostedAudioWriter = new WaveFileWriter(boostedAudioPath, new WaveFormat(16000, 16, 1));
+            _transcriptionService.BoostedAudioCaptured += (samples) => _boostedAudioWriter.WriteSamples(samples, 0, samples.Length);
 
             // Prepare AI Model Paths
             // Ensure these folders and files exist in your Output directory!
@@ -123,12 +128,6 @@ public partial class MainWindowViewModel : ViewModelBase
             // Initialize Whisper and VAD engines
             // This might take a few seconds depending on GPU/CPU speed
             await _transcriptionService.InitializeAsync(whisperPath, vadPath);
-
-            // Prepare Folders
-            PrepareMeetingFolder(_currentSession.Name);
-            // Initialize Full Audio Recording
-            string audioPath = Path.Combine(_currentMeetingFolderPath, "full_record.wav");
-            _fullAudioWriter = new WaveFileWriter(audioPath, new WaveFormat(16000, 16, 1));
 
             // Create the Live Page (ActiveMeetingViewModel)
             var activeVm = new ActiveMeetingViewModel(_currentSession.Name);
@@ -197,6 +196,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _timer?.Stop();
         _fullAudioWriter?.Dispose();
         _fullAudioWriter = null;
+        _boostedAudioWriter?.Dispose();
+        _boostedAudioWriter = null;
 
         // Finalize the session data and save it as JSON in the meeting folder
         if (_currentSession != null && CurrentPage is ActiveMeetingViewModel activeVm)
@@ -217,19 +218,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         //  Change later for a post-meeting review page instead of going back to archive directly
         Navigate(PageNames.Archive);
-    }
-
-    private void PrepareMeetingFolder(string meetingName)
-    {
-        // 1. Format date: [24-05-20] - Name
-        string datePrefix = DateTime.Now.ToString("yy-MM-dd");
-        string folderName = $"[{datePrefix}] - {meetingName}";
-
-        _currentMeetingFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive", folderName);
-
-        // Create directory if not exists
-        if (!Directory.Exists(_currentMeetingFolderPath))
-            Directory.CreateDirectory(_currentMeetingFolderPath);
     }
 
     [RelayCommand]

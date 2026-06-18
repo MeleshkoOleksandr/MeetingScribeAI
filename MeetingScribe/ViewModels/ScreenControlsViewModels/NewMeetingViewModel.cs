@@ -21,7 +21,7 @@ public partial class NewMeetingViewModel : ViewModelBase
     public NewMeetingViewModel()
     {
         // Default name with date
-        MeetingName = DateTime.Now.ToString("yy-MM-dd-HH-mm") + " - New Meeting";
+        MeetingName = DateTime.Now.ToString("yy-MM-dd HH_mm") + " - New Meeting";
         LoadLanguages();
     }
 

@@ -52,7 +52,8 @@ public class TranscriptionService : IDisposable
 
     // Allow MainWindowViewModel to listen for raw audio to save the FULL record
     public event Action<float[]>? RawAudioCaptured;
- 
+    public event Action<float[]>? BoostedAudioCaptured;
+
     /// <summary>
     /// Loads AI models and initializes engines.
     /// </summary>
@@ -71,7 +72,7 @@ public class TranscriptionService : IDisposable
             _whisperFactory = WhisperFactory.FromPath(whisperModelPath);
             _whisperProcessor = _whisperFactory.CreateBuilder()
                 .WithLanguage(ActiveSettings.TranscriptionLanguage) // Change to "it", "ru" or "auto" as needed
-                .WithThreads(2)
+                .WithThreads(Math.Max(1, Environment.ProcessorCount / 2)) // Use half of available cores
                 .Build();
 
             // Initialize Voice Activity Detector
@@ -231,7 +232,7 @@ public class TranscriptionService : IDisposable
             if (!string.IsNullOrWhiteSpace(finalResult))
             {
                 TranscriptionUpdated?.Invoke(finalResult);
-                 test.Append(finalResult + " -+-  ");
+                test.Append(finalResult + " -+-  ");
             }
         }
         finally
@@ -246,17 +247,30 @@ public class TranscriptionService : IDisposable
     private float[] ConvertToFloat(byte[] buffer)
     {
         int sampleCount = buffer.Length / 2;
-        float[] samples = new float[sampleCount];
+        float[] rawSamples = new float[sampleCount];
+        float[] boostedSamples = new float[sampleCount];
+
         for (int i = 0; i < sampleCount; i++)
         {
             short sample = BitConverter.ToInt16(buffer, i * 2);
-            // Use ActiveSettings.AudioGain here
-            float boosted = (sample / 32768.0f) * ActiveSettings.AudioGain;
-            samples[i] = Math.Clamp(boosted, -1.0f, 1.0f);
+            // --- Raw audio ---
+            float normalized = sample / 32768.0f;
+            rawSamples[i] = normalized;
+
+            // --- Boosted audio ---
+            float boosted = normalized * ActiveSettings.AudioGain;
+            // Soft clipping formula: simple cubic limiter
+            if (boosted > 1.0f) boosted = 1.0f;
+            else if (boosted < -1.0f) boosted = -1.0f;
+            else boosted = boosted - (float)Math.Pow(boosted, 3) / 3; // Soften the peaks
+
+            boostedSamples[i] = Math.Clamp(boosted, -1.0f, 1.0f);
         }
-        // Push to anyone listening for the full recording
-        RawAudioCaptured?.Invoke(samples);
-        return samples;
+        // Record to file the raw and boosted audio for the full meeting
+        RawAudioCaptured?.Invoke(rawSamples);
+        BoostedAudioCaptured?.Invoke(boostedSamples);
+
+        return boostedSamples;
     }
 
     private void SaveDebugSegment(float[] samples)
