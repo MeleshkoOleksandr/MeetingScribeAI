@@ -225,8 +225,18 @@ public partial class MainWindowViewModel : ViewModelBase
         var recordingItem = PageList.GetByTarget(PageNames.Recording);
         if (recordingItem != null) PageList.RemoveTemporaryItem(recordingItem);
 
-        //  Change later for a post-meeting review page instead of going back to archive directly
-        Navigate(PageNames.Archive);
+
+        // Create an overview page and pass our session to it
+        var reviewPage = new NavigationItem
+        {
+            Label = "Review: " + _currentSession.Name,
+            Icon = "NotebookOutline",
+            Target = PageNames.Review,
+            Page = new ReviewMeetingViewModel(_currentSession)
+        };
+
+        PageList.AddTemporaryItem(reviewPage);
+        Navigate(reviewPage);
     }
 
     private void SetupTranscriptionStreaming()

@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:MeetingScribe.Views.Controls;assembly=MeetingScribe"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:uilogic="using:MeetingScribe.UILogic"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MeetingScribe.Views.ReviewMeetingView"
+             x:DataType="vm:ReviewMeetingViewModel">
+
+    <Grid RowDefinitions="*, 100">
+        <Grid ColumnDefinitions="*, 320">
+
+            <!-- MAIN SECTION: TRANSCRIPT -->
+            <ScrollViewer Grid.Column="0" Padding="40">
+                <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="80, *" Margin="0,0,0,30">
+                                <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
+                                <StackPanel Grid.Column="1" Spacing="5">
+                                    <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" Opacity="0.9"/>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- RIGHT PANEL: FUNCTIONS -->
+            <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}" Padding="20">
+                <Grid RowDefinitions="Auto, Auto, *, Auto">
+
+                    <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerHigh}"
+                            CornerRadius="8" Padding="4">
+                        <Grid ColumnDefinitions="*, *">
+                            <!-- Transcription Button -->
+                            <ToggleButton Grid.Column="0"
+                                          Content="Transcription"
+                                          IsChecked="{Binding IsTranscriptionView}"
+                                          Classes="tab"/>
+
+                            <!-- AI Summary -->
+                            <ToggleButton Grid.Column="1"
+                                          Content="AI Summary"
+                                          IsChecked="{Binding IsSummaryView}"
+                                          Classes="tab"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- (Actions) -->
+                    <StackPanel Grid.Row="1" Margin="0,30,0,0" Spacing="10">
+                        <TextBlock Text="ACTIONS" Classes="label-caps" Margin="0,0,0,10"/>
+
+                        <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <icons:MaterialIcon Kind="AutoFix" Width="18"/>
+                                <TextBlock Text="Improve Recognition"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
+                                <TextBlock Text="Split by Speakers"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="btn-accent" HorizontalAlignment="Stretch">
+                            <TextBlock Text="Generate Summary"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- PROGRESS INDICATOR -->
+                    <StackPanel Grid.Row="3" IsVisible="{Binding IsProcessing}" Spacing="10">
+                        <TextBlock Text="{Binding CurrentTaskName}" FontSize="12" Foreground="{StaticResource BrushPrimary}"/>
+                        <ProgressBar Value="{Binding ProcessingProgress}" Minimum="0" Maximum="100" Height="4" Foreground="{StaticResource BrushPrimary}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- BOTTOM PANEL: TIMELINE -->
+        <Border Grid.Row="1" Background="{StaticResource BrushSurfaceContainerLowest}" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BrushOutlineVariant}">
+            <Grid ColumnDefinitions="Auto, *, Auto" >
+
+                <!-- Player -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="20">
+                    <Button Classes="btn-icon"><icons:MaterialIcon Kind="SkipPrevious"/></Button>
+                    <Button Classes="btn-primary" CornerRadius="50" Width="50" Height="50">
+                        <icons:MaterialIcon Kind="Play" Width="30" Height="30"/>
+                    </Button>
+                    <Button Classes="btn-icon"><icons:MaterialIcon Kind="SkipNext"/></Button>
+                </StackPanel>
+
+                <!-- Timeline (Wave) -->
+                <uilogic:LuminaAudioMeter Grid.Column="1" Margin="40,0" Height="40" VerticalAlignment="Center"/>
+
+                <!-- Volume and Additional Information -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="20">
+                    <TextBlock Text="12:45 / 45:00" Opacity="0.5"/>
+                    <icons:MaterialIcon Kind="VolumeHigh" Opacity="0.5"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

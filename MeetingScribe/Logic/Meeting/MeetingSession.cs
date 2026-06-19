@@ -16,4 +16,7 @@ public class MeetingSession
 
     // Full transcription history
     public List<TranscriptLine> FullTranscript { get; set; } = new();
+
+    public string? AiSummary { get; set; }
+    public List<SpeakerParticipant> Participants { get; set; } = new();
 }

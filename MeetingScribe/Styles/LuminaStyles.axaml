@@ -362,4 +362,41 @@
         <Setter Property="Background" Value="{StaticResource BrushPrimary}" />
     </Style>
 
+    <!-- ══════════════════════════════════════════
+    TABS
+    ══════════════════════════════════════════ -->
+    <Style Selector="ToggleButton.tab">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource BrushOnSurfaceVariant}"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <!-- (Checked) -->
+    <Style Selector="ToggleButton.tab:checked">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+        <Setter Property="Foreground" Value="{StaticResource BrushOnPrimary}"/>
+    </Style>
+
+    <!-- Remove the system highlight when hovering if the button is already selected -->
+    <Style Selector="ToggleButton.tab:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+        <Setter Property="Foreground" Value="{StaticResource BrushOnPrimary}"/>
+    </Style>
+
+    <!-- Highlighting when hovering over an INACTIVE button -->
+    <Style Selector="ToggleButton.tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BrushSurfaceBright}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
 </Styles>

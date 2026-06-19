@@ -6,5 +6,6 @@ public enum PageNames
     Archive,
     Settings,
     Team,
-    Recording
+    Recording,
+    Review
 }
