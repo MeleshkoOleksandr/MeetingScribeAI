@@ -115,6 +115,7 @@ public partial class MainWindowViewModel : ViewModelBase
             string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
             _currentMeetingFolderPath = Path.Combine(archiveRoot, folderName);
             if (!Directory.Exists(_currentMeetingFolderPath)) Directory.CreateDirectory(_currentMeetingFolderPath);
+            _currentSession.FolderPath = _currentMeetingFolderPath;
 
             // Configure Service
             _transcriptionService.ActiveSettings = CurrentSettings;
@@ -131,12 +132,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
             // Prepare AI Model Paths
             // Ensure these folders and files exist in your Output directory!
-            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedModel);
-            string vadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Models", "silero_vad.onnx");
+            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedModel);     
 
             // Initialize Whisper and VAD engines
             // This might take a few seconds depending on GPU/CPU speed
-            await _transcriptionService.InitializeAsync(whisperPath, vadPath);
+            await _transcriptionService.InitializeAsync(whisperPath, _currentSession.Language);
 
             // Create the Live Page (ActiveMeetingViewModel)
             var activeVm = new ActiveMeetingViewModel(_currentSession.Name, _currentSession.Language);
@@ -207,12 +207,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _fullAudioWriter = null;
         _boostedAudioWriter?.Dispose();
         _boostedAudioWriter = null;
+        _transcriptionService.UnloadModel();
 
         // Finalize the session data and save it as JSON in the meeting folder
         if (_currentSession != null && CurrentPage is ActiveMeetingViewModel activeVm)
         {
             // Save the transcript to the session object
-            _currentSession.FullTranscript = activeVm.TranscriptLines.ToList();
+            _currentSession.FullTranscript = new ObservableCollection<TranscriptLine>(activeVm.TranscriptLines);
             _currentSession.Duration = DateTime.Now - _startTime;
 
             // Save Session as JSON
@@ -227,12 +228,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
 
         // Create an overview page and pass our session to it
+        string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
         var reviewPage = new NavigationItem
         {
             Label = "Review: " + _currentSession.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
-            Page = new ReviewMeetingViewModel(_currentSession)
+            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService, whisperPath)
         };
 
         PageList.AddTemporaryItem(reviewPage);

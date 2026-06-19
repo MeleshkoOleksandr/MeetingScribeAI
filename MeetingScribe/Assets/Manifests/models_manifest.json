@@ -16,7 +16,7 @@
         "FileName": "ggml-large-v3-turbo.bin"
     },
     {
-        "Name": "Large Turbo q8 (Fast)",
+        "Name": "Large Turbo q8 (Less RAM)",
         "FileName": "ggml-large-v3-turbo-q8_0.bin"
     }
 ]

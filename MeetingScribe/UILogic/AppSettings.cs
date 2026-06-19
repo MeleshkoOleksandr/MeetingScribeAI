@@ -8,7 +8,7 @@ public partial class AppSettings : ObservableObject
     [ObservableProperty] private float _speechThreshold = 0.2f;
     [ObservableProperty] private int _silenceTimeoutMs = 600;
     [ObservableProperty] private float _audioGain = 3.0f;
-    [ObservableProperty] private string _selectedModel = "ggml-large-v3-turbo-q8_0.bin";
+    [ObservableProperty] private string _selectedModel = "ggml-small.bin";
     [ObservableProperty] private string _selectedAccModel = "ggml-large-v3-turbo.bin";
     [ObservableProperty] private string _transcriptionLanguage = "it";
 

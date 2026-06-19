@@ -14,7 +14,7 @@
         <Grid ColumnDefinitions="*, 320">
 
             <!-- MAIN SECTION: TRANSCRIPT -->
-            <ScrollViewer Grid.Column="0" Padding="40">
+            <ScrollViewer Grid.Column="0" Padding="20">
                 <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -75,9 +75,13 @@
                     </StackPanel>
 
                     <!-- PROGRESS INDICATOR -->
-                    <StackPanel Grid.Row="3" IsVisible="{Binding IsProcessing}" Spacing="10">
+                    <StackPanel Spacing="8" IsVisible="{Binding IsProcessing}">
                         <TextBlock Text="{Binding CurrentTaskName}" FontSize="12" Foreground="{StaticResource BrushPrimary}"/>
-                        <ProgressBar Value="{Binding ProcessingProgress}" Minimum="0" Maximum="100" Height="4" Foreground="{StaticResource BrushPrimary}"/>
+                        <ProgressBar Value="{Binding ProcessingProgress}"
+                                     Minimum="0" Maximum="100"
+                                     Height="4"
+                                     Foreground="{StaticResource BrushPrimary}"
+                                     Background="{StaticResource BrushSurfaceContainerHighest}"/>
                     </StackPanel>
                 </Grid>
             </Border>

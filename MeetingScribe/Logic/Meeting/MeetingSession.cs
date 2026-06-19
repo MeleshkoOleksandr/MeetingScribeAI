@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace MeetingScribe.Logic.Meeting;
@@ -13,9 +14,10 @@ public class MeetingSession
     public  string MeetingTopics { get; set; } = string.Empty;
     public DateTime StartTime { get; set; } = DateTime.Now;
     public TimeSpan Duration { get; set; }
+    public string FolderPath { get; set; } = "";
 
-    // Full transcription history
-    public List<TranscriptLine> FullTranscript { get; set; } = new();
+    // Full transcription
+    public ObservableCollection<TranscriptLine> FullTranscript { get; set; } = new();
 
     public string? AiSummary { get; set; }
     public List<SpeakerParticipant> Participants { get; set; } = new();

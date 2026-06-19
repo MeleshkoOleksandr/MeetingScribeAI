@@ -1,3 +1,4 @@
+using MeetingScribe.Logic.Meeting;
 using MeetingScribe.UILogic;
 using NAudio.Wave;
 using System;
@@ -53,12 +54,14 @@ public class TranscriptionService : IDisposable
     /// <summary>
     /// Loads AI models and initializes engines.
     /// </summary>
-    /// <param name="whisperModelPath">Path to ggml-base.bin or similar</param>
-    /// <param name="vadModelPath">Path to silero_vad.onnx</param>
-    public async Task InitializeAsync(string whisperModelPath, string vadModelPath)
+    public async Task InitializeAsync(string whisperModelPath, string transcriptionLanguage, string initialPrompt = "", bool useAllProcessor = false)
     {
-        if (!File.Exists(whisperModelPath) || !File.Exists(vadModelPath))
+        if (!File.Exists(whisperModelPath))
             throw new FileNotFoundException("AI Model files not found. Check Assets folder.");
+        // If models are already loaded, unload them first to free resources
+        if (_whisperFactory != null) UnloadModel();
+        // Determine how many threads to use for Whisper based on user settings
+        int threadsToUse = useAllProcessor ? Environment.ProcessorCount : Math.Max(1, Environment.ProcessorCount / 2);
 
         await Task.Run(() =>
         {
@@ -67,15 +70,55 @@ public class TranscriptionService : IDisposable
             // Initialize Whisper Factory and Processor
             _whisperFactory = WhisperFactory.FromPath(whisperModelPath);
             _whisperProcessor = _whisperFactory.CreateBuilder()
-                .WithLanguage(ActiveSettings.TranscriptionLanguage) // Change to "it", "ru" or "auto" as needed
-                .WithThreads(Math.Max(1, Environment.ProcessorCount / 2)) // Use half of available cores
+                .WithLanguage(transcriptionLanguage)
+                .WithPrompt(initialPrompt)
+                .WithThreads(threadsToUse)
                 .Build();
 
             // Initialize Voice Activity Detector
-            _vadDetector = new SileroVadDetector(vadModelPath);
+            string vadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Models", "silero_vad.onnx");
+            if (_vadDetector == null && File.Exists(vadPath))
+            {
+                _vadDetector = new SileroVadDetector(vadPath);
+            }
 
             StatusChanged?.Invoke("Ready to Record");
         });
+    }
+
+    /// <summary>
+    /// Processes an entire audio file offline for maximum quality.
+    /// </summary>
+    public async Task<List<TranscriptLine>> ProcessFileAsync(string filePath, IProgress<double> progress)
+    {
+        if (_whisperProcessor == null)
+            throw new InvalidOperationException("Whisper Processor is not initialized. Call InitializeAsync first.");
+
+        var result = new List<TranscriptLine>();
+
+        using var fileStream = File.OpenRead(filePath);
+        var totalLength = fileStream.Length;
+
+        // Process the stream segment by segment
+        await foreach (var segment in _whisperProcessor.ProcessAsync(fileStream))
+        {
+            result.Add(new TranscriptLine
+            {
+                // Format time as [HH:mm:ss]
+                Timestamp = $"[{segment.Start:hh\\:mm\\:ss}]",
+                SpeakerName = "Speaker", // Diarization will be added later
+                Text = segment.Text.Trim()
+            });
+
+            // Report progress back to UI
+            if (totalLength > 0)
+            {
+                double currentProgress = (double)fileStream.Position / totalLength * 100;
+                progress.Report(currentProgress);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -201,17 +244,12 @@ public class TranscriptionService : IDisposable
         catch (OperationCanceledException) { /* Normal exit */ }
     }
 
-    StringBuilder test = new StringBuilder();
-
     /// <summary>
     /// Sends a detected speech segment to the Whisper engine.
     /// </summary>
     private async Task TranscribeAsync(float[] audioData, CancellationToken token)
     {
         if (_whisperProcessor == null) return;
-
-        // --- Debug Only --- Save recording chunks
-        //SaveDebugSegment(audioData);
 
         // Ensure only one transcription runs at a time on the GPU/CPU
         await _whisperSemaphore.WaitAsync(token);
@@ -228,7 +266,6 @@ public class TranscriptionService : IDisposable
             if (!string.IsNullOrWhiteSpace(finalResult))
             {
                 TranscriptionUpdated?.Invoke(finalResult);
-                test.Append(finalResult + " -+-  ");
             }
         }
         finally
@@ -277,16 +314,18 @@ public class TranscriptionService : IDisposable
         return boostedSamples;
     }
 
-    private void SaveDebugSegment(float[] samples)
+    public void UnloadModel()
     {
-        if (string.IsNullOrEmpty(CurrentMeetingFolder)) return;
+        // Destroying the thread and the factory—this will free up memory/video memory
+        _whisperProcessor?.Dispose();
+        _whisperProcessor = null;
 
-        string debugDir = Path.Combine(CurrentMeetingFolder, "DebugChunks");
-        Directory.CreateDirectory(debugDir); // Ensure exists
+        _whisperFactory?.Dispose();
+        _whisperFactory = null;
 
-        string fileName = $"{DateTime.Now:HH-mm-ss-fff}.wav";
-        using var writer = new WaveFileWriter(Path.Combine(debugDir, fileName), new WaveFormat(16000, 16, 1));
-        writer.WriteSamples(samples, 0, samples.Length);
+        // We trigger a garbage collection (GC)
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
     }
 
     public void Dispose()
