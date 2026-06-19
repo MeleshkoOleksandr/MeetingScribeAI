@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,13 +9,11 @@ using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
-using NAudio.Wave;
 
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
     //    ---   Audio recording and speech recognition state
     private readonly TranscriptionService _transcriptionService = new();
     private readonly MeetingManager _meetingManager;
-    private MeetingSession? _currentSession;
+    private MeetingSession _currentSession = new MeetingSession();
 
     private DispatcherTimer? _timer;
     private DateTime _startTime;
@@ -203,42 +203,55 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task LoadMeetingFromFile()
     {
-        //// 1. Открываем диалог выбора файла (используем TopLevel для Avalonia)
-        //var storage = TopLevel.GetTopLevel(MainView.Instance)?.StorageProvider;
-        //if (storage == null) return;
+        // 1. Get Storage Provider from the App
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return;
 
-        //var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
-        //{
-        //    Title = "Select Audio File",
-        //    FileTypeFilter = new[] { FilePickerFileTypes.AudioAll }
-        //});
+        var storage = desktop.MainWindow?.StorageProvider;
+        if (storage == null) return;
 
-        //if (result.Count == 0) return;
-        //string audioPath = result[0].Path.LocalPath;
+        // 2. Определяем фильтр для аудио-файлов
+        var audioFilter = new FilePickerFileType("Audio Files")
+        {
+            Patterns = new[] { "*.mp3", "*.wav", "*.m4a", "*.wma", "*.flac" },
+        //    AppleFileTypes = new[] { "public.audio" },
+            MimeTypes = new[] { "audio/*" }
+        };
 
-        //// 2. Создаем "виртуальную" сессию для этого файла
-        //var metadata = new MeetingSession
-        //{
-        //    Name = Path.GetFileNameWithoutExtension(audioPath),
-        //    Language = CurrentSettings.TranscriptionLanguage
-        //};
+        // 3. Открываем диалог выбора файла
+        var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Audio File",
+            FileTypeFilter = new[] { audioFilter },
+            AllowMultiple = false
+        });
 
-        //// 3. Сразу переходим в Review (минуя запись)
-        //string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
+        if (result == null || result.Count == 0) return;
 
-        //// Мы передаем путь к файлу в сессию, чтобы ReviewViewModel знала, что анализировать
-        //metadata.FolderPath = Path.GetDirectoryName(audioPath)!;
-        //// Нужно убедиться, что ReviewViewModel умеет работать с любым путем к файлу, а не только внутри архива
+        // 4. Получаем локальный путь к файлу (Avalonia возвращает URI)
+        string selectedPath = result[0].Path.LocalPath;
 
-        //var reviewPage = new NavigationItem
-        //{
-        //    Label = "Review: " + metadata.Name,
-        //    Target = PageNames.Review,
-        //    Page = new ReviewMeetingViewModel(metadata, _transcriptionService, whisperPath)
-        //};
+        // 3. Create Session (Transcoding happens here)
+        // Show a "Loading" status if you want
+        var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, CurrentSettings);
 
-        //PageList.AddTemporaryItem(reviewPage);
-        //Navigate(reviewPage);
+        // 4. Navigate to Review
+        string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
+
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath);
+        var reviewPage = new NavigationItem
+        {
+            Label = "Review: " + session.Name,
+            Icon = "FileMusicOutline",
+            Target = PageNames.Review,
+            Page = reviewVm
+        };
+
+        PageList.AddTemporaryItem(reviewPage);
+        Navigate(reviewPage);
+
+        // 5. Trigger auto-processing
+        _ = reviewVm.ImproveRecognitionCommand.ExecuteAsync(null);
     }
 
     private void SetupTranscriptionStreaming()

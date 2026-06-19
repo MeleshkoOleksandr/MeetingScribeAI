@@ -97,7 +97,9 @@ public class TranscriptionService : IDisposable
         var result = new List<TranscriptLine>();
 
         using var fileStream = File.OpenRead(filePath);
-        var totalLength = fileStream.Length;
+        // Get the total length of the file for progress reporting
+        double totalSeconds = 0;
+        using (var reader = new AudioFileReader(filePath)) { totalSeconds = reader.TotalTime.TotalSeconds; }
 
         // Process the stream segment by segment
         await foreach (var segment in _whisperProcessor.ProcessAsync(fileStream))
@@ -111,11 +113,9 @@ public class TranscriptionService : IDisposable
             });
 
             // Report progress back to UI
-            if (totalLength > 0)
-            {
-                double currentProgress = (double)fileStream.Position / totalLength * 100;
-                progress.Report(currentProgress);
-            }
+            double currentProcessedSeconds = segment.End.TotalSeconds;
+            double percent = (currentProcessedSeconds / totalSeconds) * 100;
+            progress.Report(Math.Min(100, percent));
         }
 
         return result;

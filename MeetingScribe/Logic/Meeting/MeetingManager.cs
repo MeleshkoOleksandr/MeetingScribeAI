@@ -1,6 +1,7 @@
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -8,7 +9,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.Logic.Meeting;
-
 
 public class MeetingManager
 {
@@ -73,5 +73,50 @@ public class MeetingManager
         string jsonPath = Path.Combine(_currentFolderPath, "session_data.json");
         string json = JsonSerializer.Serialize(CurrentSession, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(jsonPath, json);
+    }
+
+
+    public async Task<MeetingSession> CreateSessionFromAudioFile(string sourceFilePath, AppSettings settings)
+    {
+        // 1. Create Metadata
+        var session = new MeetingSession
+        {
+            Name = Path.GetFileNameWithoutExtension(sourceFilePath),
+            Language = settings.TranscriptionLanguage,
+            StartTime = DateTime.Now
+        };
+
+        // 2. Prepare Folder
+        string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
+        string folderName = $"[{DateTime.Now:yy-MM-dd}] - {session.Name}";
+        string sessionFolder = Path.Combine(archiveRoot, folderName);
+        Directory.CreateDirectory(sessionFolder);
+        session.FolderPath = sessionFolder;
+
+        // 3. Transcode to standard format (16kHz, Mono, 16-bit)
+        // Whisper works best with this specific format
+        string targetPath = Path.Combine(sessionFolder, "boosted_record.wav");
+
+        await Task.Run(() =>
+        {
+            using (var reader = new AudioFileReader(sourceFilePath))
+            {
+                // Resample to 16000Hz and convert to Mono
+                var outFormat = new WaveFormat(16000, 16, 1);
+                using (var resampler = new MediaFoundationResampler(reader, outFormat))
+                {
+                    // High quality resampling
+                    resampler.ResamplerQuality = 60;
+                    WaveFileWriter.CreateWaveFile(targetPath, resampler);
+                }
+            }
+        });
+
+        // 4. Save Initial JSON (Metadata only)
+        string jsonPath = Path.Combine(sessionFolder, "session_data.json");
+        string json = JsonSerializer.Serialize(session, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(jsonPath, json);
+
+        return session;
     }
 }
