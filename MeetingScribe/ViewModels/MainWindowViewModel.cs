@@ -1,3 +1,5 @@
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -27,6 +29,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     //            ---   Navigation state 
     public PageList PageList { get; } = new();     // List of pages used in app (static and temporary) and there methods 
+
     [ObservableProperty] private ViewModelBase _currentPage;
     [ObservableProperty] private bool _isSidebarExpanded = true;
 
@@ -48,23 +51,21 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    //          ---   Audio recording and speech recognition state
+    //    ---   Audio recording and speech recognition state
     private readonly TranscriptionService _transcriptionService = new();
-    private DispatcherTimer? _timer;
-    private DateTime _startTime;
+    private readonly MeetingManager _meetingManager;
     private MeetingSession? _currentSession;
 
+    private DispatcherTimer? _timer;
+    private DateTime _startTime;
+  
     [ObservableProperty] private string _elapsedTime = "00:00:00";
     [ObservableProperty] private bool _isRecording;
     [ObservableProperty] private bool _isPaused;
 
-    //   ---   Meeting recording state
-    private string _currentMeetingFolderPath = "";
-    private WaveFileWriter? _fullAudioWriter;
-    private WaveFileWriter? _boostedAudioWriter;
     // Current volume level (0–100)
     [ObservableProperty] private double _volumeLevel;
-    // Data to illustrate the wave
+    // Data to illustrate the  volume level history (for the waveform visualization)
     public ObservableCollection<double> WaveformHistory { get; } = new();
 
 
@@ -103,44 +104,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            //  Get Settings from the Settings Page
-            var settingsItem = PageList.GetByTarget(PageNames.Settings);
-            var settingsVm = settingsItem?.Page as SettingsViewModel;
-            _currentSession = setupPage.GetSessionData();
-
-            // Changing settings
-            CurrentSettings.TranscriptionLanguage = _currentSession.Language;
-            // Prepare Folders
-            string folderName = _currentSession.Name;
-            string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
-            _currentMeetingFolderPath = Path.Combine(archiveRoot, folderName);
-            if (!Directory.Exists(_currentMeetingFolderPath)) Directory.CreateDirectory(_currentMeetingFolderPath);
-            _currentSession.FolderPath = _currentMeetingFolderPath;
-
-            // Configure Service
-            _transcriptionService.ActiveSettings = CurrentSettings;
-            _transcriptionService.CurrentMeetingFolder = _currentMeetingFolderPath;
-
-            // Initialize Full Audio Recording
-            string fullAudioPath = Path.Combine(_currentMeetingFolderPath, "full_record.wav");
-            _fullAudioWriter = new WaveFileWriter(fullAudioPath, new WaveFormat(16000, 16, 1));
-            _transcriptionService.RawAudioCaptured += (samples) => _fullAudioWriter.WriteSamples(samples, 0, samples.Length);
-            // Gained audio recording
-            string boostedAudioPath = Path.Combine(_currentMeetingFolderPath, "boosted_record.wav");
-            _boostedAudioWriter = new WaveFileWriter(boostedAudioPath, new WaveFormat(16000, 16, 1));
-            _transcriptionService.BoostedAudioCaptured += (samples) => _boostedAudioWriter.WriteSamples(samples, 0, samples.Length);
-
-            // Prepare AI Model Paths
-            // Ensure these folders and files exist in your Output directory!
-            string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedModel);     
-
-            // Initialize Whisper and VAD engines
-            // This might take a few seconds depending on GPU/CPU speed
-            await _transcriptionService.InitializeAsync(whisperPath, _currentSession.Language);
+            // Initialization via the manager
+            _currentSession = await _meetingManager.InitializeMeeting(setupPage.GetSessionData(), CurrentSettings);
 
             // Create the Live Page (ActiveMeetingViewModel)
             var activeVm = new ActiveMeetingViewModel(_currentSession.Name, _currentSession.Language);
-            // Create a Temporary Navigation Item for the Sidebar
             var liveNavItem = new NavigationItem
             {
                 Label = "Meeting Recording",
@@ -155,13 +123,10 @@ public partial class MainWindowViewModel : ViewModelBase
             PageList.AddTemporaryItem(liveNavItem);
             Navigate(liveNavItem);
 
-            // Subscribe to transcription events
-            // We use a separate method to handle incoming text segments
+            // Start
             _transcriptionService.TranscriptionUpdated -= OnNewTextReceived; // Clean up old subs
             _transcriptionService.TranscriptionUpdated += OnNewTextReceived;
-
-            // Start the Audio Engine and VAD loop
-            _transcriptionService.Start();
+            _meetingManager.Start();
 
             // Start the Elapsed Time timer
             _startTime = DateTime.Now;
@@ -173,9 +138,10 @@ public partial class MainWindowViewModel : ViewModelBase
             };
             _timer.Start();
 
-            // Trigger UI state (Shows the Bottom Control Bar)
+            //Show the recording state in the UI
             IsRecording = true;
             IsPaused = false;
+
         }
         catch (Exception ex)
         {
@@ -184,9 +150,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// This method is called every time Whisper finishes transcribing a speech segment.
-    /// </summary>
+    // This method is called every time Whisper finishes transcribing a speech segment.
     private void OnNewTextReceived(string text)
     {
         // Important: Redirect the text to the ActiveMeeting page only if it's currently active
@@ -201,37 +165,24 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         // Stop the transcription and audio recording
         IsRecording = false;
-        _transcriptionService.Stop();
         _timer?.Stop();
-        _fullAudioWriter?.Dispose();
-        _fullAudioWriter = null;
-        _boostedAudioWriter?.Dispose();
-        _boostedAudioWriter = null;
-        _transcriptionService.UnloadModel();
+        _meetingManager.Stop();
 
         // Finalize the session data and save it as JSON in the meeting folder
-        if (_currentSession != null && CurrentPage is ActiveMeetingViewModel activeVm)
+        if (CurrentPage is ActiveMeetingViewModel activeVm)
         {
-            // Save the transcript to the session object
-            _currentSession.FullTranscript = new ObservableCollection<TranscriptLine>(activeVm.TranscriptLines);
-            _currentSession.Duration = DateTime.Now - _startTime;
-
-            // Save Session as JSON
-            string jsonPath = Path.Combine(_currentMeetingFolderPath, "session_data.json");
-            string json = JsonSerializer.Serialize(_currentSession, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(jsonPath, json);
+            _meetingManager.SaveSession(DateTime.Now - _startTime, activeVm.TranscriptLines);
         }
 
         // Clean up UI
         var recordingItem = PageList.GetByTarget(PageNames.Recording);
         if (recordingItem != null) PageList.RemoveTemporaryItem(recordingItem);
 
-
         // Create an overview page and pass our session to it
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
         var reviewPage = new NavigationItem
         {
-            Label = "Review: " + _currentSession.Name,
+            Label = "Review: " + _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
             Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService, whisperPath)
@@ -239,22 +190,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         PageList.AddTemporaryItem(reviewPage);
         Navigate(reviewPage);
-    }
-
-    private void SetupTranscriptionStreaming()
-    {
-        _transcriptionService.VolumeLevelChanged += (level) =>
-        {
-            // Updating the microphone scale
-            VolumeLevel = level * 100;
-
-            // Update the wave (add a new value to the history)
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                WaveformHistory.Add(level);
-                if (WaveformHistory.Count > 50) WaveformHistory.RemoveAt(0);
-            });
-        };
     }
 
     [RelayCommand]
@@ -265,11 +200,69 @@ public partial class MainWindowViewModel : ViewModelBase
         else _transcriptionService.Start();
     }
 
+    [RelayCommand]
+    private async Task LoadMeetingFromFile()
+    {
+        //// 1. Открываем диалог выбора файла (используем TopLevel для Avalonia)
+        //var storage = TopLevel.GetTopLevel(MainView.Instance)?.StorageProvider;
+        //if (storage == null) return;
+
+        //var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        //{
+        //    Title = "Select Audio File",
+        //    FileTypeFilter = new[] { FilePickerFileTypes.AudioAll }
+        //});
+
+        //if (result.Count == 0) return;
+        //string audioPath = result[0].Path.LocalPath;
+
+        //// 2. Создаем "виртуальную" сессию для этого файла
+        //var metadata = new MeetingSession
+        //{
+        //    Name = Path.GetFileNameWithoutExtension(audioPath),
+        //    Language = CurrentSettings.TranscriptionLanguage
+        //};
+
+        //// 3. Сразу переходим в Review (минуя запись)
+        //string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
+
+        //// Мы передаем путь к файлу в сессию, чтобы ReviewViewModel знала, что анализировать
+        //metadata.FolderPath = Path.GetDirectoryName(audioPath)!;
+        //// Нужно убедиться, что ReviewViewModel умеет работать с любым путем к файлу, а не только внутри архива
+
+        //var reviewPage = new NavigationItem
+        //{
+        //    Label = "Review: " + metadata.Name,
+        //    Target = PageNames.Review,
+        //    Page = new ReviewMeetingViewModel(metadata, _transcriptionService, whisperPath)
+        //};
+
+        //PageList.AddTemporaryItem(reviewPage);
+        //Navigate(reviewPage);
+    }
+
+    private void SetupTranscriptionStreaming()
+    {
+        _transcriptionService.VolumeLevelChanged += (level) =>
+        {
+            // Updating the microphone scale
+            VolumeLevel = level * 100;
+            // Update the wave (add a new value to the history)
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                WaveformHistory.Add(level);
+                if (WaveformHistory.Count > 50) WaveformHistory.RemoveAt(0);
+            });
+        };
+    }
+
 
      // -- ══════ Constructor  ══════ --//
+
     public MainWindowViewModel()
     {
         Navigate(PageNames.New);
         SetupTranscriptionStreaming();
+        _meetingManager = new MeetingManager(_transcriptionService);
     }
 }
