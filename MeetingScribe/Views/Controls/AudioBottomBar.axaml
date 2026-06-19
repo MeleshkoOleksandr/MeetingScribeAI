@@ -7,28 +7,16 @@
              x:DataType="vm:MainWindowViewModel"> <!--  We bind it to the main VM -->
 
              <Border Height="80" Background="{StaticResource BrushSurfaceContainerLow}"
-                     BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0" Padding="20,0">
-                 <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto">
-
-                     <!--  (Elapsed Time) -->
-                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="100">
-                         <TextBlock Text="ELAPSED TIME" Classes="label-caps" Opacity="0.5"/>
-                         <TextBlock Text="{Binding ElapsedTime}" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                     </StackPanel>
-
-                     <!--  (Waveform) -->
-                  <uilogic:LuminaAudioMeter Grid.Column="1" 
-                               Height="40"                   
-                               HorizontalAlignment="Stretch"
-                               Waveform="{Binding WaveformHistory}" />
+                     BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0" Padding="10,0">
+                 <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto">
 
                      <!-- Main Control Buttons -->
-                     <StackPanel Grid.Column="2"  Margin="5,0,0,0"  Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                     <StackPanel Grid.Column="0"   Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                          <!-- Pause Button -->
-                         <Button Classes="btn-icon"
+                         <Button Classes="btn-icon" Height="40" Width="40"
                                  Command="{Binding TogglePauseCommand}"
                                  BorderThickness="1" BorderBrush="Gray">
-                             <icons:MaterialIcon Kind="{Binding IsPaused, Converter={StaticResource PauseIconConverter}}" Width="20"/>
+                             <icons:MaterialIcon Kind="{Binding IsPaused, Converter={StaticResource PauseIconConverter}}" Width="25"/>
                          </Button>
 
                          <!-- Stop Button -->
@@ -42,13 +30,23 @@
                          </Button>
                      </StackPanel>
 
+                     <!--  (Elapsed Time) -->
+                     <StackPanel Grid.Column="1" Margin="10,0,0,0"  VerticalAlignment="Center" Width="105">
+                         <TextBlock Text="ELAPSED TIME" Classes="label-caps" Opacity="0.5"/>
+                         <TextBlock Text="{Binding ElapsedTime}" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                     </StackPanel>
+
+                     <!--  (Waveform) -->
+                     <uilogic:LuminaAudioMeter Grid.Column="2" Height="40" HorizontalAlignment="Stretch" Margin="0,25,0,0"
+                                               Waveform="{Binding WaveformHistory}" />
+
                      <!-- GAIN CONTROL (Right) -->
-                     <StackPanel Grid.Column="3"  Orientation="Horizontal" Margin="15,0" Spacing="10" VerticalAlignment="Center">
+                     <StackPanel Grid.Column="3"  Orientation="Horizontal" Margin="10,0" Spacing="10" VerticalAlignment="Center">
                          <!-- Gain Slider -->
                          <StackPanel Width="150" VerticalAlignment="Center" Margin="0,10,0,0">
                              <TextBlock Text="{Binding CurrentSettings.AudioGain, StringFormat='GAIN: \{0:F1\}x'}"
                                         FontSize="10" Classes="label-caps"/>
-     
+
                              <Slider Value="{Binding CurrentSettings.AudioGain}" VerticalAlignment="Top" Margin="0,0,0,20"
                                      Minimum="1" Maximum="10"
                                      Classes="LuminaSlider"/>
@@ -56,13 +54,13 @@
                          <icons:MaterialIcon Kind="Waveform" Foreground="{StaticResource BrushSecondary}" Width="18" Margin="0,25,0,0" />
                          <!-- Progress Bar -->
                          <ProgressBar Value="{Binding VolumeLevel}" Margin="0,25,0,0"
-                                      Height="4" Width="90"  MinWidth="90" 
-                                      Foreground="{StaticResource BrushSecondary}" 
+                                      Height="8" Width="80"  MinWidth="0"
+                                      Foreground="{StaticResource BrushSecondary}"
                                       Background="#222"/>
                      </StackPanel>
 
                      <!-- Marker Button -->
-                     <Button Grid.Column="4" Classes="btn-secondary" Padding="12,6">
+                     <Button Grid.Column="4" Classes="btn-secondary" Padding="10,6">
                          <StackPanel Orientation="Horizontal" Spacing="6">
                              <icons:MaterialIcon Kind="BookmarkPlusOutline" Width="16"/>
                              <TextBlock Text="Marker" FontSize="13"/>
