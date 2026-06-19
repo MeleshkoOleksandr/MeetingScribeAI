@@ -14,11 +14,11 @@
         <Grid ColumnDefinitions="*, 320">
 
             <!-- MAIN SECTION: TRANSCRIPT -->
-            <ScrollViewer Grid.Column="0" Padding="20">
+            <ScrollViewer Grid.Column="0"  Padding="20,20,0,50" >
                 <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="80, *" Margin="0,0,0,30">
+                            <Grid ColumnDefinitions="80, *" Margin="0,0,30,20">
                                 <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
                                 <StackPanel Grid.Column="1" Spacing="5">
                                     <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
@@ -74,14 +74,25 @@
                         </Button>
                     </StackPanel>
 
+                    <!-- Users -->
+                    <StackPanel Grid.Row="2" Margin="0,30,0,0" Spacing="10">
+                    </StackPanel>
+
                     <!-- PROGRESS INDICATOR -->
-                    <StackPanel Spacing="8" IsVisible="{Binding IsProcessing}">
-                        <TextBlock Text="{Binding CurrentTaskName}" FontSize="12" Foreground="{StaticResource BrushPrimary}"/>
-                        <ProgressBar Value="{Binding ProcessingProgress}"
+                    <StackPanel Grid.Row="3" IsVisible="{Binding IsProcessing}" Spacing="10" Margin="0,20,0,0">
+
+                        <TextBlock Text="{Binding CurrentTaskName}"
+                                   FontSize="12"
+                                   Foreground="{StaticResource BrushPrimary}"
+                                   HorizontalAlignment="Center"/>
+
+                        <ProgressBar Height="6"
+                                     Value="{Binding ProcessingProgress}"
                                      Minimum="0" Maximum="100"
-                                     Height="4"
+                                     IsIndeterminate="{Binding IsIndeterminate}"
                                      Foreground="{StaticResource BrushPrimary}"
-                                     Background="{StaticResource BrushSurfaceContainerHighest}"/>
+                                     Background="{StaticResource BrushSurfaceContainerHighest}"
+                                     CornerRadius="3"/>
                     </StackPanel>
                 </Grid>
             </Border>

@@ -19,6 +19,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isProcessing;
     [ObservableProperty] private double _processingProgress;
     [ObservableProperty] private string _currentTaskName = "";
+    [ObservableProperty] private bool _isIndeterminate;
 
     TranscriptionService _transcriptionService;
     string _whisperPath;
@@ -65,7 +66,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         try
         {
             IsProcessing = true;
-            CurrentTaskName = "Initializing High-Quality AI...";
+            IsIndeterminate = true;
+            CurrentTaskName = "Initializing AI Model...";
             ProcessingProgress = 0;
 
             //  Gather existing text for the context prompt
@@ -85,6 +87,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             await _transcriptionService.InitializeAsync(_whisperPath, Session.Language, oldText, true);
 
             // Start processing with progress reporting
+            IsIndeterminate = false;
             CurrentTaskName = "Analyzing audio file...";
             var progressHandler = new Progress<double>(value => ProcessingProgress = value);
 
@@ -112,8 +115,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             // Unload the heavy model to free up RAM/VRAM
             _transcriptionService.UnloadModel();
 
-            await Task.Delay(2000);
             IsProcessing = false;
+            IsIndeterminate = false;
         }
     }
 }

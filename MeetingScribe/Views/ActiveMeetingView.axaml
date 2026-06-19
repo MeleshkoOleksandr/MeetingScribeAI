@@ -29,11 +29,11 @@
         </Border>
 
         <!-- TRANSCRIPTION AREA -->
-        <ScrollViewer Name="TranscriptScrollViewer" Grid.Row="1" Padding="40,30">
+        <ScrollViewer Name="TranscriptScrollViewer" Grid.Row="1" Padding="20,30,0,0" >
             <ItemsControl ItemsSource="{Binding TranscriptLines}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnDefinitions="100, *" Margin="0,0,0,25">
+                        <Grid ColumnDefinitions="100, *" Margin="0,0,40,20">
 
                             <!-- timecode -->
                             <TextBlock Grid.Column="0"
