@@ -10,8 +10,8 @@
              x:Class="MeetingScribe.Views.ReviewMeetingView"
              x:DataType="vm:ReviewMeetingViewModel">
 
-    <Grid RowDefinitions="*, 100">
-        <Grid ColumnDefinitions="*, 320">
+    <Grid RowDefinitions="*, 60">
+        <Grid ColumnDefinitions="*, 300">
 
             <!-- MAIN SECTION: TRANSCRIPT -->
             <ScrollViewer Grid.Column="0"  Padding="20,20,0,50" >
@@ -103,21 +103,37 @@
             <Grid ColumnDefinitions="Auto, *, Auto" >
 
                 <!-- Player -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="20">
-                    <Button Classes="btn-icon"><icons:MaterialIcon Kind="SkipPrevious"/></Button>
-                    <Button Classes="btn-primary" CornerRadius="50" Width="50" Height="50">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2">
+                    <Button Classes="btn-icon" Width="30" Height="30">
+                        <icons:MaterialIcon Kind="SkipPrevious" Width="20" Height="20" Foreground="{StaticResource BrushPrimary}"/>
+                    </Button>
+                    <Button Classes="btn-icon" Width="30" Height="30">
+                        <icons:MaterialIcon Kind="SkipPreviousCircleOutline" Width="20" Height="20" Foreground="{StaticResource BrushPrimary}"/>
+                    </Button>
+                    <Button Classes="btn-primary" CornerRadius="15" Width="40" Height="40">
                         <icons:MaterialIcon Kind="Play" Width="30" Height="30"/>
                     </Button>
-                    <Button Classes="btn-icon"><icons:MaterialIcon Kind="SkipNext"/></Button>
+                    <Button Classes="btn-icon" Width="30" Height="30">
+                        <icons:MaterialIcon Kind="SkipNextCircleOutline" Width="20" Height="20" Foreground="{StaticResource BrushPrimary}"/>
+                    </Button>
+                    <Button Classes="btn-icon" Width="30" Height="30">
+                        <icons:MaterialIcon Kind="SkipNext" Width="20" Height="20" Foreground="{StaticResource BrushPrimary}"/>
+                    </Button>
+
                 </StackPanel>
 
                 <!-- Timeline (Wave) -->
-                <uilogic:LuminaAudioMeter Grid.Column="1" Margin="40,0" Height="40" VerticalAlignment="Center"/>
+                <uilogic:LuminaAudioMeter Grid.Column="1" Height="40" VerticalAlignment="Center"/>
 
                 <!-- Volume and Additional Information -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="20">
-                    <TextBlock Text="12:45 / 45:00" Opacity="0.5"/>
-                    <icons:MaterialIcon Kind="VolumeHigh" Opacity="0.5"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="5"  Margin="10,0">
+                    <TextBlock Text="12:45 / 45:00" Opacity="0.5" VerticalAlignment="Center" Foreground="{StaticResource BrushSecondary}"  />
+            
+                    <icons:MaterialIcon Kind="VolumeHigh" Opacity="0.5" Foreground="{StaticResource BrushSecondary}" />
+                    <ProgressBar Value="50" Opacity="0.5" 
+                                 Height="8" Width="80"  MinWidth="0"
+                                 Foreground="{StaticResource BrushSecondary}"
+                                 Background="#222"/>
                 </StackPanel>
             </Grid>
         </Border>
