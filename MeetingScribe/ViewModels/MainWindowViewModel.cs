@@ -22,12 +22,12 @@ namespace MeetingScribe.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     //  -- ══════ Fields & Properties  ══════ --//
-
+    #region Fields & Properties
 
     // Link to settings (from the PageList object)
     public AppSettings CurrentSettings => ((SettingsViewModel)PageList.GetByTarget(PageNames.Settings).Page).Settings;
 
-    //            ---   Navigation state 
+    // ---   Navigation state 
     public PageList PageList { get; } = new();     // List of pages used in app (static and temporary) and there methods 
 
     [ObservableProperty] private ViewModelBase _currentPage;
@@ -51,7 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    //    ---   Audio recording and speech recognition state
+    // ---   Audio recording and speech recognition state
     private readonly TranscriptionService _transcriptionService = new();
     private readonly MeetingManager _meetingManager;
     private MeetingSession _currentSession = new MeetingSession();
@@ -68,13 +68,22 @@ public partial class MainWindowViewModel : ViewModelBase
     // Data to illustrate the  volume level history (for the waveform visualization)
     public ObservableCollection<double> WaveformHistory { get; } = new();
 
+    #endregion
 
 
     // -- ══════ Navigation  ══════ --//
+    #region Navigation
 
     private void HandleNavigation(NavigationItem? value)
     {
         if (value == null) return;
+
+        // If we go to the archive, we update the list of files
+        if (value.Page is ArchiveViewModel archiveVm)
+        {
+            archiveVm.LoadArchive();
+        }
+
         CurrentPage = value.Page;
     }
 
@@ -93,7 +102,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
 
-    // -- ══════ Meetings functions & Recording  ══════ --//
+    #endregion
+
+
+    // -- ══════ Meetings Recording functions  ══════ --//
+    #region Meetings Recording functions
 
     // Command triggered by the "Start Recording" button in NewMeetingView
     [RelayCommand]
@@ -203,14 +216,14 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task LoadMeetingFromFile()
     {
-        // 1. Get Storage Provider from the App
+        //  Get Storage Provider from the App
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             return;
 
         var storage = desktop.MainWindow?.StorageProvider;
         if (storage == null) return;
 
-        // 2. Определяем фильтр для аудио-файлов
+        //  Defining a filter for audio files
         var audioFilter = new FilePickerFileType("Audio Files")
         {
             Patterns = new[] { "*.mp3", "*.wav", "*.m4a", "*.wma", "*.flac" },
@@ -218,7 +231,7 @@ public partial class MainWindowViewModel : ViewModelBase
             MimeTypes = new[] { "audio/*" }
         };
 
-        // 3. Открываем диалог выбора файла
+        //  Open the file selection dialog
         var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select Audio File",
@@ -228,14 +241,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (result == null || result.Count == 0) return;
 
-        // 4. Получаем локальный путь к файлу (Avalonia возвращает URI)
+        //  We get the local path to the file (Avalonia returns a URI)
         string selectedPath = result[0].Path.LocalPath;
 
-        // 3. Create Session (Transcoding happens here)
+        //  Create Session (Transcoding happens here)
         // Show a "Loading" status if you want
         var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, CurrentSettings);
 
-        // 4. Navigate to Review
+        //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
 
         var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath);
@@ -250,7 +263,7 @@ public partial class MainWindowViewModel : ViewModelBase
         PageList.AddTemporaryItem(reviewPage);
         Navigate(reviewPage);
 
-        // 5. Trigger auto-processing
+        //  Trigger auto-processing
         _ = reviewVm.ImproveRecognitionCommand.ExecuteAsync(null);
     }
 
@@ -269,9 +282,10 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
+    #endregion
 
-     // -- ══════ Constructor  ══════ --//
 
+    // -- ══════ Constructor  ══════ --//
     public MainWindowViewModel()
     {
         Navigate(PageNames.New);
