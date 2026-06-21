@@ -102,6 +102,27 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
 
+    // This method is called from the Archive page when the user wants to open a past meeting for review
+    public void OpenMeetingReview(MeetingSession session)
+    {
+        //  Create a new ReviewMeetingViewModel with the selected session and navigate to it
+        string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath);
+
+        // Creating a  navigation item for this review pag
+        var reviewNavItem = new NavigationItem
+        {
+            Label = session.Name,
+            Icon = "NotebookOutline",
+            Target = PageNames.Review,
+            Page = reviewVm
+        };
+
+        // Add to the dynamic sidebar list and navigate to it
+        PageList.AddTemporaryItem(reviewNavItem);
+        Navigate(reviewNavItem);
+    }
+
     #endregion
 
 
@@ -195,7 +216,8 @@ public partial class MainWindowViewModel : ViewModelBase
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
         var reviewPage = new NavigationItem
         {
-            Label = "Review: " + _currentSession?.Name,
+            Label = "Review:",
+            Description = _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
             Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService, whisperPath)
@@ -290,6 +312,10 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Navigate(PageNames.New);
         SetupTranscriptionStreaming();
+        // Initialize the MeetingManager with the transcription service
         _meetingManager = new MeetingManager(_transcriptionService);
+        // Initialize the Archive page with the callback to open a meeting review
+        (PageList.GetByTarget(PageNames.Archive).Page as ArchiveViewModel).InitArchiveViewModel(OpenMeetingReview);
+      
     }
 }

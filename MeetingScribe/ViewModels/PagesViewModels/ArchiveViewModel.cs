@@ -51,9 +51,11 @@ public partial class ArchiveViewModel : ViewModelBase
             return result.ToList();
         }
     }
+    // Action to be invoked when a meeting is opened
+    private  Action<MeetingSession> _onOpenRequest;
 
     // Refresh the filtered meetings list and reset the selected meeting
-    private void RefreshSelection()
+    private void RefreshSelection( )
     {
         OnPropertyChanged(nameof(FilteredMeetings));
         // Reset the selected meeting to the first one in the filtered list
@@ -69,6 +71,12 @@ public partial class ArchiveViewModel : ViewModelBase
 
     public ArchiveViewModel()
     {
+       
+    }
+    public void InitArchiveViewModel(Action<MeetingSession> onOpenRequest)
+    {
+        _onOpenRequest = onOpenRequest;
+        LoadArchive();
     }
 
     public void LoadArchive()
@@ -101,9 +109,10 @@ public partial class ArchiveViewModel : ViewModelBase
     [RelayCommand]
     private void OpenSelectedMeeting()
     {
-        if (SelectedMeeting == null) return;
-
-        // GO to the meeting page with the selected meeting session
+        if (SelectedMeeting != null)
+        {
+            _onOpenRequest?.Invoke(SelectedMeeting);
+        }
     }
 
 }
