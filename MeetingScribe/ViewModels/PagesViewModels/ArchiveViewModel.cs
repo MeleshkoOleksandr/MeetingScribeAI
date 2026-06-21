@@ -15,28 +15,60 @@ namespace MeetingScribe.ViewModels;
 
 public partial class ArchiveViewModel : ViewModelBase
 {
-    private readonly TranscriptionService _transcriptionService = new TranscriptionService();
-    private readonly string _whisperPath = "";
+    // Sort options for the meetings list
+    public List<string> SortOptions { get; } = ["▽ DATE", "△ DATE", "▽ NAME", "△ NAME"];
+    [ObservableProperty] private string _selectedSortOption = "▽ DATE";
 
+    // Observable collection of meetings in the archive
     [ObservableProperty] private ObservableCollection<MeetingSession> _meetings = new();
     [ObservableProperty] private MeetingSession? _selectedMeeting;
+    // Search text for filtering the meetings list
     [ObservableProperty] private string _searchText = "";
 
-    // Список для отображения с учетом фильтрации
-    public IEnumerable<MeetingSession> FilteredMeetings =>
-        string.IsNullOrWhiteSpace(SearchText)
-            ? Meetings
-            : Meetings.Where(m => m.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+    // Refresh the filtered meetings list when the search text or sort option changes
+    partial void OnSearchTextChanged(string value) => RefreshSelection();
+    partial void OnSelectedSortOptionChanged(string value) => RefreshSelection();
+
+    // List of meetings filtered by the search text
+    public IEnumerable<MeetingSession> FilteredMeetings
+    {
+        get
+        {
+            var result = string.IsNullOrWhiteSpace(SearchText)
+                ? Meetings
+                : Meetings.Where(m => m.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+            // apply sorting based on the selected sort option
+            result = SelectedSortOption switch
+            {
+                "▽ DATE" => result.OrderByDescending(m => m.StartTime),
+                "△ DATE" => result.OrderBy(m => m.StartTime),
+                "▽ NAME" => result.OrderBy(m => m.Name),
+                "△ NAME" => result.OrderByDescending(m => m.Name),
+                _ => result
+            };
+
+            return result.ToList();
+        }
+    }
+
+    // Refresh the filtered meetings list and reset the selected meeting
+    private void RefreshSelection()
+    {
+        OnPropertyChanged(nameof(FilteredMeetings));
+        // Reset the selected meeting to the first one in the filtered list
+        SelectedMeeting = FilteredMeetings.FirstOrDefault();
+    }
+
+    // Command to apply the selected sort option
+    [RelayCommand]
+    public void ApplySort(string option)
+    {
+        SelectedSortOption = option;
+    }
 
     public ArchiveViewModel()
     {
-    }
-
-    public ArchiveViewModel(TranscriptionService transcriptionService, string whisperPath)
-    {
-        _transcriptionService = transcriptionService;
-        _whisperPath = whisperPath;
-        LoadArchive();
     }
 
     public void LoadArchive()
@@ -58,11 +90,12 @@ public partial class ArchiveViewModel : ViewModelBase
                     if (session != null) Meetings.Add(session);
                 }
                 catch (Exception ex)
-                {             
+                {
                     System.Diagnostics.Debug.WriteLine($"Error on reading archive meeting from file: {ex.Message}");
                 }
             }
         }
+        RefreshSelection();
     }
 
     [RelayCommand]
@@ -73,5 +106,4 @@ public partial class ArchiveViewModel : ViewModelBase
         // GO to the meeting page with the selected meeting session
     }
 
-    partial void OnSearchTextChanged(string value) => OnPropertyChanged(nameof(FilteredMeetings));
 }

@@ -10,77 +10,87 @@
     <Grid ColumnDefinitions="*, 320">
 
         <!-- LEFT SIDE: LIST -->
-        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *" Margin="25,20,5,25">
-
-            <!-- Search and Sort -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *" Margin="25,20,5,25">      
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                 <!-- Search -->
                 <TextBox Grid.Column="0" Text="{Binding SearchText}"
                          PlaceholderText="Search archive..." Classes="lumina-input">
                     <TextBox.InnerLeftContent>
                         <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
                     </TextBox.InnerLeftContent>
                 </TextBox>
-                <StackPanel Orientation="Horizontal"  Grid.Column="1">
-                    <Button Classes="btn-icon" Margin="10,0,0,0" Foreground="{StaticResource BrushSecondary}">
-                        <icons:MaterialIcon Kind="SortVariant"/>
-                    </Button>
-                    <TextBlock Text="NAME" FontSize="12" Margin="5,0" VerticalAlignment="Center"  Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
+                <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Center" Margin="10,0">    
+                <!-- Sort -->
+                <Button Background="Transparent" Padding="5" Cursor="Hand" >
+                <StackPanel Orientation="Horizontal" >
+                    <icons:MaterialIcon Kind="Sort" Width="25" Height="25"
+                                        Foreground="{StaticResource BrushPrimary}" />
+                    <TextBlock Text="{Binding SelectedSortOption}" FontSize="14" Margin="8,0,0,0" VerticalAlignment="Center" 
+                               Foreground="{StaticResource BrushPrimary}" Opacity="0.9"/>
+                </StackPanel>
+                <!-- (Flyout) -->
+                <Button.Flyout>
+                    <MenuFlyout ItemsSource="{Binding SortOptions}">
+                        <!-- Customize the appearance of each item -->
+                        <MenuFlyout.ItemContainerTheme>
+                            <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="Header" Value="{Binding}"/>
+                                <Setter Property="Command" Value="{Binding $parent[UserControl].((vm:ArchiveViewModel)DataContext).ApplySortCommand}"/>
+                                <Setter Property="CommandParameter" Value="{Binding}"/>
+                            </ControlTheme>
+                        </MenuFlyout.ItemContainerTheme>
+                    </MenuFlyout>
+                </Button.Flyout>
+                </Button>
                 </StackPanel>
             </Grid>
-
             <TextBlock Grid.Row="1" Text="Archive" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
-
             <!-- List of Meetings -->
             <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0"
                      ItemsSource="{Binding FilteredMeetings}"
                      SelectedItem="{Binding SelectedMeeting}">
-                     <ListBox.Styles>               
-                        <Style Selector="ListBoxItem">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Padding" Value="0"/>
-        <Setter Property="Margin" Value="0,0,20,5"/>
-        <Setter Property="Template">
-            <ControlTemplate>
-                <!-- Main Card Container -->
-                <Border Name="MainBorder" 
-                        Background="{TemplateBinding Background}" 
-                        CornerRadius="8" 
-                        ClipToBounds="True">
-                    <Grid ColumnDefinitions="4, *">
-                        
-                        <!--  GREEN STRIPE -->
-                        <Border Name="SelectionStripe" 
-                                Grid.Column="0" Width="4" IsVisible="False"
-                                Background="{StaticResource BrushPrimary}"/>
-                                                            
-                        <!--  CONTENTS (A DataTemplate from the ListBox item) -->
-                        <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1" Padding="0"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"                                     
-                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-                    </Grid>
-                </Border>
-            </ControlTemplate>
-        </Setter>
-      </Style>
 
-      <Style Selector="ListBoxItem:selected">
-            <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
-        </Style>
-        <Style Selector="ListBoxItem:selected /template/ Border#SelectionStripe">
-            <Setter Property="IsVisible" Value="True"/>
-        </Style>
-        <Style Selector="ListBoxItem:pointerover">
-            <Setter Property="Background" Value="#1e2119"/>
-        </Style>
-                </ListBox.Styles>
-           
+            <ListBox.Resources>
+                <!-- REDEFINING SYSTEM HIGHLIGHT BRUSHES-->
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentHighBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowPointerOverBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+                <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="White" />
+             </ListBox.Resources>
+
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,16,12"/>
+                    <Setter Property="Template">
+                        <ControlTemplate>
+                            <Border Name="MainBorder"  CornerRadius="8" ClipToBounds="True" Background="{TemplateBinding Background}" >
+                                <Grid ColumnDefinitions="4, *">
+                                    <Border Name="SelectionStripe" Grid.Column="0" Width="4" 
+                                            Background="{StaticResource BrushPrimary}"  
+                                            IsVisible="{TemplateBinding IsSelected}"/>                          
+                                    <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1" Padding="0"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter>
+                </Style>
+
+                <Style Selector="ListBoxItem:selected">
+                    <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
+                </Style>
+                <Style Selector="ListBoxItem:pointerover:not(:selected)">
+                    <Setter Property="Background" Value="#1e2119"/>
+                </Style>
+            </ListBox.Styles>
                 <ListBox.ItemTemplate>       
                     <DataTemplate>
                         <Border Padding="20,15" Background="Transparent">
                             <Grid ColumnDefinitions="*, Auto" >
-
                                 <!-- Text block -->
                                 <StackPanel Grid.Column="0">
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,5">
@@ -98,16 +108,13 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <icons:MaterialIcon Kind="ClockOutline" Width="14" Foreground="Gray"/>
-                                            <TextBlock Text="{Binding Duration, StringFormat='\{0:mm\} min'}"
+                                           <TextBlock Text="{Binding Duration, StringFormat=\{0:mm\} min}"
                                                        FontSize="13" Foreground="Gray"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
-
                                 <!-- More info arrow -->
-                                <icons:MaterialIcon Grid.Column="1" Kind="ChevronRight"
-                                                    Width="20" Height="20" Foreground="Gray"
-                                                    VerticalAlignment="Center"/>
+                                <icons:MaterialIcon Grid.Column="1" Kind="ChevronRight" Width="20" Height="20" Foreground="Gray" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -120,20 +127,18 @@
                 BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="1,0,0,0">
 
             <!-- We display details only if something is selected -->
-            <Grid IsVisible="{Binding SelectedMeeting, Converter={x:Static ObjectConverters.IsNotNull}}"
-                  RowDefinitions="Auto, *, Auto" >
-
+            <Grid IsVisible="{Binding SelectedMeeting, Converter={x:Static ObjectConverters.IsNotNull}}" RowDefinitions="Auto, *, Auto" >
                 <StackPanel Grid.Row="0" Spacing="10">
                     <TextBlock Text="MEETING DETAILS" Classes="label-caps" Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
                     <TextBlock Text="{Binding SelectedMeeting.Name}" FontSize="22" FontWeight="Bold" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Opacity="0.4">
+                    <StackPanel  Orientation="Horizontal" Spacing="10" Opacity="0.4">
                         <StackPanel Orientation="Horizontal" Spacing="3">
                             <icons:MaterialIcon Kind="Calendar" Width="14"/>
                             <TextBlock Text="{Binding SelectedMeeting.StartTime, StringFormat=\{0:MMM dd yyyy\}}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="3">
                             <icons:MaterialIcon Kind="ClockOutline" Width="14"/>
-                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:hh\\:mm\}}" FontSize="12"/>
+                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:hh\:mm\}}" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -152,18 +157,17 @@
                         <!--   Team -->
                         <StackPanel Spacing="10">
                             <TextBlock Text="PARTICIPANTS" Classes="label-caps" Opacity="0.6"/>
-                       <!--     <StackPanel Orientation="Horizontal" Spacing="2">
-                                <Border Classes="chip" CornerRadius="180" Height="30" Background="Red" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                           <!-- <Border Classes="chip" CornerRadius="180" Height="30" Background="Red" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
                                 <Border Classes="chip" CornerRadius="180" Height="30" Background="BlueViolet" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
-                                <Border Classes="chip" CornerRadius="180" Height="30" Background="LightBlue" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
-                            </StackPanel>-->
+                                <Border Classes="chip" CornerRadius="180" Height="30" Background="LightBlue" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>-->
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-
                 <!-- Bottom buttons -->
-                <StackPanel  Spacing="10" Grid.Row="2"  >
-                    <Border Grid.Row="5" Classes="divider-h" Margin="0,10" Opacity="0.6"/>
+                <StackPanel  Spacing="10" Grid.Row="2">
+                    <Border Classes="divider-h" Margin="0,10" Opacity="0.6"/>
                     <Button Classes="btn-accent" Command="{Binding OpenSelectedMeetingCommand}" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <icons:MaterialIcon Kind="OpenInApp" Width="18"/>
