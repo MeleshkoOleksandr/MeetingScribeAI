@@ -60,16 +60,7 @@
                         <Slider Value="{Binding Settings.AudioGain}" Minimum="1.0" Maximum="10.0"
                                 IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center"/>
                     </StackPanel>
-
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="PROCESING TYPE" Classes="label-caps"/>
-                        <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedIndex="1">
-                            <ComboBoxItem >CPU</ComboBoxItem>
-                            <ComboBoxItem >CUDA</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-
+  
                     <!-- Model Selection -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="REAL TIME RECOGNITION MODEL" Classes="label-caps"/>
