@@ -4,10 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.ViewModels;

@@ -7,52 +7,107 @@
              x:DataType="vm:ArchiveViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.ArchiveView">
-    <Grid ColumnDefinitions="*, 350">
+    <Grid ColumnDefinitions="*, 320">
 
-        <!-- ЛЕВАЯ ЧАСТЬ: СПИСОК -->
-        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *" Margin="40,20">
+        <!-- LEFT SIDE: LIST -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *" Margin="25,20,5,25">
 
-            <!-- Поиск и Сортировка -->
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,30">
+            <!-- Search and Sort -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
                 <TextBox Grid.Column="0" Text="{Binding SearchText}"
-                         Watermark="Search archive..." Classes="lumina-input">
+                         PlaceholderText="Search archive..." Classes="lumina-input">
                     <TextBox.InnerLeftContent>
                         <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
                     </TextBox.InnerLeftContent>
                 </TextBox>
-                <Button Grid.Column="1" Classes="btn-icon" Margin="10,0,0,0">
-                    <icons:MaterialIcon Kind="SortVariant"/>
-                </Button>
+                <StackPanel Orientation="Horizontal"  Grid.Column="1">
+                    <Button Classes="btn-icon" Margin="10,0,0,0" Foreground="{StaticResource BrushSecondary}">
+                        <icons:MaterialIcon Kind="SortVariant"/>
+                    </Button>
+                    <TextBlock Text="NAME" FontSize="12" Margin="5,0" VerticalAlignment="Center"  Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
+                </StackPanel>
             </Grid>
 
             <TextBlock Grid.Row="1" Text="Archive" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
 
-            <!-- Список совещаний -->
+            <!-- List of Meetings -->
             <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0"
                      ItemsSource="{Binding FilteredMeetings}"
                      SelectedItem="{Binding SelectedMeeting}">
-                <ListBox.ItemTemplate>
+                     <ListBox.Styles>               
+                        <Style Selector="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Margin" Value="0,0,20,5"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- Main Card Container -->
+                <Border Name="MainBorder" 
+                        Background="{TemplateBinding Background}" 
+                        CornerRadius="8" 
+                        ClipToBounds="True">
+                    <Grid ColumnDefinitions="4, *">
+                        
+                        <!--  GREEN STRIPE -->
+                        <Border Name="SelectionStripe" 
+                                Grid.Column="0" Width="4" IsVisible="False"
+                                Background="{StaticResource BrushPrimary}"/>
+                                                            
+                        <!--  CONTENTS (A DataTemplate from the ListBox item) -->
+                        <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1" Padding="0"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"                                     
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+      </Style>
+
+      <Style Selector="ListBoxItem:selected">
+            <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ Border#SelectionStripe">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover">
+            <Setter Property="Background" Value="#1e2119"/>
+        </Style>
+                </ListBox.Styles>
+           
+                <ListBox.ItemTemplate>       
                     <DataTemplate>
-                        <Border Padding="20" CornerRadius="8" Margin="0,0,0,10" Background="#1a1d15">
-                            <Grid RowDefinitions="Auto, Auto, Auto">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold"/>
-                                    <Border Background="#2D2D2D" CornerRadius="4" Padding="6,2">
-                                        <TextBlock Text="Q3 Roadmap" FontSize="10" Opacity="0.6"/>
-                                    </Border>
-                                </StackPanel>
-                                <TextBlock Grid.Row="1" Text="{Binding Description}"
-                                           FontSize="13" Opacity="0.5" Margin="0,5,0,10" MaxLines="1"/>
-                                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="20" Opacity="0.4">
-                                    <StackPanel Orientation="Horizontal" Spacing="5">
-                                        <icons:MaterialIcon Kind="Calendar" Width="14"/>
-                                        <TextBlock Text="{Binding StartTime, StringFormat=\{0:MMM dd yyyy\}}" FontSize="12"/>
+                        <Border Padding="20,15" Background="Transparent">
+                            <Grid ColumnDefinitions="*, Auto" >
+
+                                <!-- Text block -->
+                                <StackPanel Grid.Column="0">
+                                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,5">
+                                        <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="5">
-                                        <icons:MaterialIcon Kind="ClockOutline" Width="14"/>
-                                        <TextBlock Text="{Binding Duration, StringFormat=\{0:hh\\:mm\}}" FontSize="12"/>
+
+                                    <TextBlock Text="{Binding Description}" FontSize="14" Foreground="Gray"
+                                               Margin="0,0,0,12" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="20">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <icons:MaterialIcon Kind="CalendarBlank" Width="14" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding StartTime,  StringFormat=\{0:MMM dd yyyy\}}"
+                                                       FontSize="13" Foreground="Gray"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <icons:MaterialIcon Kind="ClockOutline" Width="14" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Duration, StringFormat='\{0:mm\} min'}"
+                                                       FontSize="13" Foreground="Gray"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
+
+                                <!-- More info arrow -->
+                                <icons:MaterialIcon Grid.Column="1" Kind="ChevronRight"
+                                                    Width="20" Height="20" Foreground="Gray"
+                                                    VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -60,17 +115,17 @@
             </ListBox>
         </Grid>
 
-        <!-- ПРАВАЯ ЧАСТЬ: ДЕТАЛИ -->
+        <!--  RIGHT SIDE: DETAILS -->
         <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}" Padding="20"
                 BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="1,0,0,0">
 
-            <!-- Показываем детали только если что-то выбрано -->
+            <!-- We display details only if something is selected -->
             <Grid IsVisible="{Binding SelectedMeeting, Converter={x:Static ObjectConverters.IsNotNull}}"
                   RowDefinitions="Auto, *, Auto" >
 
                 <StackPanel Grid.Row="0" Spacing="10">
                     <TextBlock Text="MEETING DETAILS" Classes="label-caps" Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
-                    <TextBlock Text="{Binding SelectedMeeting.Name}" FontSize="24" FontWeight="Bold" TextWrapping="Wrap" Margin="0,15,0,0"/>
+                    <TextBlock Text="{Binding SelectedMeeting.Name}" FontSize="22" FontWeight="Bold" TextWrapping="Wrap" Margin="0,10,0,0"/>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Opacity="0.4">
                         <StackPanel Orientation="Horizontal" Spacing="3">
                             <icons:MaterialIcon Kind="Calendar" Width="14"/>
@@ -89,17 +144,24 @@
                             <TextBlock Text="DESCRIPTION" Classes="label-caps" Opacity="0.6"/>
                             <TextBlock Text="{Binding SelectedMeeting.Description}" TextWrapping="Wrap" LineHeight="20"/>
                         </StackPanel>
-
-                        <!-- Темы (заглушка) -->
+                        <!--   Topics -->
                         <StackPanel Spacing="10">
                             <TextBlock Text="KEY TOPICS" Classes="label-caps" Opacity="0.6"/>
-                            <Border Classes="chip" HorizontalAlignment="Left"><TextBlock Text="AI Feature Prioritization"/></Border>
+                            <Border Classes="chip" HorizontalAlignment="Left"><TextBlock Text="Tags mockup"/></Border>
+                        </StackPanel>
+                        <!--   Team -->
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="PARTICIPANTS" Classes="label-caps" Opacity="0.6"/>
+                       <!--     <StackPanel Orientation="Horizontal" Spacing="2">
+                                <Border Classes="chip" CornerRadius="180" Height="30" Background="Red" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
+                                <Border Classes="chip" CornerRadius="180" Height="30" Background="BlueViolet" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
+                                <Border Classes="chip" CornerRadius="180" Height="30" Background="LightBlue" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
+                            </StackPanel>-->
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
-                <!-- Кнопки внизу -->
-
+                <!-- Bottom buttons -->
                 <StackPanel  Spacing="10" Grid.Row="2"  >
                     <Border Grid.Row="5" Classes="divider-h" Margin="0,10" Opacity="0.6"/>
                     <Button Classes="btn-accent" Command="{Binding OpenSelectedMeetingCommand}" HorizontalAlignment="Stretch">
@@ -109,9 +171,9 @@
                         </StackPanel>
                     </Button>
                     <Button Classes="btn-secondary" HorizontalAlignment="Stretch" Foreground="#FF5252">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                             <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
-                            <TextBlock Text="Delete Archive"/>
+                            <TextBlock Text="Delete from Archive"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

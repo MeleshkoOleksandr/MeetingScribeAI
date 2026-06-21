@@ -21,7 +21,7 @@
                     <StackPanel Spacing="5">
                         <TextBlock Text="INTERFACE LANGUAGE" Classes="label-caps"/>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding Settings.TranscriptionLanguage}">
+                                  SelectedIndex="1">
                             <ComboBoxItem >Italiano</ComboBoxItem>
                             <ComboBoxItem >English</ComboBoxItem>
                         </ComboBox>
@@ -61,6 +61,15 @@
                                 IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center"/>
                     </StackPanel>
 
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="PROCESING TYPE" Classes="label-caps"/>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedIndex="1">
+                            <ComboBoxItem >CPU</ComboBoxItem>
+                            <ComboBoxItem >CUDA</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+
                     <!-- Model Selection -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="REAL TIME RECOGNITION MODEL" Classes="label-caps"/>
@@ -75,7 +84,7 @@
                         </ComboBox>
                     </StackPanel>
 
-                     <!-- Model Post meating Selection -->
+                    <!-- Model Post meating Selection -->
                     <StackPanel Spacing="5" Margin="0,10,0,0">
                         <TextBlock Text="ACCURATE MODEL" Classes="label-caps"/>
                         <ComboBox ItemsSource="{Binding AvailableModels}"
