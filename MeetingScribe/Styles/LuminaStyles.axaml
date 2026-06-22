@@ -267,6 +267,21 @@
         <Setter Property="Width" Value="80"/>
     </Style>
 
+    <!-- Round button -->
+    <Style Selector="Button.btn-icon-round">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+        <Setter Property="Foreground" Value="{StaticResource BrushOnPrimary}"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="CornerRadius" Value="16"/> <!-- Полный круг -->
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style Selector="Button.btn-icon-round:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#c5f091"/> <!-- Светлее при наведении -->
+    </Style>
+
     <!-- ══════════════════════════════════════════
     CHIPS / AVATAR / BADGE
     ══════════════════════════════════════════ -->
