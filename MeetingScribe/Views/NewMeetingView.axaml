@@ -19,7 +19,14 @@
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="MEETING NAME" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input"  PlaceholderText="Enter meeting name…"  Text="{Binding MeetingName}"/>
+                        <TextBox Classes="lumina-input"  PlaceholderText="Enter meeting name…"  Text="{Binding MeetingName}">
+                            <TextBox.InnerRightContent>
+                                <Button Command="{Binding AddCurrentDateCommand}"  ToolTip.Tip="Add current date to name"
+                                        Classes="btn-icon" Margin="0,0,5,0" Cursor="Hand">
+                                    <icons:MaterialIcon Kind="CalendarPlus" Width="20" Foreground="{StaticResource BrushPrimary}"/>
+                                </Button>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
                     </StackPanel>
                     <StackPanel Spacing="6">
                         <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
@@ -45,18 +52,18 @@
             <Border Grid.Row="1" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10">
                 <Grid RowDefinitions="Auto, *">
                     <StackPanel Grid.Row="0" Spacing="16" Margin="0,0,0,16">
-                       <DockPanel  LastChildFill="False">
-                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="FormatListBulletedSquare" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
-                            <TextBlock Text="Meeting Topics" Classes="card-title"/>
-                        </StackPanel>
-                        <!--Loading an agenda from a .docx file-->
-                        <Button DockPanel.Dock="Right"
-                                Classes="btn-icon-round"
-                                ToolTip.Tip="Import from .docx Agenda"
-                                Command="{Binding ImportAgendaCommand}">
-                            <icons:MaterialIcon Kind="FileDocumentPlusOutline" Width="17" Height="17"/>
-                        </Button>
+                        <DockPanel  LastChildFill="False">
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="FormatListBulletedSquare" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
+                                <TextBlock Text="Meeting Topics" Classes="card-title"/>
+                            </StackPanel>
+                            <!--Loading an agenda from a .docx file-->
+                            <Button DockPanel.Dock="Right"
+                                    Classes="btn-icon-round"
+                                    ToolTip.Tip="Import from .docx Agenda"
+                                    Command="{Binding ImportAgendaCommand}">
+                                <icons:MaterialIcon Kind="FileDocumentPlusOutline" Width="17" Height="17"/>
+                            </Button>
                         </DockPanel>
                     </StackPanel>
 

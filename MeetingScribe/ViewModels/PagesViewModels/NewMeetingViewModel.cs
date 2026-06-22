@@ -32,8 +32,20 @@ public partial class NewMeetingViewModel : ViewModelBase
     public NewMeetingViewModel()
     {
         // Default name with date
-        MeetingName = DateTime.Now.ToString("yy-MM-dd HH_mm") + " - New Meeting";
+        MeetingName = "New Meeting";
         LoadLanguages();
+    }
+
+    [RelayCommand]
+    private void AddCurrentDate()
+    {
+        string datePrefix = $"[{DateTime.Now:yy-MM-dd}]";
+
+        // If the meeting name already contains the date prefix, do not add it again
+        if (!string.IsNullOrEmpty(MeetingName) && MeetingName.Contains(datePrefix))
+            return;
+
+        MeetingName = MeetingName + datePrefix;
     }
 
     private void LoadLanguages()
@@ -59,12 +71,12 @@ public partial class NewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task ImportAgenda()
     {
-        // 1. Получаем доступ к файловой системе через окно
+        // 1. Get the storage provider from the main window
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         var storage = desktop.MainWindow?.StorageProvider;
         if (storage == null) return;
 
-        // 2. Выбор только .docx файлов
+        // 2. Select the file using the file picker. Only allow .docx files
         var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select Meeting Agenda",
@@ -76,21 +88,21 @@ public partial class NewMeetingViewModel : ViewModelBase
 
         try
         {
-            // 3. Вызов вашего парсера
+            // 3. Exrcuting the parsing logic from AgendaParser
             string filePath = result[0].Path.LocalPath;
             var (participants, topics) = AgendaParser.ParseMeetingAgenda(filePath);
 
-            // 4. Заполняем поля на UI
+            // 4. Show the parsed data in the UI
             MeetingTopics = topics;
             ParticipantsText = participants;
 
-            // Опционально: Добавить в описание, что импорт прошел успешно
+            // Optional: If the description is empty, you can set a default description based on the agenda file name or other logic
             if (string.IsNullOrEmpty(Description))
                 Description = $"Imported from agenda: {DateTime.Now:d}";
         }
         catch (Exception ex)
         {
-            // Тут можно вывести ошибку пользователю
+            //  Parse error handling: Log the error and optionally show a message to the user
             System.Diagnostics.Debug.WriteLine($"Parsing error: {ex.Message}");
         }
     }
