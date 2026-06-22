@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
@@ -10,7 +10,7 @@ namespace MeetingScribe.Logic.Services;
 public class SileroVadDetector : IDisposable
 {
     private readonly InferenceSession _session;
-    private readonly float[] _state = new float[2 * 1 * 128];// Внутреннее состояние RNN (h и c)
+    private readonly float[] _state = new float[2 * 1 * 128]; // The internal state of an RNN (h и c)
     private readonly int _sampleRate = 16000;
 
     public SileroVadDetector(string modelPath)
@@ -24,18 +24,18 @@ public class SileroVadDetector : IDisposable
     }
 
     /// <summary>
-    /// Проверяет 30-миллисекундный кусок аудио. Возвращает вероятность речи от 0.0 до 1.0
+    /// Checks a 30-millisecond audio sample. Returns a speech probability between 0.0 and 1.0
     /// </summary>
     public float IsSpeechProbability(float[] samples)
     {
         if (samples.Length != 480)
             throw new ArgumentException("Размер чанка должен быть строго 480 сэмплов (30 мс).");
 
-        // Создаем тензоры для ONNX
+        // Creating Tensors for ONNX
         var inputTensor = new DenseTensor<float>(samples, new[] { 1, samples.Length });
         var srTensor = new DenseTensor<long>(new long[] { _sampleRate }, new[] { 1 });
 
-        // ВАЖНО: Явно передаем текущее состояние в тензор
+        // We  pass the current state to the tensor
         var stateTensor = new DenseTensor<float>(_state, new[] { 2, 1, 128 });
 
         var inputs = new List<NamedOnnxValue>
@@ -47,16 +47,14 @@ public class SileroVadDetector : IDisposable
 
         using var results = _session.Run(inputs);
 
-        // 1. Получаем вероятность речи (индекс 0)
+        // 1. We obtain the speech probability (index 0)
         var outputTensor = results.ElementAt(0).AsTensor<float>();
         float probability = outputTensor.First();
 
-        // 2. Получаем обновленное состояние сети (индекс 1)
+        // 2. We recive the updated network status (index 1)
         var newStateTensor = results.ElementAt(1).AsTensor<float>();
 
-        // НАДЕЖНОЕ КОПИРОВАНИЕ СОСТОЯНИЯ:
-        // Вместо foreach, который может нарушить порядок индексов в многомерном тензоре,
-        // используем нативное копирование массива Onnx Runtime
+        // We use Onnx Runtime's native array copying
         float[] updatedState = newStateTensor.ToArray();
         Buffer.BlockCopy(updatedState, 0, _state, 0, _state.Length * sizeof(float));
 

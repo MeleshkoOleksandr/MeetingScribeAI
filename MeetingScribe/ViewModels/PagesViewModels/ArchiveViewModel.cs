@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MeetingScribe.Logic.Meeting;
-using MeetingScribe.Logic.Services;
 
 using System;
 using System.Collections.Generic;
@@ -70,8 +69,7 @@ public partial class ArchiveViewModel : ViewModelBase
     }
 
     public ArchiveViewModel()
-    {
-       
+    {   
     }
     public void InitArchiveViewModel(Action<MeetingSession> onOpenRequest)
     {
@@ -114,5 +112,4 @@ public partial class ArchiveViewModel : ViewModelBase
             _onOpenRequest?.Invoke(SelectedMeeting);
         }
     }
-
 }

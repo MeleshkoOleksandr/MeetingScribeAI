@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -78,12 +79,9 @@ public class LuminaAudioMeter : Control
         {
             // The height of the bar is proportional to the volume (from 2px to full height)
             double barHeight = Math.Max(2, val * totalHeight);
-
             var rect = new Rect(x, centerY - barHeight / 2, barWidth, barHeight);
-
             // Draw a rounded rectangle
             context.FillRectangle(brush, rect, 2);
-
             x += barWidth + spacing;
         }
     }

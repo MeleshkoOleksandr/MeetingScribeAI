@@ -1,7 +1,8 @@
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
+
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

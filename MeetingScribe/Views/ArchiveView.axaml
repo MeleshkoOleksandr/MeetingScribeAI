@@ -181,7 +181,6 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-
             </Grid>
         </Border>
     </Grid>

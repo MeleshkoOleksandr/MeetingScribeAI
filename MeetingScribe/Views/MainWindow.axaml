@@ -7,8 +7,8 @@
         x:Class="MeetingScribe.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
 
-        Width="1280" Height="850"
-        MinWidth="1000" MinHeight="820"
+        Width="1100" Height="800"
+        MinWidth="1000" MinHeight="700"
 
         Title="MeetingScribe"
         Icon="/Assets/Images/Logo_main.ico"

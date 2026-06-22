@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -13,7 +14,6 @@ using MeetingScribe.UILogic;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -249,7 +249,6 @@ public partial class MainWindowViewModel : ViewModelBase
         var audioFilter = new FilePickerFileType("Audio Files")
         {
             Patterns = new[] { "*.mp3", "*.wav", "*.m4a", "*.wma", "*.flac" },
-        //    AppleFileTypes = new[] { "public.audio" },
             MimeTypes = new[] { "audio/*" }
         };
 
@@ -266,7 +265,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //  We get the local path to the file (Avalonia returns a URI)
         string selectedPath = result[0].Path.LocalPath;
 
-        //  Create Session (Transcoding happens here)
+        // Create Session (Transcoding happens here)
         // Show a "Loading" status if you want
         var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, CurrentSettings);
 
