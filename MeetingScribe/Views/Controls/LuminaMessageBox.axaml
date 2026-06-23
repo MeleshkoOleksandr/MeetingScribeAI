@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="MeetingScribe.Views.LuminaMessageBox"
+        Width="450" Height="250"
+        WindowStartupLocation="CenterOwner"
+        Background="#1a1d15"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        CanResize="False"
+        CornerRadius="12">
+
+    <Border BorderBrush="#2D2D2D" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
+        <Grid RowDefinitions="*, Auto, Auto">
+            
+            <!-- Main content -->
+            <StackPanel Grid.Row="0" >
+                <Border Padding="30,30,30,10"> 
+                <Grid ColumnDefinitions="Auto, *">
+                    <!-- Ico -->
+                    <Border Grid.Column="0" Width="48" Height="48" 
+                            Background="#332020" CornerRadius="12"
+                            VerticalAlignment="Top">
+                        <icons:MaterialIcon Kind="DeleteForeverOutline" 
+                                           Foreground="#ffb4ab" 
+                                           Width="28" Height="28"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="10">
+                        <TextBlock Name="TitleText" Text="Delete Recording?" 
+                                   FontSize="22" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Name="MessageText" 
+                                   Text="Are you sure you want to permanently delete 'Product Strategy Sync'? This action cannot be undone." 
+                                   TextWrapping="Wrap" 
+                                   FontSize="14"
+                                   LineHeight="22"
+                                   Foreground="#C3C9B6"
+                                   Opacity="0.8"/>
+                    </StackPanel>
+                </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Buttons -->
+            <Border Padding="30,10,30,30" Grid.Row="1"> 
+            <StackPanel  Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        Spacing="15" >
+                <Button Name="CancelBtn" Content="Cancel" 
+                        Classes="btn-ghost" 
+                        Padding="20,12" CornerRadius="8"
+                        FontSize="15" FontWeight="SemiBold"
+                        Foreground="White" Opacity="0.6"/>
+                
+                <Button Name="ConfirmBtn" 
+                        Classes="danger" 
+                        Padding="20,12"
+                        CornerRadius="8"
+                        FontWeight="Bold">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
+                        <TextBlock Text="Delete Forever" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            </Border> 
+
+            <!-- Line in bottom -->
+            <ProgressBar Grid.Row="2" Height="4" 
+                         Background="Transparent" 
+                         Value="30" 
+                         Foreground="#ffb4ab" 
+                         BorderThickness="0"/>
+        </Grid>
+    </Border>
+</Window>

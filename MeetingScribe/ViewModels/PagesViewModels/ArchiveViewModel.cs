@@ -1,14 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using MeetingScribe.Logic.Meeting;
-
+using MeetingScribe.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text.Json;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace MeetingScribe.ViewModels;
 
@@ -51,10 +51,10 @@ public partial class ArchiveViewModel : ViewModelBase
         }
     }
     // Action to be invoked when a meeting is opened
-    private  Action<MeetingSession> _onOpenRequest;
+    private Action<MeetingSession> _onOpenRequest;
 
     // Refresh the filtered meetings list and reset the selected meeting
-    private void RefreshSelection( )
+    private void RefreshSelection()
     {
         OnPropertyChanged(nameof(FilteredMeetings));
         // Reset the selected meeting to the first one in the filtered list
@@ -69,7 +69,7 @@ public partial class ArchiveViewModel : ViewModelBase
     }
 
     public ArchiveViewModel()
-    {   
+    {
     }
     public void InitArchiveViewModel(Action<MeetingSession> onOpenRequest)
     {
@@ -118,35 +118,43 @@ public partial class ArchiveViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void DeleteMeeting()
+    private async Task DeleteMeeting()
     {
         // Is meeting selected? If not, exit the method
         if (SelectedMeeting == null) return;
 
-        try
-        {
-            // Chreck if the folder exists before attempting to delete it
-            string pathToDelete = SelectedMeeting.FolderPath;
+        var result = await LuminaMessageBox.Show(
+    "Delete Recording?",
+    $"Are you sure you want to permanently delete '{SelectedMeeting.Name}'? This action cannot be undone.",
+    "Delete Forever");
 
-            if (Directory.Exists(pathToDelete))
+        if (result == LuminaMessageBox.MessageBoxResult.Confirm)
+        {
+            try
             {
-                // Delete the directory and all its contents
-                Directory.Delete(pathToDelete, true);
+                // Chreck if the folder exists before attempting to delete it
+                string pathToDelete = SelectedMeeting.FolderPath;
 
-                // Delete the meeting from the observable collection
-                Meetings.Remove(SelectedMeeting);
+                if (Directory.Exists(pathToDelete))
+                {
+                    // Delete the directory and all its contents
+                    Directory.Delete(pathToDelete, true);
 
-                // Select the first meeting in the filtered list
-                SelectedMeeting = null;
-                RefreshSelection();
+                    // Delete the meeting from the observable collection
+                    Meetings.Remove(SelectedMeeting);
 
-                System.Diagnostics.Debug.WriteLine($"Meeting deleted: {pathToDelete}");
+                    // Select the first meeting in the filtered list
+                    SelectedMeeting = null;
+                    RefreshSelection();
+
+                    System.Diagnostics.Debug.WriteLine($"Meeting deleted: {pathToDelete}");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            // Some error occurred while deleting the meeting, log the error message
-            System.Diagnostics.Debug.WriteLine($"Error deleting meeting: {ex.Message}");
+            catch (Exception ex)
+            {
+                // Some error occurred while deleting the meeting, log the error message
+                System.Diagnostics.Debug.WriteLine($"Error deleting meeting: {ex.Message}");
+            }
         }
     }
 }

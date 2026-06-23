@@ -16,7 +16,7 @@
         ExtendClientAreaToDecorationsHint="True"
 
         FontFamily="Inter,Segoe UI,sans-serif"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         >
 
     <Window.Styles>

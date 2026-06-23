@@ -259,6 +259,28 @@
         <Setter Property="Background" Value="#D32F2F"/>
     </Style>
 
+
+    <!-- Delete confirm button-->
+    <Style Selector="Button.danger">
+        <Setter Property="Background" Value="#ffb4ab"/>
+        <Setter Property="Foreground" Value="#690005"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#ff9da5"/> 
+        <Setter Property="Foreground" Value="#690005"/>
+    </Style>
+
+    <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#ffb4ab"/>
+        <Setter Property="Opacity" Value="0.8"/>
+    </Style>
+
     <!-- Timestamp text -->
     <Style Selector="TextBlock.timestamp">
         <Setter Property="Foreground" Value="{StaticResource BrushSecondary}"/>
