@@ -123,10 +123,8 @@ public partial class ArchiveViewModel : ViewModelBase
         // Is meeting selected? If not, exit the method
         if (SelectedMeeting == null) return;
 
-        var result = await LuminaMessageBox.Show(
-    "Delete Recording?",
-    $"Are you sure you want to permanently delete '{SelectedMeeting.Name}'? This action cannot be undone.",
-    "Delete Forever");
+        var result =  await LuminaMessageBox.Show("Delete Recording?", $"Are you sure you want to permanently delete '{SelectedMeeting.Name}'? This action cannot be undone.",
+            LuminaMessageBoxType.Danger, "Delete Forever");
 
         if (result == LuminaMessageBox.MessageBoxResult.Confirm)
         {
