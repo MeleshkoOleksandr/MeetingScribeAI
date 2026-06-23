@@ -93,7 +93,11 @@ public partial class ArchiveViewModel : ViewModelBase
                 {
                     var json = File.ReadAllText(jsonPath);
                     var session = JsonSerializer.Deserialize<MeetingSession>(json);
-                    if (session != null) Meetings.Add(session);
+                    if (session != null)
+                    {
+                        session.FolderPath = dir; // Store the folder path in the session object
+                        Meetings.Add(session);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -110,6 +114,39 @@ public partial class ArchiveViewModel : ViewModelBase
         if (SelectedMeeting != null)
         {
             _onOpenRequest?.Invoke(SelectedMeeting);
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteMeeting()
+    {
+        // Is meeting selected? If not, exit the method
+        if (SelectedMeeting == null) return;
+
+        try
+        {
+            // Chreck if the folder exists before attempting to delete it
+            string pathToDelete = SelectedMeeting.FolderPath;
+
+            if (Directory.Exists(pathToDelete))
+            {
+                // Delete the directory and all its contents
+                Directory.Delete(pathToDelete, true);
+
+                // Delete the meeting from the observable collection
+                Meetings.Remove(SelectedMeeting);
+
+                // Select the first meeting in the filtered list
+                SelectedMeeting = null;
+                RefreshSelection();
+
+                System.Diagnostics.Debug.WriteLine($"Meeting deleted: {pathToDelete}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Some error occurred while deleting the meeting, log the error message
+            System.Diagnostics.Debug.WriteLine($"Error deleting meeting: {ex.Message}");
         }
     }
 }

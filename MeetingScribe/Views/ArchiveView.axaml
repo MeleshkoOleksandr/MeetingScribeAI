@@ -174,7 +174,7 @@
                             <TextBlock Text="Open Recording"/>
                         </StackPanel>
                     </Button>
-                    <Button Classes="btn-secondary" HorizontalAlignment="Stretch" Foreground="#FF5252">
+                    <Button Classes="btn-secondary"  Command="{Binding DeleteMeetingCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                             <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
                             <TextBlock Text="Delete from Archive"/>
