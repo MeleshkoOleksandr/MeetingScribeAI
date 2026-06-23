@@ -38,6 +38,7 @@
             <conv:SidebarIconConverter x:Key="SidebarIconConverter"/>
             <conv:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
             <conv:PauseIconConverter x:Key="PauseIconConverter"/>
+            <conv:BoolToStatusBrushConverter x:Key="BoolToStatusBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

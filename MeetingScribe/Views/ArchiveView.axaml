@@ -131,15 +131,28 @@
                 <StackPanel Grid.Row="0" Spacing="10">
                     <TextBlock Text="MEETING DETAILS" Classes="label-caps" Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
                     <TextBlock Text="{Binding SelectedMeeting.Name}" FontSize="22" FontWeight="Bold" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    <StackPanel  Orientation="Horizontal" Spacing="10" Opacity="0.4">
-                        <StackPanel Orientation="Horizontal" Spacing="3">
+                    <StackPanel  Orientation="Horizontal" Spacing="10" >
+                        <StackPanel Orientation="Horizontal" Spacing="3" Opacity="0.4">
                             <icons:MaterialIcon Kind="Calendar" Width="14"/>
                             <TextBlock Text="{Binding SelectedMeeting.StartTime, StringFormat=\{0:MMM dd yyyy\}}" FontSize="12"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="3">
+                        <StackPanel Orientation="Horizontal" Spacing="3" Opacity="0.4">
                             <icons:MaterialIcon Kind="ClockOutline" Width="14"/>
-                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:hh\:mm\}}" FontSize="12"/>
+                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:mm\} min}" FontSize="12"/>
                         </StackPanel>
+                        
+                        <!-- Separaor -->
+                        <Border Width="1" Height="10" Background="Gray" Opacity="0.2"/>
+                        <!-- Transcription -->
+                        <icons:MaterialIcon Kind="TextAccount" 
+                                            Width="16" Height="16"
+                                            Foreground="{Binding SelectedMeeting.hasTranscription, Converter={StaticResource BoolToStatusBrushConverter}}"
+                                            ToolTip.Tip="Transcription Available"/>
+                        <!-- Sammary -->
+                        <icons:MaterialIcon Kind="AutoFix" 
+                                            Width="16" Height="16"
+                                            Foreground="{Binding SelectedMeeting.hasSummary, Converter={StaticResource BoolToStatusBrushConverter}}"
+                                            ToolTip.Tip="AI Summary Available"/>
                     </StackPanel>
                 </StackPanel>
 
