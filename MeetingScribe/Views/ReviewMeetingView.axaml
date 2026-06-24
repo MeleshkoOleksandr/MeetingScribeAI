@@ -70,7 +70,7 @@
             <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}"
                     BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="1,0,0,0">
 
-                <Grid RowDefinitions="Auto, *, Auto">
+                <Grid RowDefinitions="Auto, *, Auto, Auto">
 
                     <!--Top: Tabs-->
                     <StackPanel Grid.Row="0">
@@ -85,48 +85,84 @@
 
                     <!-- Middle: Dynamic Buttons -->
                     <ScrollViewer Grid.Row="1" Padding="20,0">
-                        <StackPanel Spacing="20">
 
-                            <!-- Кнопки для Script -->
+                        <StackPanel Spacing="20">
+                            <!-- Script -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}">
                                 <TextBlock Text="SCRIPT ACTIONS" Classes="label-caps" Opacity="0.6"/>
                                 <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}" HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="AutoFix"/><TextBlock Text="Refine Text"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="AutoFix" Width="18"/>
+                                        <TextBlock Text="Improve Recognition"/>
+                                    </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="AccountConvert"/><TextBlock Text="Diarization"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
+                                        <TextBlock Text="Diarization and Refinement"/>
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
 
-                            <!-- Кнопки для Summary -->
+                            <!-- Summary -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsSummaryView}">
                                 <TextBlock Text="AI SUMMARY" Classes="label-caps" Opacity="0.6"/>
                                 <Button Classes="btn-accent" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <icons:MaterialIcon Kind="Magic"/>
-                                        <TextBlock Text="Generate Now"/>
+                                        <icons:MaterialIcon Kind="Magic" Width="18"/>
+                                        <TextBlock Text="General Summary"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="btn-accent" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="Magic" Width="18"/>
+                                        <TextBlock Text="Template Summary"/>
                                     </StackPanel>
                                 </Button>
 
                                 <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <icons:MaterialIcon Kind="FileWordOutline"/>
+                                        <icons:MaterialIcon Kind="FileWordOutline" Width="18"/>
                                         <TextBlock Text="Export to Word"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
 
-                       </StackPanel>
-                   </ScrollViewer>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- PROGRESS INDICATOR -->
+                    <StackPanel Grid.Row="2" IsVisible="{Binding IsProcessing}" Spacing="10" Margin="0,20,0,0">
+
+                        <TextBlock Text="{Binding CurrentTaskName}"
+                                   FontSize="12"
+                                   Foreground="{StaticResource BrushPrimary}"
+                                   HorizontalAlignment="Center"/>
+
+                        <ProgressBar Height="6"
+                                     Value="{Binding ProcessingProgress}"
+                                     Minimum="0" Maximum="100"
+                                     IsIndeterminate="{Binding IsIndeterminate}"
+                                     Foreground="{StaticResource BrushPrimary}"
+                                     Background="{StaticResource BrushSurfaceContainerHighest}"
+                                     CornerRadius="3"/>
+                    </StackPanel>
 
                     <!-- Bottom: Global Actions (Close/Save) -->
-                    <Border Grid.Row="2" Padding="20" BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0">
+                    <Border Grid.Row="3" Padding="20" BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0">
                         <StackPanel Spacing="10">
                             <Button Command="{Binding SaveChangesCommand}" Classes="btn-primary" HorizontalAlignment="Stretch">
-                                <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="ContentSave"/><TextBlock Text="Save Changes"/></StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <icons:MaterialIcon Kind="ContentSave" IsVisible="{Binding !IsDirty}" Width="18"/>
+                                    <icons:MaterialIcon Kind="ContentSaveAlert" IsVisible="{Binding IsDirty}" Foreground="#FF5252" Width="18"/>
+                                    <TextBlock Text="Save Changes"/>
+                                </StackPanel>
                             </Button>
-                            <Button Command="{Binding CloseReviewCommand}" Classes="btn-ghost" HorizontalAlignment="Stretch" Foreground="#FF5252">
-                                <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="Close"/><TextBlock Text="Close Review"/></StackPanel>
+                            <Button Classes="btn-secondary"  Command="{Binding CloseReviewCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                                    <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
+                                    <TextBlock Text="Close Review"/>
+                                </StackPanel>
                             </Button>
                         </StackPanel>
                     </Border>

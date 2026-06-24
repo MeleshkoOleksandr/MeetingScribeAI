@@ -5,10 +5,11 @@ using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.Enums;
-
+using MeetingScribe.Views;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.ViewModels;
@@ -26,7 +27,25 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private string _currentTaskName = "";
     [ObservableProperty] private bool _isIndeterminate;
 
-  
+    [ObservableProperty] private bool _isDirty; // Unsaved changes flag
+    private readonly Action<ReviewMeetingViewModel>? _onCloseRequest;
+
+    public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, Action<ReviewMeetingViewModel>? onCloseRequest = null)
+    {
+        _session = session;
+        _whisperPath = whisperPath;
+        _transcriptionService = transcriptionService;
+        _onCloseRequest = onCloseRequest;
+
+        // Subscribe to property changes in the session to track unsaved changes
+        Session.PropertyChanged += (s, e) => IsDirty = true;
+        // Subscribe to collection changes in the transcript to track unsaved changes
+        Session.FullTranscript.CollectionChanged += (s, e) => IsDirty = true;
+        // initialize the dirty flag to false since we just loaded the session
+        IsDirty = false;
+    }
+
+
     #region UI Navigation and general commands
 
     [ObservableProperty] private ReviewMode _currentMode = ReviewMode.Script;
@@ -48,19 +67,53 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         set { if (value) CurrentMode = ReviewMode.Info; OnPropertyChanged(nameof(IsTranscriptionView)); OnPropertyChanged(nameof(IsSummaryView)); OnPropertyChanged(nameof(IsInfoView)); }
     }
 
-    // comands for UI buttons
-    [RelayCommand] private void CloseReview() { /* Логика закрытия вкладки */ }
-    [RelayCommand] private void SaveChanges() { /* Логика записи JSON на диск */ }
+    
+    // --- Save command ---
+    [RelayCommand]
+    private async Task SaveChanges()
+    {
+        try
+        {
+            string jsonPath = Path.Combine(Session.FolderPath, "session_data.json");
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonContent = JsonSerializer.Serialize(Session, options);
+
+            await File.WriteAllTextAsync(jsonPath, jsonContent);
+
+            IsDirty = false; // Reset the dirty flag after saving
+
+            await LuminaMessageBox.Show("Success", "All changes have been saved to the archive.", LuminaMessageBoxType.Message);
+        }
+        catch (Exception ex)
+        {
+            await LuminaMessageBox.Show("Error", $"Could not save changes: {ex.Message}", LuminaMessageBoxType.Danger);
+        }
+    }
+
+    // --- Close command ---
+    [RelayCommand]
+    private async Task CloseReview()
+    {
+        if (IsDirty)
+        {
+            // If there are unsaved changes, prompt the user for confirmation before closing
+            var result = await LuminaMessageBox.Show(
+                "Unsaved Changes",
+                "You have unsaved changes in this session. Are you sure you want to close it and lose your work?",
+                LuminaMessageBoxType.Danger,
+                "Discard Changes");
+
+            if (result != LuminaMessageBox.MessageBoxResult.Confirm)
+                return; // No confirmation, so we don't close the view
+        }
+        // Close the view and invoke the callback to notify the parent view model
+        _onCloseRequest?.Invoke(this);
+    }
 
     #endregion
 
 
-    public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath)
-    {
-        _session = session;
-        _whisperPath = whisperPath;
-        _transcriptionService = transcriptionService;
-    }
+    #region Script mode
 
     // --- Appoint the speakers (Semantic Diarization) ---
     [RelayCommand]
@@ -138,6 +191,14 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
     }
 
+    #endregion
+
+
+    #region Sammary mode
+
     // Текст Саммари
     [ObservableProperty] private string _summaryMarkdown = "# Meeting Summary\nImported results will appear here...";
+
+    #endregion
+
 }

@@ -14,6 +14,7 @@ using MeetingScribe.UILogic.Enums;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -107,7 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         //  Create a new ReviewMeetingViewModel with the selected session and navigate to it
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CloseMeetingReview);
 
         // Creating a  navigation item for this review pag
         var reviewNavItem = new NavigationItem
@@ -121,6 +122,20 @@ public partial class MainWindowViewModel : ViewModelBase
         // Add to the dynamic sidebar list and navigate to it
         PageList.AddTemporaryItem(reviewNavItem);
         Navigate(reviewNavItem);
+    }
+
+    //  This method is called from the ReviewMeetingViewModel when the user wants to close the review and return to the archive
+    private void CloseMeetingReview(ReviewMeetingViewModel vm)
+    {
+        // Search for the navigation item associated with this review page in the temporary items list
+        var itemToRemove = PageList.TemporaryItems.FirstOrDefault(i => i.Page == vm);
+
+        if (itemToRemove != null)
+        {
+            PageList.RemoveTemporaryItem(itemToRemove);
+            // Return to the Archive page after closing the review
+            Navigate(PageNames.Archive);
+        }
     }
 
     #endregion
