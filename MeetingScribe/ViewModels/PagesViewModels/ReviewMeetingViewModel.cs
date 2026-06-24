@@ -14,6 +14,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 {
     [ObservableProperty] private MeetingSession _session;
     [ObservableProperty] private bool _isTranscriptionView = true;
+    [ObservableProperty] private bool _isInfoView = true;
     [ObservableProperty] private bool _isProcessing;
     [ObservableProperty] private double _processingProgress;
     [ObservableProperty] private string _currentTaskName = "";

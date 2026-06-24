@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MeetingScribe.UILogic.Enums;
 using MeetingScribe.ViewModels;
 using System.Diagnostics;
 

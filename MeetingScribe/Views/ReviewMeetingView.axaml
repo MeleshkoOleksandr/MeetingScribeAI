@@ -36,17 +36,22 @@
 
                     <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerHigh}"
                             CornerRadius="8" Padding="4">
-                        <Grid ColumnDefinitions="*, *">
+                        <Grid ColumnDefinitions="*, *, *">
                             <!-- Transcription Button -->
                             <ToggleButton Grid.Column="0"
-                                          Content="Transcription"
+                                          Content="Script"
                                           IsChecked="{Binding IsTranscriptionView}"
                                           Classes="tab"/>
 
                             <!-- AI Summary -->
                             <ToggleButton Grid.Column="1"
-                                          Content="AI Summary"
+                                          Content="Summary"
                                           IsChecked="{Binding IsSummaryView}"
+                                          Classes="tab"/>
+                            <!-- Meeting  -->
+                            <ToggleButton Grid.Column="3"
+                                          Content="Info"
+                                          IsChecked="{Binding IsInfoView}"
                                           Classes="tab"/>
                         </Grid>
                     </Border>
@@ -128,9 +133,9 @@
                 <!-- Volume and Additional Information -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="5"  Margin="10,0">
                     <TextBlock Text="12:45 / 45:00" Opacity="0.5" VerticalAlignment="Center" Foreground="{StaticResource BrushSecondary}"  />
-            
+
                     <icons:MaterialIcon Kind="VolumeHigh" Opacity="0.5" Foreground="{StaticResource BrushSecondary}" />
-                    <ProgressBar Value="50" Opacity="0.5" 
+                    <ProgressBar Value="50" Opacity="0.5"
                                  Height="8" Width="80"  MinWidth="0"
                                  Foreground="{StaticResource BrushSecondary}"
                                  Background="#222"/>

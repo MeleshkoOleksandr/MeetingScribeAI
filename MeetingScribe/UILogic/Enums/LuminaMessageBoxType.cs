@@ -1,3 +1,5 @@
+namespace MeetingScribe.UILogic.Enums;
+
 public enum LuminaMessageBoxType
 {
     Message, // informational message (Green)

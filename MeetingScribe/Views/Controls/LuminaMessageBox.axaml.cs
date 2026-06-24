@@ -1,10 +1,9 @@
-using Avalonia;
 using Material.Icons.Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Material.Icons;
 using System.Threading.Tasks;
+using MeetingScribe.UILogic.Enums;
 
 namespace MeetingScribe.Views;
 

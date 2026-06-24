@@ -1,4 +1,4 @@
-namespace MeetingScribe.UILogic;
+namespace MeetingScribe.UILogic.Enums;
 
 public enum PageNames
 {

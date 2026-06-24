@@ -1,3 +1,4 @@
+using MeetingScribe.UILogic.Enums;
 using MeetingScribe.ViewModels;
 using System;
 using System.Collections.Generic;

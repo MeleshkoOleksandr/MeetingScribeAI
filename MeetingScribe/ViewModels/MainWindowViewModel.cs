@@ -10,7 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
-
+using MeetingScribe.UILogic.Enums;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
