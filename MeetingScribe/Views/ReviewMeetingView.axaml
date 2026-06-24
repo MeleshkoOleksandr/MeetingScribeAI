@@ -13,92 +13,123 @@
     <Grid RowDefinitions="*, 60">
         <Grid ColumnDefinitions="*, 300">
 
-            <!-- MAIN SECTION: TRANSCRIPT -->
-            <ScrollViewer Grid.Column="0"  Padding="20,20,0,50" >
-                <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnDefinitions="80, *" Margin="0,0,30,20">
-                                <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
-                                <StackPanel Grid.Column="1" Spacing="5">
-                                    <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" Opacity="0.9"/>
-                                </StackPanel>
+            <!-- ========================================== -->
+            <!--   MAIN SECTION: DYNAMIC CONTENT            -->
+            <!-- ========================================== -->
+            <Border Grid.Column="0" Background="{StaticResource BrushSurfaceContainerLowest}">
+                <Grid>
+                    <!-- 1. MODE: SCRIPT (Transcription) -->
+                    <ScrollViewer IsVisible="{Binding IsTranscriptionView}" Padding="20,20,0,50">
+                        <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="80, *" Margin="0,0,30,20">
+                                        <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
+                                        <StackPanel Grid.Column="1" Spacing="5">
+                                            <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" Opacity="0.9"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- 2. MODE: SUMMARY (Markdown) -->
+                    <ScrollViewer IsVisible="{Binding IsSummaryView}" Padding="40">
+                        <SelectableTextBlock Text="{Binding SummaryMarkdown}"
+                                             TextWrapping="Wrap"
+                                             FontSize="16"
+                                             LineHeight="28"
+                                             FontFamily="Inter, Segoe UI"/>
+                    </ScrollViewer>
+
+                    <!-- 3. MODE: INFO (Metadata Editor) -->
+                    <ScrollViewer IsVisible="{Binding IsInfoView}" Padding="40">
+                        <StackPanel MaxWidth="600" HorizontalAlignment="Left" Spacing="25">
+                            <TextBlock Text="Meeting Metadata" FontSize="22" FontWeight="Bold"/>
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="MEETING NAME" Classes="label-caps"/>
+                                <TextBox Text="{Binding Session.Name}" Classes="lumina-input"/>
+                            </StackPanel>
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
+                                <TextBox Text="{Binding Session.Description}"
+                                         AcceptsReturn="True" MinHeight="150" TextWrapping="Wrap" Classes="lumina-input"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- ========================================== -->
+            <!--   RIGHT PANEL: FUNCTIONS                   -->
+            <!-- ========================================== -->
+            <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}"
+                    BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="1,0,0,0">
+
+                <Grid RowDefinitions="Auto, *, Auto">
+
+                    <!--Top: Tabs-->
+                    <StackPanel Grid.Row="0">
+                        <Border Background="{StaticResource BrushSurfaceContainerHigh}" Margin="10" CornerRadius="10" Padding="10">
+                            <Grid ColumnDefinitions="*, *, *">
+                                <ToggleButton Grid.Column="0" Content="Script" IsChecked="{Binding IsTranscriptionView}" Classes="tab"/>
+                                <ToggleButton Grid.Column="1" Content="Summary" IsChecked="{Binding IsSummaryView}" Classes="tab"/>
+                                <ToggleButton Grid.Column="2" Content="Info" IsChecked="{Binding IsInfoView}" Classes="tab"/>
                             </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
 
-            <!-- RIGHT PANEL: FUNCTIONS -->
-            <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}" Padding="20">
-                <Grid RowDefinitions="Auto, Auto, *, Auto">
+                    <!-- Middle: Dynamic Buttons -->
+                    <ScrollViewer Grid.Row="1" Padding="20,0">
+                        <StackPanel Spacing="20">
 
-                    <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerHigh}"
-                            CornerRadius="8" Padding="4">
-                        <Grid ColumnDefinitions="*, *, *">
-                            <!-- Transcription Button -->
-                            <ToggleButton Grid.Column="0"
-                                          Content="Script"
-                                          IsChecked="{Binding IsTranscriptionView}"
-                                          Classes="tab"/>
+                            <!-- Кнопки для Script -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}">
+                                <TextBlock Text="SCRIPT ACTIONS" Classes="label-caps" Opacity="0.6"/>
+                                <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="AutoFix"/><TextBlock Text="Refine Text"/></StackPanel>
+                                </Button>
+                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="AccountConvert"/><TextBlock Text="Diarization"/></StackPanel>
+                                </Button>
+                            </StackPanel>
 
-                            <!-- AI Summary -->
-                            <ToggleButton Grid.Column="1"
-                                          Content="Summary"
-                                          IsChecked="{Binding IsSummaryView}"
-                                          Classes="tab"/>
-                            <!-- Meeting  -->
-                            <ToggleButton Grid.Column="3"
-                                          Content="Info"
-                                          IsChecked="{Binding IsInfoView}"
-                                          Classes="tab"/>
-                        </Grid>
+                            <!-- Кнопки для Summary -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsSummaryView}">
+                                <TextBlock Text="AI SUMMARY" Classes="label-caps" Opacity="0.6"/>
+                                <Button Classes="btn-accent" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="Magic"/>
+                                        <TextBlock Text="Generate Now"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="FileWordOutline"/>
+                                        <TextBlock Text="Export to Word"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                       </StackPanel>
+                   </ScrollViewer>
+
+                    <!-- Bottom: Global Actions (Close/Save) -->
+                    <Border Grid.Row="2" Padding="20" BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0">
+                        <StackPanel Spacing="10">
+                            <Button Command="{Binding SaveChangesCommand}" Classes="btn-primary" HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="ContentSave"/><TextBlock Text="Save Changes"/></StackPanel>
+                            </Button>
+                            <Button Command="{Binding CloseReviewCommand}" Classes="btn-ghost" HorizontalAlignment="Stretch" Foreground="#FF5252">
+                                <StackPanel Orientation="Horizontal" Spacing="10"><icons:MaterialIcon Kind="Close"/><TextBlock Text="Close Review"/></StackPanel>
+                            </Button>
+                        </StackPanel>
                     </Border>
-
-                    <!-- (Actions) -->
-                    <StackPanel Grid.Row="1" Margin="0,30,0,0" Spacing="10">
-                        <TextBlock Text="ACTIONS" Classes="label-caps" Margin="0,0,0,10"/>
-
-                        <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}" HorizontalAlignment="Stretch">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <icons:MaterialIcon Kind="AutoFix" Width="18"/>
-                                <TextBlock Text="Improve Recognition"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}" HorizontalAlignment="Stretch">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
-                                <TextBlock Text="Split by Speakers"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Classes="btn-accent" HorizontalAlignment="Stretch">
-                            <TextBlock Text="Generate Summary"/>
-                        </Button>
-                    </StackPanel>
-
-                    <!-- Users -->
-                    <StackPanel Grid.Row="2" Margin="0,30,0,0" Spacing="10">
-                    </StackPanel>
-
-                    <!-- PROGRESS INDICATOR -->
-                    <StackPanel Grid.Row="3" IsVisible="{Binding IsProcessing}" Spacing="10" Margin="0,20,0,0">
-
-                        <TextBlock Text="{Binding CurrentTaskName}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource BrushPrimary}"
-                                   HorizontalAlignment="Center"/>
-
-                        <ProgressBar Height="6"
-                                     Value="{Binding ProcessingProgress}"
-                                     Minimum="0" Maximum="100"
-                                     IsIndeterminate="{Binding IsIndeterminate}"
-                                     Foreground="{StaticResource BrushPrimary}"
-                                     Background="{StaticResource BrushSurfaceContainerHighest}"
-                                     CornerRadius="3"/>
-                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>

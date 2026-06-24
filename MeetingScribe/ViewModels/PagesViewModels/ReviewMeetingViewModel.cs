@@ -1,8 +1,11 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
+using MeetingScribe.UILogic.Enums;
+
 using System;
 using System.IO;
 using System.Linq;
@@ -12,29 +15,45 @@ namespace MeetingScribe.ViewModels;
 
 public partial class ReviewMeetingViewModel : ViewModelBase
 {
+    // Whisper path and transcription service are injected for processing
+    string _whisperPath;
+    TranscriptionService _transcriptionService;
+    // The current meeting session being reviewed
     [ObservableProperty] private MeetingSession _session;
-    [ObservableProperty] private bool _isTranscriptionView = true;
-    [ObservableProperty] private bool _isInfoView = true;
+    // Properties for UI binding to show processing state and progress
     [ObservableProperty] private bool _isProcessing;
     [ObservableProperty] private double _processingProgress;
     [ObservableProperty] private string _currentTaskName = "";
     [ObservableProperty] private bool _isIndeterminate;
 
-    TranscriptionService _transcriptionService;
-    string _whisperPath;
+  
+    #region UI Navigation and general commands
 
-    // The second property for the tab buttons
+    [ObservableProperty] private ReviewMode _currentMode = ReviewMode.Script;
+
+    // ToggleButtons properties for switching between different views in the UI
+    public bool IsTranscriptionView
+    {
+        get => CurrentMode == ReviewMode.Script;
+        set { if (value) CurrentMode = ReviewMode.Script; OnPropertyChanged(nameof(IsTranscriptionView)); OnPropertyChanged(nameof(IsSummaryView)); OnPropertyChanged(nameof(IsInfoView)); }
+    }
     public bool IsSummaryView
     {
-        get => !IsTranscriptionView;
-        set => IsTranscriptionView = !value;
+        get => CurrentMode == ReviewMode.Summary;
+        set { if (value) CurrentMode = ReviewMode.Summary; OnPropertyChanged(nameof(IsTranscriptionView)); OnPropertyChanged(nameof(IsSummaryView)); OnPropertyChanged(nameof(IsInfoView)); }
+    }
+    public bool IsInfoView
+    {
+        get => CurrentMode == ReviewMode.Info;
+        set { if (value) CurrentMode = ReviewMode.Info; OnPropertyChanged(nameof(IsTranscriptionView)); OnPropertyChanged(nameof(IsSummaryView)); OnPropertyChanged(nameof(IsInfoView)); }
     }
 
-    // When IsTranscriptionView changes, the UI must be notified of the change in IsSummaryView
-    partial void OnIsTranscriptionViewChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsSummaryView));
-    }
+    // comands for UI buttons
+    [RelayCommand] private void CloseReview() { /* Логика закрытия вкладки */ }
+    [RelayCommand] private void SaveChanges() { /* Логика записи JSON на диск */ }
+
+    #endregion
+
 
     public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath)
     {
@@ -118,4 +137,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsIndeterminate = false;
         }
     }
+
+    // Текст Саммари
+    [ObservableProperty] private string _summaryMarkdown = "# Meeting Summary\nImported results will appear here...";
 }
