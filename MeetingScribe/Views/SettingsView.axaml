@@ -7,91 +7,140 @@
              x:DataType="vm:SettingsViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.SettingsView">
-    <ScrollViewer Padding="10">
-        <StackPanel Spacing="10">
+    <ScrollViewer Padding="5" >
+        <Grid  ColumnDefinitions="*, *">
 
-            <!-- Card 1: General Settings -->
-            <Border Classes="card">
-                <StackPanel Spacing="10">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <icons:MaterialIcon Kind="Cog" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Text="General Settings" Classes="card-title"/>
+            <Grid RowDefinitions="Auto,*" Grid.Column="0" Margin="5" >
+                <!-- Card 1: General Settings -->
+                <Border Classes="card" Grid.Row="0" Margin="0,0,0,10">
+                    <StackPanel Spacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <icons:MaterialIcon Kind="Cog" Foreground="{StaticResource BrushPrimary}"/>
+                            <TextBlock Text="General Settings" Classes="card-title"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="INTERFACE LANGUAGE" Classes="label-caps"/>
+                            <ComboBox HorizontalAlignment="Stretch"
+                                      SelectedIndex="1">
+                                <ComboBoxItem >Italiano</ComboBoxItem>
+                                <ComboBoxItem >English</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
                     </StackPanel>
+                </Border>
 
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="INTERFACE LANGUAGE" Classes="label-caps"/>
-                        <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedIndex="1">
-                            <ComboBoxItem >Italiano</ComboBoxItem>
-                            <ComboBoxItem >English</ComboBoxItem>
-                        </ComboBox>
+                <Border Classes="card" Grid.Row="1" >
+                    <StackPanel Spacing="15">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <icons:MaterialIcon Kind="AutoFix" Foreground="{StaticResource BrushPrimary}"/>
+                            <TextBlock Text="AI Intelligence" Classes="card-title"/>
+                        </StackPanel>
+
+                        <!-- Provider select -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="AI SERVICE PROVIDER" Classes="label-caps"/>
+                            <ComboBox ItemsSource="{Binding AiProviders}"
+                                      SelectedItem="{Binding SelectedAiProvider}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Key field -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="API KEY" Classes="label-caps" Opacity="0.6"/>
+                            <TextBox Text="{Binding CurrentApiKey}"
+                                     PasswordChar="{Binding PasswordChar}"
+                                     PlaceholderText="Enter API key..."
+                                     Classes="lumina-input">
+                                <TextBox.InnerRightContent>
+                                    <Button Command="{Binding TogglePasswordVisibilityCommand}"
+                                            Classes="btn-icon"
+                                            Margin="0,0,5,0"
+                                            Cursor="Hand">
+                                        <!-- Hide the key -->
+                                        <icons:MaterialIcon Kind="{Binding IsApiKeyVisible, Converter={StaticResource PasswordIconConverter}}"
+                                                            Width="20" Opacity="0.5"/>
+                                    </Button>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                            <TextBlock Text="Key is saved locally in secrets.json"
+                                       FontSize="10" Opacity="0.4" Margin="5,0"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Border>
+                </Border>
+            </Grid>
 
-            <!-- Card 2: Speech Recognition Engine -->
-            <Border Classes="card">
-                <StackPanel Spacing="1">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <icons:MaterialIcon Kind="MicrophoneSettings" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Text="Speech Recognition" Classes="card-title"/>
-                    </StackPanel>
-
-                    <!-- VAD Threshold -->
-                    <StackPanel Spacing="1" Margin="0,10,0,0" >
-                        <TextBlock Text="{Binding Settings.SpeechThreshold, StringFormat='VAD SENSITIVITY: \{0:F2\}'}"
-                                   Classes="label-caps"/>
-                        <Slider Value="{Binding Settings.SpeechThreshold}" Minimum="0.1" Maximum="0.9"
-                                IsSnapToTickEnabled="True" TickFrequency="0.05"  VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Silence Timeout-->
+            <Grid RowDefinitions=" *" Grid.Column="1" Margin="5">
+                <!-- Card 2: Speech Recognition Engine -->
+                <Border Grid.Row="0" Classes="card">
                     <StackPanel Spacing="1">
-                        <TextBlock Text="{Binding Settings.SilenceTimeoutMs, StringFormat='PAUSE DURATION: \{0:D3\}'}"
-                                   Classes="label-caps"/>
-                        <Slider Value="{Binding Settings.SilenceTimeoutMs}" Minimum="100" Maximum="2000"
-                                IsSnapToTickEnabled="True" TickFrequency="10" VerticalAlignment="Center"/>
-                    </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <icons:MaterialIcon Kind="MicrophoneSettings" Foreground="{StaticResource BrushPrimary}"/>
+                            <TextBlock Text="Speech Recognition" Classes="card-title"/>
+                        </StackPanel>
 
-                    <!-- Audio Gain -->
-                    <StackPanel Spacing="1">
-                        <TextBlock Text="{Binding Settings.AudioGain, StringFormat='MIC BOOST (Gain): \{0:F1\}'}"
-                                   Classes="label-caps"/>
-                        <Slider Value="{Binding Settings.AudioGain}" Minimum="1.0" Maximum="10.0"
-                                IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center"/>
-                    </StackPanel>
-  
-                    <!-- Model Selection -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="REAL TIME RECOGNITION MODEL" Classes="label-caps"/>
-                        <ComboBox ItemsSource="{Binding AvailableModels}"
-                                  SelectedItem="{Binding SelectedModelItem}"
-                                  HorizontalAlignment="Stretch">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
+                        <!-- VAD Threshold -->
+                        <StackPanel Spacing="1" Margin="0,10,0,0" >
+                            <TextBlock Text="{Binding Settings.SpeechThreshold, StringFormat='VAD SENSITIVITY: \{0:F2\}'}"
+                                       Classes="label-caps"/>
+                            <Slider Value="{Binding Settings.SpeechThreshold}" Minimum="0.1" Maximum="0.9"
+                                    IsSnapToTickEnabled="True" TickFrequency="0.05"  VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                    <!-- Model Post meating Selection -->
-                    <StackPanel Spacing="5" Margin="0,10,0,0">
-                        <TextBlock Text="ACCURATE MODEL" Classes="label-caps"/>
-                        <ComboBox ItemsSource="{Binding AvailableModels}"
-                                  SelectedItem="{Binding SelectedModelAccItem}"
-                                  HorizontalAlignment="Stretch">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <!-- Silence Timeout-->
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding Settings.SilenceTimeoutMs, StringFormat='PAUSE DURATION: \{0:D3\}'}"
+                                       Classes="label-caps"/>
+                            <Slider Value="{Binding Settings.SilenceTimeoutMs}" Minimum="100" Maximum="2000"
+                                    IsSnapToTickEnabled="True" TickFrequency="10" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Audio Gain -->
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding Settings.AudioGain, StringFormat='MIC BOOST (Gain): \{0:F1\}'}"
+                                       Classes="label-caps"/>
+                            <Slider Value="{Binding Settings.AudioGain}" Minimum="1.0" Maximum="10.0"
+                                    IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Model Selection -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="REAL TIME RECOGNITION MODEL" Classes="label-caps"/>
+                            <ComboBox ItemsSource="{Binding AvailableModels}"
+                                      SelectedItem="{Binding SelectedModelItem}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Model Post meating Selection -->
+                        <StackPanel Spacing="5" Margin="0,10,0,0">
+                            <TextBlock Text="ACCURATE MODEL" Classes="label-caps"/>
+                            <ComboBox ItemsSource="{Binding AvailableModels}"
+                                      SelectedItem="{Binding SelectedModelAccItem}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
                     </StackPanel>
+                </Border>
+            </Grid>
 
+        </Grid>
 
-                </StackPanel>
-            </Border>
-        </StackPanel>
     </ScrollViewer>
 </UserControl>

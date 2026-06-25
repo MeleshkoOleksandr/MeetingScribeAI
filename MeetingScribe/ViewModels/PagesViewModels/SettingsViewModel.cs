@@ -1,4 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MeetingScribe.Logic;
+using MeetingScribe.Logic.AI;
 using MeetingScribe.UILogic;
 using MeetingScribe.UILogic.ManifestReaders;
 using System;
@@ -18,9 +21,17 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private ModelManifest? _selectedModelItem;
     [ObservableProperty] private ModelManifest? _selectedModelAccItem;
 
+    // Provider list from ai_providers.json
+    [ObservableProperty] private ObservableCollection<AiProvider> _aiProviders = new();
+    // Selected provider from the list, which is saved in settings
+    [ObservableProperty] private AiProvider? _selectedAiProvider;
+    // Current API key for the selected provider, loaded from SecretsManager
+    [ObservableProperty] private string _currentApiKey = "";
+
     public SettingsViewModel()
     {
         LoadManifests();
+        LoadAiProviders();
     }
 
     private void LoadManifests()
@@ -57,5 +68,50 @@ public partial class SettingsViewModel : ViewModelBase
     partial void OnSelectedModelAccItemChanged(ModelManifest? value)
     {
         if (value != null) Settings.SelectedAccModel = value.FileName;
+    }
+
+
+    private void LoadAiProviders()
+    {
+        // Load the list of AI providers from ai_providers.json
+        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "ai_providers.json");
+        var providers = JsonSerializer.Deserialize<List<AiProvider>>(File.ReadAllText(path));
+        AiProviders = new ObservableCollection<AiProvider>(providers ?? new());
+
+        // Set the selected provider based on the saved settings, or default to the first provider if not found
+        SelectedAiProvider = AiProviders.FirstOrDefault(p => p.Id == Settings.AiProviderId) ?? AiProviders.FirstOrDefault();
+    }
+
+    // Update settings and load API key when provider changes
+    partial void OnSelectedAiProviderChanged(AiProvider? value)
+    {
+        if (value == null) return;
+
+        Settings.AiProviderId = value.Id;
+
+        // Auto-load the API key for the selected provider from SecretsManager
+        var keys = SecretsManager.LoadKeys();
+        CurrentApiKey = keys.TryGetValue(value.Id, out var key) ? key : "";
+    }
+
+    // Save the API key when it changes in the text field
+    partial void OnCurrentApiKeyChanged(string value)
+    {
+        if (SelectedAiProvider != null)
+        {
+            SecretsManager.SaveKey(SelectedAiProvider.Id, value);
+        }
+    }
+
+    // Toggle the visibility of the API key in the UI
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PasswordChar))]
+    private bool _isApiKeyVisible;
+    public char PasswordChar => IsApiKeyVisible ? '\0' : '*';
+
+    [RelayCommand]
+    private void TogglePasswordVisibility()
+    {
+        IsApiKeyVisible = !IsApiKeyVisible;
     }
 }

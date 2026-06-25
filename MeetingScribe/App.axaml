@@ -39,6 +39,7 @@
             <conv:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
             <conv:PauseIconConverter x:Key="PauseIconConverter"/>
             <conv:BoolToStatusBrushConverter x:Key="BoolToStatusBrushConverter"/>
+            <conv:PasswordIconConverter x:Key="PasswordIconConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

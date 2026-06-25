@@ -30,3 +30,6 @@ obj/
 ## --- API Keys & Secrets ---
 appsettings.json
 *.env
+
+## --- Secrets ---
+secrets.json

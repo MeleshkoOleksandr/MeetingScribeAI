@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="Assets\Manifests\ai_providers.json" />
     <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
     <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
@@ -40,6 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Assets\Manifests\ai_providers.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Manifests\languages_manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -50,6 +54,9 @@
 
   <ItemGroup>
     <None Update="Assets\Models\silero_vad.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="secrets.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\WhisperModels\ggml-base.bin">
