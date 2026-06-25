@@ -1,0 +1,14 @@
+[
+    {
+        "Id": "Gemini",
+        "Name": "Google Gemini",
+        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "Model": "gemini-1.5-flash"
+    },
+    {
+        "Id": "ChatGPT",
+        "Name": "OpenAI ChatGPT",
+        "Url": "https://api.openai.com/v1/chat/completions",
+        "Model": "gpt-4o-mini"
+    }
+]
