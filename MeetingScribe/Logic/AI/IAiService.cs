@@ -6,8 +6,6 @@ namespace MeetingScribe.Logic.AI;
 
 public interface IAiService
 {
-    Task<List<TranscriptLine>> RefineAndDiarizeAsync(
-        string rawTranscript,
-        string participants,
-        string meetingContext);
+    Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context);
+    Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda);
 }

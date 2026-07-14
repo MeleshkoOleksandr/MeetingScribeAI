@@ -36,6 +36,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isDirty; // Unsaved changes flag
     private readonly Action<ReviewMeetingViewModel>? _onCloseRequest;
 
+    IAiService? aiService;
+
     public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, Action<ReviewMeetingViewModel>? onCloseRequest = null)
     {
         _session = session;
@@ -117,6 +119,30 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         _onCloseRequest?.Invoke(this);
     }
 
+    private async Task ConnectAiService()
+    {
+        if (aiService == null)
+        {
+            // Getting AI prvider
+            var providersPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "ai_providers.json");
+            var providers = JsonSerializer.Deserialize<List<AiProvider>>(File.ReadAllText(providersPath));
+            var config = providers?.FirstOrDefault(p => p.Id == Settings.AiProviderId);
+
+            if (config == null) throw new Exception("AI Provider configuration not found.");
+
+            // Getting AI Api key
+            var keys = SecretsManager.LoadKeys();
+            if (!keys.TryGetValue(config.Id, out var apiKey) || string.IsNullOrEmpty(apiKey))
+            {
+                await LuminaMessageBox.Show("Key Missing", $"Please enter an API key for {config.Name} in Settings.", LuminaMessageBoxType.Danger);
+                return;
+            }
+
+            // Creating the AI service instance
+            aiService = AiServiceFactory.Create(config, apiKey);
+        }
+    }
+
     #endregion
 
 
@@ -189,89 +215,98 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task SplitBySpeakers()
     {
-        // Проверка: не запущен ли уже процесс и есть ли текст для обработки
+        // Check if processing is already in progress
         if (IsProcessing || Session.FullTranscript.Count == 0) return;
 
         try
         {
+            await ConnectAiService();
+
             IsProcessing = true;
-            IsIndeterminate = true; // Включаем пульсацию, так как запрос к ИИ может занять время
+            IsIndeterminate = true; // Enable indeterminate progress bar since we don't have a specific progress metric for this operation
+            ProcessingProgress = 0;
             CurrentTaskName = "AI is analyzing conversation flow...";
 
-            // 1. ПОДГОТОВКА ТЕКСТА
-            // Собираем весь текст в одну строку. Мы добавляем таймкоды, чтобы ИИ знал хронологию.
-            string rawText = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
+            // 1. Подготовка чанков (используем ваш метод GroupLinesByTime)
+            string rawTextFull = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
+            var lines = rawTextFull.Split('\n');
+            var chunks = TextOparations.GroupLinesByTime(lines, 15);
 
-            // Берем описание совещания как контекст (помогает ИИ понять тему разговора)
-            string context = string.IsNullOrWhiteSpace(Session.Description) ? "General meeting" : Session.Description;
+            var refinedTranscript = new List<TranscriptLine>();
+            Session.SegmentSummaries.Clear();
 
-            // Список участников (пока заглушка, но ИИ попытается вытащить имена из текста)
-            string participantsList = "Auto-detect from conversation";
-
-            // 2. ПОЛУЧЕНИЕ НАСТРОЕК ПРОВАЙДЕРА
-            // Загружаем манифест, чтобы найти URL и Модель для выбранного ID (Gemini/ChatGPT)
-            var providersPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "ai_providers.json");
-            var providers = JsonSerializer.Deserialize<List<AiProvider>>(File.ReadAllText(providersPath));
-            var config = providers?.FirstOrDefault(p => p.Id == Settings.AiProviderId);
-
-            if (config == null) throw new Exception("AI Provider configuration not found.");
-
-            // 3. ПОЛУЧЕНИЕ КЛЮЧА
-            var keys = SecretsManager.LoadKeys();
-            if (!keys.TryGetValue(config.Id, out var apiKey) || string.IsNullOrEmpty(apiKey))
+            for (int i = 0; i < chunks.Count; i++)
             {
-                await LuminaMessageBox.Show("Key Missing", $"Please enter an API key for {config.Name} in Settings.", LuminaMessageBoxType.Danger);
-                return;
-            }
+                IsIndeterminate = false;
+                CurrentTaskName = $"AI Analysis: Part {i + 1} of {chunks.Count}...";
+                ProcessingProgress = (double)i / chunks.Count * 100;
 
-            // 4. ВЫЗОВ СЕРВИСА ЧЕРЕЗ ФАБРИКУ
-            IAiService? aiService = AiServiceFactory.Create(config, apiKey);
-            if (aiService == null) return;
+                string chunkText = string.Join("\n", chunks[i]);
 
-            // Отправляем запрос (этот метод теперь внутри использует Mscc.GenerativeAI)
-            var refinedResult = await aiService.RefineAndDiarizeAsync(rawText, participantsList, context);
+                // Вызов ИИ
+                var result = await aiService.ProcessChunkAsync(chunkText, "Auto-detect", Session.Description);
 
-            // 5. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
-            if (refinedResult != null && refinedResult.Any())
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
+                if (result != null)
                 {
-                    Session.FullTranscript.Clear();
-                    foreach (var line in refinedResult)
-                    {
-                        Session.FullTranscript.Add(line);
-                    }
-                    IsDirty = true; // Помечаем, что сессия изменилась и её нужно сохранить
-                    CurrentTaskName = "Success: Speakers identified!";
-                });
+                    refinedTranscript.AddRange(result.Lines);
+                    Session.SegmentSummaries.Add(result.SegmentSummary);
+                }
+                await Task.Delay(1000); // Пауза для стабильности API
             }
-            else
-            {
-                CurrentTaskName = "AI could not process the text.";
-            }
-        }
-        catch (Exception ex)
-        {
-            // Выводим детальную ошибку, если что-то пошло не так (например, лимиты API)
-            await LuminaMessageBox.Show("AI Error", ex.Message, LuminaMessageBoxType.Danger);
-        }
-        finally
-        {
-            IsProcessing = false;
-            IsIndeterminate = false;
-            // Даем пользователю 2 секунды прочитать статус "Success", прежде чем прогресс-бар исчезнет
-            await Task.Delay(2000);
-        }
-    }
 
+            // 2. Обновляем UI
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Session.FullTranscript.Clear();
+                foreach (var line in refinedTranscript) Session.FullTranscript.Add(line);
+
+                Session.HasAIImprovements = true; // СТАВИМ ФЛАГ
+                IsDirty = true;
+                CurrentTaskName = "Diarization & Chunk summaries complete!";
+            });
+        }
+        finally { IsProcessing = false; }
+    }
 
     #endregion
 
 
     #region Sammary mode
 
-    // Текст Саммари
-    [ObservableProperty] private string _summaryMarkdown = "# Meeting Summary\nImported results will appear here...";
+    [RelayCommand]
+    private async Task GenerateFinalSummary()
+    {
+        await ConnectAiService();
+
+        // ПРОВЕРКА ФЛАГА
+        if (!Session.HasAIImprovements || Session.SegmentSummaries.Count == 0)
+        {
+            var res = await LuminaMessageBox.Show("Step Missing",
+                "Please run 'Diarization and Refinement' first to prepare data for summary.",
+                LuminaMessageBoxType.Message);
+            return;
+        }
+
+        try
+        {
+            IsProcessing = true;
+            IsIndeterminate = true;
+            CurrentTaskName = "Synthesizing final meeting protocol...";
+
+            // Отправляем только список SegmentSummaries (очень мало токенов!)
+            string finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description);
+
+            if (!string.IsNullOrEmpty(finalMarkdown))
+            {
+
+                Session.GeneralSummary = finalMarkdown;
+                Session.HasSummary = true;
+                IsTranscriptionView = false;
+                //IsDirty = true; // IsDirty сработает и само, если настроена подписка на PropertyChanged
+            }
+        }
+        finally { IsProcessing = false; }
+    }
 
     #endregion
 

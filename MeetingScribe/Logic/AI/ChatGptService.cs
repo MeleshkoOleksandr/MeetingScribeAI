@@ -1,6 +1,7 @@
 
 using MeetingScribe.Logic.AI;
 using MeetingScribe.Logic.Meeting;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace MeetingScribe.Logic.AI;
 
+//TODO: Implement the ChatGPT service to refine and diarize meeting transcripts
 public class ChatGptService : IAiService
 {
     private readonly string _apiKey;
@@ -50,5 +52,21 @@ public class ChatGptService : IAiService
     {
         // TODO: Implement the parsing logic to convert the JSON response into a list of TranscriptLine objects
         return new List<TranscriptLine>();
+    }
+
+    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context)
+    {
+    
+        return null;
+    }
+
+    private string BuildCombinedPrompt(string raw, string participants, string context)
+    {
+        return "Promt";
+    }
+
+    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    {
+        return null;
     }
 }

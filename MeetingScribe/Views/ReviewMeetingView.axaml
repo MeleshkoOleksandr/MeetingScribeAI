@@ -37,7 +37,7 @@
 
                     <!-- 2. MODE: SUMMARY (Markdown) -->
                     <ScrollViewer IsVisible="{Binding IsSummaryView}" Padding="40">
-                        <SelectableTextBlock Text="{Binding SummaryMarkdown}"
+                        <SelectableTextBlock Text="{Binding Session.GeneralSummary}"
                                              TextWrapping="Wrap"
                                              FontSize="16"
                                              LineHeight="28"
@@ -107,8 +107,8 @@
                             <!-- Summary -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsSummaryView}">
                                 <TextBlock Text="AI SUMMARY" Classes="label-caps" Opacity="0.6"/>
-                                <Button Classes="btn-accent" HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Classes="btn-accent" Command="{Binding GenerateFinalSummaryCommand}" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal"  Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
                                         <TextBlock Text="General Summary"/>
                                     </StackPanel>
