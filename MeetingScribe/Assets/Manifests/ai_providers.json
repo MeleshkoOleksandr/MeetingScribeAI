@@ -1,7 +1,13 @@
 [
     {
-        "Id": "Gemini",
-        "Name": "Google Gemini",
+        "Id": "Gemini_Free",
+        "Name": "Google Gemini Free ",
+        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "Model": "gemini-flash-latest"
+    },
+    {
+        "Id": "Gemini_Paid",
+        "Name": "Google Gemini Paid",
         "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
         "Model": "gemini-flash-latest"
     },
