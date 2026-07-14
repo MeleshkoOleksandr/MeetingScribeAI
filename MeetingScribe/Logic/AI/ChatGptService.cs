@@ -25,7 +25,7 @@ public class ChatGptService : IAiService
 
     public async Task<List<TranscriptLine>> RefineAndDiarizeAsync(string rawTranscript, string participants, string meetingContext)
     {
-        var prompt = "Follow the same logic as described in the system message..."; // (Аналогичный промпт)
+        var prompt = "Follow the same logic as described in the system message..."; // Add your prompt here, including rawTranscript, participants, and meetingContext
 
         var requestBody = new
         {
@@ -34,7 +34,7 @@ public class ChatGptService : IAiService
                 new { role = "system", content = "You format meeting transcripts into JSON." },
                 new { role = "user", content = prompt }
             },
-            response_format = new { type = "json_object" } // ChatGPT умеет возвращать чистый JSON
+            response_format = new { type = "json_object" } // row JSON from ChatGPT
         };
 
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiKey);
@@ -42,13 +42,13 @@ public class ChatGptService : IAiService
         var response = await _httpClient.PostAsync(_url, new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json"));
         var resultJson = await response.Content.ReadAsStringAsync();
 
-        // Парсинг ответа OpenAI (другая структура JSON)
+        // Parse the JSON response to extract the relevant information and return a list of TranscriptLine objects
         return ParseOpenAiResponse(resultJson);
     }
 
     private List<TranscriptLine> ParseOpenAiResponse(string json)
     {
-        // Логика извлечения из choices[0].message.content
+        // TODO: Implement the parsing logic to convert the JSON response into a list of TranscriptLine objects
         return new List<TranscriptLine>();
     }
 }

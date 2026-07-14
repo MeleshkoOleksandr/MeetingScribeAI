@@ -108,7 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         //  Create a new ReviewMeetingViewModel with the selected session and navigate to it
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CloseMeetingReview);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings, CloseMeetingReview);
 
         // Creating a  navigation item for this review pag
         var reviewNavItem = new NavigationItem
@@ -235,7 +235,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Description = _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
-            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService, whisperPath)
+            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService,  whisperPath, CurrentSettings)
         };
 
         PageList.AddTemporaryItem(reviewPage);
@@ -287,7 +287,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
 
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings);
         var reviewPage = new NavigationItem
         {
             Label = "Review: " + session.Name,
@@ -330,6 +330,5 @@ public partial class MainWindowViewModel : ViewModelBase
         _meetingManager = new MeetingManager(_transcriptionService);
         // Initialize the Archive page with the callback to open a meeting review
         (PageList.GetByTarget(PageNames.Archive).Page as ArchiveViewModel).InitArchiveViewModel(OpenMeetingReview);
-      
     }
 }

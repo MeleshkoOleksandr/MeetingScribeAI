@@ -2,8 +2,8 @@
     {
         "Id": "Gemini",
         "Name": "Google Gemini",
-        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-        "Model": "gemini-1.5-flash"
+        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "Model": "gemini-flash-latest"
     },
     {
         "Id": "ChatGPT",

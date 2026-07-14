@@ -96,7 +96,7 @@
                                         <TextBlock Text="Improve Recognition"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
                                         <TextBlock Text="Diarization and Refinement"/>

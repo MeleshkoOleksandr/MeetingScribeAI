@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace MeetingScribe.Logic.AI;
 
 public static class AiServiceFactory
@@ -12,7 +8,6 @@ public static class AiServiceFactory
 
         return config.Id switch
         {
-            // Теперь конструкторы совпадают!
             "Gemini" => new GeminiAiService(apiKey, config.Model, config.Url),
             "ChatGPT" => new ChatGptService(apiKey, config.Model, config.Url),
             _ => null
