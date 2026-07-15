@@ -91,21 +91,20 @@ public class GeminiAiService : IAiService
         CONTEXT: {context}
         PARTICIPANTS: {participants}
         TASK:
-            1. Refine the transcript: fix grammar, industry terms, and remove filler words ('umm', 'like', etc.).
-            2. Identify speakers based on context. 
-                - Use the PROVIDED PARTICIPANT LIST if names are mentioned or can be inferred.
-                - BE CONSISTENT: If a speaker is identified as 'Speaker 1', ensure they remain 'Speaker 1' throughout this segment.
-                - If you can identify a name (e.g. someone says 'Hi, John'), use that name instead of a generic ID.
-            3. Break the text into logical, readable dialogue segments.
-            4. Preserve original timestamps exactly as they appear in the source.
-            5. Summarize key points and decisions from THIS segment (max 150 words).
+             1. CLEANUP: Fix grammar, remove filler words ('umm', 'uh', 'like'). Fix technical terms.
+             2. DIARIZATION: Identify speakers. Use names from the list if possible. Be consistent.
+             3. CONSOLIDATE: This is crucial. The raw transcript is fragmented into very short pieces. 
+                You MUST MERGE consecutive segments from the same speaker into single, long, coherent paragraphs. 
+                Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
+            4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
+            5. SUMMARIZING: Summarize key points and decisions from THIS segment.
 
         RETURN FORMAT (Strict JSON):
         {{
           ""lines"": [
             {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
           ],
-          ""segmentSummary"": ""Brief summary of what happened in this part...""
+          ""segmentSummary"": ""Summary of what happened in this part...""
         }}
 
         RAW DATA:
