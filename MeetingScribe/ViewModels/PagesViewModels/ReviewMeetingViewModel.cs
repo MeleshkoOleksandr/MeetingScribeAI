@@ -2,6 +2,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
@@ -15,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.ViewModels;
@@ -37,14 +39,24 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     private readonly Action<ReviewMeetingViewModel>? _onCloseRequest;
 
     IAiService? aiService;
+    private readonly MainWindowViewModel _mainVm;
 
-    public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, Action<ReviewMeetingViewModel>? onCloseRequest = null)
+    private CancellationTokenSource? _processCts;
+    public bool IsGlobalBusy => _mainVm.IsGlobalBusy;
+    [ObservableProperty] private bool _isImprovingText; // Flag to indicate if text improvement is in progress
+    [ObservableProperty] private bool _isAIRef; // Flag to indicate ai refinement is in progress
+
+    public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, MainWindowViewModel mainVm, Action<ReviewMeetingViewModel>? onCloseRequest = null)
     {
         _session = session;
         _whisperPath = whisperPath;
         _transcriptionService = transcriptionService;
         _onCloseRequest = onCloseRequest;
         Settings = settings;
+
+        _mainVm = mainVm;
+        // Propertie that block buttons when long-running operations are in progress
+        _mainVm.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(MainWindowViewModel.IsGlobalBusy)) { OnPropertyChanged(nameof(IsGlobalBusy)); } };
 
         // Subscribe to property changes in the session to track unsaved changes
         Session.PropertyChanged += (s, e) => IsDirty = true;
@@ -156,8 +168,12 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
         try
         {
+            _processCts = new CancellationTokenSource();
+
             IsProcessing = true;
             IsIndeterminate = true;
+            IsImprovingText = true;
+            _mainVm.IsGlobalBusy = true;
             CurrentTaskName = "Initializing AI Model...";
             ProcessingProgress = 0;
 
@@ -182,7 +198,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             CurrentTaskName = "Analyzing audio file...";
             var progressHandler = new Progress<double>(value => ProcessingProgress = value);
 
-            var refinedLines = await _transcriptionService.ProcessFileAsync(audioPath, progressHandler);
+            var refinedLines = await _transcriptionService.ProcessFileAsync(audioPath, progressHandler, _processCts.Token);
 
             // Update the UI Collection
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -204,11 +220,28 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         finally
         {
             // Unload the heavy model to free up RAM/VRAM
+            _transcriptionService.Stop();
             _transcriptionService.UnloadModel();
 
             IsProcessing = false;
             IsIndeterminate = false;
+            IsImprovingText = false;
+            _mainVm.IsGlobalBusy = false;
+
+            _processCts?.Dispose();
+            _processCts = null;
         }
+    }
+
+    [RelayCommand]
+    private void CancelCurrentAction()
+    {
+        _processCts?.Cancel();
+        CurrentTaskName = "Cancelling current operation...";
+
+        IsImprovingText = false;
+        IsAIRef = false;
+        _mainVm.IsGlobalBusy = false;
     }
 
     // --- Appoint the speakers (Semantic Diarization) ---
@@ -221,13 +254,16 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         try
         {
             await ConnectAiService();
+            _processCts = new CancellationTokenSource();
 
             IsProcessing = true;
             IsIndeterminate = true; // Enable indeterminate progress bar since we don't have a specific progress metric for this operation
+            IsAIRef = true;
+            _mainVm.IsGlobalBusy = true;
             ProcessingProgress = 0;
             CurrentTaskName = "AI is analyzing conversation flow...";
 
-            // 1. Подготовка чанков (используем ваш метод GroupLinesByTime)
+            // Making chanks of the transcript to send to the AI service
             string rawTextFull = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
             var lines = rawTextFull.Split('\n');
             var chunks = TextOparations.GroupLinesByTime(lines, 15);
@@ -243,29 +279,41 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
                 string chunkText = string.Join("\n", chunks[i]);
 
-                // Вызов ИИ
-                var result = await aiService.ProcessChunkAsync(chunkText, "Auto-detect", Session.Description);
+                // AI service call to analyze the chunk and return speaker-labeled lines
+                var result = await aiService.ProcessChunkAsync(chunkText, "Auto-detect", Session.Description, _processCts.Token);
 
                 if (result != null)
                 {
                     refinedTranscript.AddRange(result.Lines);
                     Session.SegmentSummaries.Add(result.SegmentSummary);
                 }
-                await Task.Delay(1000); // Пауза для стабильности API
+                //If current task was cancelled, break the loop
+                if (_processCts.IsCancellationRequested) { return;}
+                //Make pause between chunks to avoid overwhelming the AI service
+                await Task.Delay(1000);
             }
 
-            // 2. Обновляем UI
+            // Refresh the UI with the new speaker-labeled transcript
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Session.FullTranscript.Clear();
                 foreach (var line in refinedTranscript) Session.FullTranscript.Add(line);
 
-                Session.HasAIImprovements = true; // СТАВИМ ФЛАГ
+                Session.HasAIImprovements = true;
                 IsDirty = true;
                 CurrentTaskName = "Diarization & Chunk summaries complete!";
             });
         }
-        finally { IsProcessing = false; }
+        finally 
+        { 
+            IsProcessing = false;
+            IsIndeterminate = false;
+            IsAIRef = false;
+            _mainVm.IsGlobalBusy = false;
+
+            _processCts?.Dispose();
+            _processCts = null;
+        }
     }
 
     #endregion
@@ -278,7 +326,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     {
         await ConnectAiService();
 
-        // ПРОВЕРКА ФЛАГА
+        // Check if we have any segment summaries to work with
         if (!Session.HasAIImprovements || Session.SegmentSummaries.Count == 0)
         {
             var res = await LuminaMessageBox.Show("Step Missing",
@@ -293,16 +341,14 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsIndeterminate = true;
             CurrentTaskName = "Synthesizing final meeting protocol...";
 
-            // Отправляем только список SegmentSummaries (очень мало токенов!)
+            // Sendind the segment summaries to the AI service for final summary generation
             string finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description);
 
             if (!string.IsNullOrEmpty(finalMarkdown))
             {
-
                 Session.GeneralSummary = finalMarkdown;
                 Session.HasSummary = true;
                 IsTranscriptionView = false;
-                //IsDirty = true; // IsDirty сработает и само, если настроена подписка на PropertyChanged
             }
         }
         finally { IsProcessing = false; }

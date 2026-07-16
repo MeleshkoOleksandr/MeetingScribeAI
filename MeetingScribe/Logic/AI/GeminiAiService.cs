@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.Logic.AI;
@@ -25,7 +26,7 @@ public class GeminiAiService : IAiService
         _isPaid = isPaid;
     }
 
-    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context)
+    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token)
     {
         var prompt = BuildCombinedPrompt(rawText, participants, context);
 
@@ -51,7 +52,7 @@ public class GeminiAiService : IAiService
 
             try
             {
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, token);
 
                 // Server is bisy or rate-limited, retry after delay
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
@@ -75,11 +76,17 @@ public class GeminiAiService : IAiService
                 // Successful response, deserialize and return
                 return ParseCombinedResponse(responseJson);
             }
+            catch (OperationCanceledException)
+            {
+                System.Diagnostics.Debug.WriteLine("User cancelled the AI process.");
+                return null;
+            }
             catch (Exception ex)
             {
                 if (i == maxRetries - 1) throw; // If it's the last attempt, rethrow the exception
                 await Task.Delay(delayMs);
             }
+
         }
         return null;
     }

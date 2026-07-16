@@ -89,7 +89,7 @@ public class TranscriptionService : IDisposable
     /// <summary>
     /// Processes an entire audio file offline for maximum quality.
     /// </summary>
-    public async Task<List<TranscriptLine>> ProcessFileAsync(string filePath, IProgress<double> progress)
+    public async Task<List<TranscriptLine>> ProcessFileAsync(string filePath, IProgress<double> progress, CancellationToken token)
     {
         if (_whisperProcessor == null)
             throw new InvalidOperationException("Whisper Processor is not initialized. Call InitializeAsync first.");
@@ -104,6 +104,8 @@ public class TranscriptionService : IDisposable
         // Process the stream segment by segment
         await foreach (var segment in _whisperProcessor.ProcessAsync(fileStream))
         {
+            token.ThrowIfCancellationRequested(); //Cancel if requested 
+
             result.Add(new TranscriptLine
             {
                 // Format time as [HH:mm:ss]
@@ -316,16 +318,36 @@ public class TranscriptionService : IDisposable
 
     public void UnloadModel()
     {
-        // Destroying the thread and the factory—this will free up memory/video memory
-        _whisperProcessor?.Dispose();
-        _whisperProcessor = null;
 
-        _whisperFactory?.Dispose();
-        _whisperFactory = null;
+        lock (_whisperSemaphore) // Check model usage
+        {
+            try
+            {
+                // Destroying the thread and the factory—this will free up memory/video memory
+                _whisperProcessor?.Dispose();
+                _whisperProcessor = null;
 
-        // We trigger a garbage collection (GC)
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
+                _whisperFactory?.Dispose();
+                _whisperFactory = null;
+
+                // Clear VAD
+                _vadDetector?.Dispose();
+                _vadDetector = null;
+            }
+            catch (OperationCanceledException)
+            {
+                System.Diagnostics.Debug.WriteLine("User cancelled the process.");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Safe dispose failed: {ex.Message}");
+            }
+            finally
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+        }
     }
 
     public void Dispose()

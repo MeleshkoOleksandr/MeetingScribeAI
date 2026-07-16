@@ -69,6 +69,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // Data to illustrate the  volume level history (for the waveform visualization)
     public ObservableCollection<double> WaveformHistory { get; } = new();
 
+    // Flag to indicate if the user has started heavy and long tasks (like transcription or AI processing)
+    [ObservableProperty] private bool _isGlobalBusy;
+
     #endregion
 
 
@@ -108,7 +111,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         //  Create a new ReviewMeetingViewModel with the selected session and navigate to it
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings, CloseMeetingReview);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings, this, CloseMeetingReview);
 
         // Creating a  navigation item for this review pag
         var reviewNavItem = new NavigationItem
@@ -235,7 +238,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Description = _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
-            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService,  whisperPath, CurrentSettings)
+            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService,  whisperPath, CurrentSettings , this)
         };
 
         PageList.AddTemporaryItem(reviewPage);
@@ -287,7 +290,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
 
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings , this);
         var reviewPage = new NavigationItem
         {
             Label = "Review: " + session.Name,

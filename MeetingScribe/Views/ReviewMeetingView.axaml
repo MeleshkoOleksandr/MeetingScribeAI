@@ -88,18 +88,34 @@
 
                         <StackPanel Spacing="20">
                             <!-- Script -->
-                            <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}">
+                            <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}"    >
                                 <TextBlock Text="SCRIPT ACTIONS" Classes="label-caps" Opacity="0.6"/>
-                                <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}"  
+                                        IsVisible="{Binding !IsImprovingText}" IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AutoFix" Width="18"/>
                                         <TextBlock Text="Improve Recognition"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsImprovingText}"
+                                        HorizontalAlignment="Stretch" Background="#332020">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="#ffb4ab"/>
+                                        <TextBlock Text="Cancel Process" Foreground="#ffb4ab"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}"
+                                        IsVisible="{Binding !IsAIRef}" IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
                                         <TextBlock Text="Diarization and Refinement"/>
+                                    </StackPanel>
+                                </Button>
+                                     <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsAIRef}"
+                                        HorizontalAlignment="Stretch" Background="#332020">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="#ffb4ab"/>
+                                        <TextBlock Text="Cancel Process" Foreground="#ffb4ab"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -107,20 +123,20 @@
                             <!-- Summary -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsSummaryView}">
                                 <TextBlock Text="AI SUMMARY" Classes="label-caps" Opacity="0.6"/>
-                                <Button Classes="btn-accent" Command="{Binding GenerateFinalSummaryCommand}" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-accent" Command="{Binding GenerateFinalSummaryCommand}" IsEnabled="{Binding !IsGlobalBusy}"  HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal"  Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
                                         <TextBlock Text="General Summary"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Classes="btn-accent" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-accent" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
                                         <TextBlock Text="Template Summary"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch">
+                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="FileWordOutline" Width="18"/>
                                         <TextBlock Text="Export to Word"/>
@@ -151,14 +167,14 @@
                     <!-- Bottom: Global Actions (Close/Save) -->
                     <Border Grid.Row="3" Padding="20" BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,0">
                         <StackPanel Spacing="10">
-                            <Button Command="{Binding SaveChangesCommand}" Classes="btn-primary" HorizontalAlignment="Stretch">
+                            <Button Command="{Binding SaveChangesCommand}" Classes="btn-primary" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <icons:MaterialIcon Kind="ContentSave" IsVisible="{Binding !IsDirty}" Width="18"/>
                                     <icons:MaterialIcon Kind="ContentSaveAlert" IsVisible="{Binding IsDirty}" Foreground="#FF5252" Width="18"/>
                                     <TextBlock Text="Save Changes"/>
                                 </StackPanel>
                             </Button>
-                            <Button Classes="btn-secondary"  Command="{Binding CloseReviewCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252">
+                            <Button Classes="btn-secondary"  Command="{Binding CloseReviewCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252" IsEnabled="{Binding !IsGlobalBusy}" >
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                                     <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
                                     <TextBlock Text="Close Review"/>

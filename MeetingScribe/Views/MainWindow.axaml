@@ -28,7 +28,7 @@
     <Window.Resources>
         <!-- Template for one menu item -->
         <DataTemplate x:Key="MenuItemTemplate" x:DataType="uilog:NavigationItem">
-            <Grid Height="48" Background="Transparent" ToolTip.Tip="{Binding Label}">
+            <Grid Height="48" Background="Transparent" ToolTip.Tip="{Binding Label}" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="48"/>
                     <ColumnDefinition Width="*"/>
@@ -100,6 +100,7 @@
                 <!-- Navigation Menu -->
                 <!-- Main ListBox (Static Items) -->
                 <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0"
+                         IsEnabled="{Binding !IsGlobalBusy}"
                          ItemsSource="{Binding PageList.MenuItems}"
                          SelectedItem="{Binding SelectedMenuItem}"
                          ItemTemplate="{StaticResource MenuItemTemplate}">

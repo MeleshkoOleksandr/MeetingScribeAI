@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.Logic.AI;
@@ -54,7 +55,7 @@ public class ChatGptService : IAiService
         return new List<TranscriptLine>();
     }
 
-    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context)
+    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token)
     {
     
         return null;
