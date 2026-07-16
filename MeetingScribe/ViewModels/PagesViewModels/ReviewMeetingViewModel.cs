@@ -321,8 +321,26 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
     #region Sammary mode
 
+    private enum SammaryTypes
+    {
+        GeneralSummary,
+        TemplateSammary
+    }
+
     [RelayCommand]
     private async Task GenerateFinalSummary()
+    {
+        await makeSammary(SammaryTypes.GeneralSummary);
+      
+    }
+
+    [RelayCommand]
+    private async Task GenerateTemplateSummary()
+    {
+        await makeSammary(SammaryTypes.TemplateSammary);
+    }
+
+    private async Task<bool> makeSammary(SammaryTypes sammaryType)
     {
         await ConnectAiService();
 
@@ -332,7 +350,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             var res = await LuminaMessageBox.Show("Step Missing",
                 "Please run 'Diarization and Refinement' first to prepare data for summary.",
                 LuminaMessageBoxType.Message);
-            return;
+            return false;
         }
 
         try
@@ -342,8 +360,19 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             CurrentTaskName = "Synthesizing final meeting protocol...";
 
             // Sendind the segment summaries to the AI service for final summary generation
-            string finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description);
-
+            string finalMarkdown = "";
+            switch (sammaryType)
+            {
+                case SammaryTypes.GeneralSummary:
+                    finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description);
+                    break;
+                case SammaryTypes.TemplateSammary:
+                    finalMarkdown = await aiService.TemplateSummariesAsync(Session.SegmentSummaries, Session.Description);
+                    break;
+                default:
+                    break;
+            }
+      
             if (!string.IsNullOrEmpty(finalMarkdown))
             {
                 Session.GeneralSummary = finalMarkdown;
@@ -352,6 +381,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             }
         }
         finally { IsProcessing = false; }
+
+        return true;
     }
 
     #endregion

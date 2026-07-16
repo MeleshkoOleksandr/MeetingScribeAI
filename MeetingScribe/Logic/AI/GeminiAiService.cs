@@ -103,8 +103,8 @@ public class GeminiAiService : IAiService
              3. CONSOLIDATE: This is crucial. The raw transcript is fragmented into very short pieces. 
                 You MUST MERGE consecutive segments from the same speaker into single, long, coherent paragraphs. 
                 Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
-            4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
-            5. SUMMARIZING: Summarize key points and decisions from THIS segment.
+             4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
+             5. SUMMARIZING: Summarize key points and decisions from THIS segment.
 
         RETURN FORMAT (Strict JSON):
         {{
@@ -124,7 +124,7 @@ public class GeminiAiService : IAiService
         {
             using var doc = JsonDocument.Parse(json);
 
-            // 1. Пробиваемся к текстовому полю внутри ответа Google
+            // We're trying to access the text field inside the Google response
             if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
                 return null;
 
@@ -135,13 +135,12 @@ public class GeminiAiService : IAiService
 
             if (string.IsNullOrEmpty(textResponse)) return null;
 
-            // 2. Десериализуем текст в наш класс AiResponseChunk
+            // Deserialize the text into our AiResponseChunk class 
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
-            // Важно: здесь мы используем textResponse (результат шага 1)
             return JsonSerializer.Deserialize<AiResponseChunk>(textResponse, options);
         }
         catch (Exception ex)
@@ -153,10 +152,10 @@ public class GeminiAiService : IAiService
 
     public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
     {
-        // 1. Собираем все кусочки в один текст
+        // Stitching summaries together with the meeting agenda for context
         string combinedPartials = string.Join("\n\n---\n\n", partialSummaries);
 
-        // 2. Формируем промпт для финальной сборки
+        // Making a prompt for the AI to make summaries
         string prompt = $@"You are a professional meeting minutes assistant.
                         Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol in Markdown format.
     
@@ -172,11 +171,48 @@ public class GeminiAiService : IAiService
                         PARTIAL SUMMARIES TO SYNTHESIZE:
                         {combinedPartials}";
 
-        // 3. Отправляем запрос
+        return await SendSammaryPromt(prompt);
+    }
+
+    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    {
+        // Stitching summaries together with the meeting agenda for context
+        string combinedPartials = string.Join("\n\n---\n\n", partialSummaries);
+
+        // Making a prompt for company tenplate summaries
+        string prompt = $@"Sei un assistente professionale esperto nella stesura di verbali di riunione aziendali.
+                        Basandoti sui riassunti parziali forniti, redigi un verbale ufficiale in lingua ITALIANA seguendo rigorosamente questa struttura:
+
+                        # VERBALE DI RIUNIONE: [Meeting Name]
+    
+                        ## 1. Informazioni dalla Direzione
+                        (Riassumi qui le comunicazioni, gli annunci e le direttive provenienti dai vertici o dalla direzione)
+
+                        ## 2. Parte Gestionale
+                        (Riassumi le decisioni riguardanti l'organizzazione, le risorse umane, i budget o i processi interni)
+
+                        ## 3. Parte Operativa
+                        (Riassumi i dettagli tecnici, lo stato di avanzamento dei progetti e le attività pratiche discusse)
+
+                        ## 4. Eventuali
+                        (Riassumi varie ed eventuali, comunicazioni minori o punti sollevati alla fine della riunione)
+
+                        ---
+                        CONTESTO INIZIALE (Agenda): {meetingAgenda}
+    
+                        RIASSUNTI DEI SEGMENTI DA ELABORARE:
+                        {combinedPartials}";
+
+        return await SendSammaryPromt(prompt);
+    }
+
+    private async Task<string> SendSammaryPromt(string prompt)
+    {
+        // Sending a request
         var requestBody = new
         {
             contents = new[] { new { parts = new[] { new { text = prompt } } } },
-            generationConfig = new { temperature = 0.7 } // Чуть больше творчества для красивого текста
+            generationConfig = new { temperature = 0.7 }
         };
 
         string jsonPayload = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });

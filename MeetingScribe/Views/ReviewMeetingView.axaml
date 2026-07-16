@@ -129,10 +129,10 @@
                                         <TextBlock Text="General Summary"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Classes="btn-accent" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
+                                <Button Classes="btn-accent" Command="{Binding GenerateTemplateSummaryCommand}"  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
-                                        <TextBlock Text="Template Summary"/>
+                                        <TextBlock Text="Template Summary (it)"/>
                                     </StackPanel>
                                 </Button>
 

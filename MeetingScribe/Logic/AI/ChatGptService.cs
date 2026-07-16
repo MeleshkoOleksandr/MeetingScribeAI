@@ -61,12 +61,12 @@ public class ChatGptService : IAiService
         return null;
     }
 
-    private string BuildCombinedPrompt(string raw, string participants, string context)
+    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
     {
-        return "Promt";
+        return null;
     }
 
-    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda)
     {
         return null;
     }
