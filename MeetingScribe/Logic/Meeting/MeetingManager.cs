@@ -102,6 +102,8 @@ public class MeetingManager
         {
             using (var reader = new AudioFileReader(sourceFilePath))
             {
+                // Setting up meeting duration
+                session.Duration = reader.TotalTime;
                 // Resample to 16000Hz and convert to Mono
                 var outFormat = new WaveFormat(16000, 16, 1);
                 using (var resampler = new MediaFoundationResampler(reader, outFormat))
