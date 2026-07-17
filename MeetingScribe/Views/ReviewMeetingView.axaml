@@ -63,18 +63,24 @@
                     </Border>
 
                     <!-- 3. MODE: INFO (Metadata Editor) -->
-                    <ScrollViewer IsVisible="{Binding IsInfoView}" >
-                        <StackPanel MaxWidth="600" HorizontalAlignment="Left" Spacing="25">
+                    <ScrollViewer IsVisible="{Binding IsInfoView}" Padding="20" >
+                        <StackPanel  Spacing="25">
                             <TextBlock Text="Meeting Metadata" FontSize="22" FontWeight="Bold"/>
 
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="6">
                                 <TextBlock Text="MEETING NAME" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.Name}" Classes="lumina-input"/>
                             </StackPanel>
 
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="6">
                                 <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.Description}"
+                                         AcceptsReturn="True" MinHeight="100" TextWrapping="Wrap" Classes="lumina-input"/>
+                            </StackPanel>
+
+                               <StackPanel Spacing="6">
+                                <TextBlock Text="Meeting Topics" Classes="label-caps"/>
+                                <TextBox Text="{Binding Session.MeetingTopics}"
                                          AcceptsReturn="True" MinHeight="150" TextWrapping="Wrap" Classes="lumina-input"/>
                             </StackPanel>
                         </StackPanel>
