@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:md="https://github.com/whistyun/Markdown.Avalonia.Tight"
+             xmlns:ctxt="clr-namespace:ColorTextBlock.Avalonia;assembly=ColorTextBlock.Avalonia"
              xmlns:controls="clr-namespace:MeetingScribe.Views.Controls;assembly=MeetingScribe"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:uilogic="using:MeetingScribe.UILogic"
@@ -16,36 +18,52 @@
             <!-- ========================================== -->
             <!--   MAIN SECTION: DYNAMIC CONTENT            -->
             <!-- ========================================== -->
-            <Border Grid.Column="0" Background="{StaticResource BrushSurfaceContainerLowest}">
-                <Grid>
+            <Border Grid.Column="0" Background="{StaticResource BrushSurfaceContainerLowest}" x:Name="MainContentBorder"  >
+                <Grid >
                     <!-- 1. MODE: SCRIPT (Transcription) -->
-                    <ScrollViewer IsVisible="{Binding IsTranscriptionView}" Padding="20,20,0,50">
-                        <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid ColumnDefinitions="80, *" Margin="0,0,30,20">
-                                        <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
-                                        <StackPanel Grid.Column="1" Spacing="5">
-                                            <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" Opacity="0.9"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <Border Padding="20,20,0,0" IsVisible="{Binding IsTranscriptionView}" >
+                        <ScrollViewer IsVisible="{Binding IsTranscriptionView}">
+                            <ItemsControl ItemsSource="{Binding Session.FullTranscript}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="80, *" Margin="0,0,30,20">
+                                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" Classes="timestamp"/>
+                                            <StackPanel Grid.Column="1" Spacing="5">
+                                                <TextBlock Text="{Binding SpeakerName}" Foreground="{StaticResource BrushSecondary}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" Opacity="0.9"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
 
                     <!-- 2. MODE: SUMMARY (Markdown) -->
-                    <ScrollViewer IsVisible="{Binding IsSummaryView}" Padding="40">
-                        <SelectableTextBlock Text="{Binding Session.GeneralSummary}"
-                                             TextWrapping="Wrap"
-                                             FontSize="16"
-                                             LineHeight="28"
-                                             FontFamily="Inter, Segoe UI"/>
-                    </ScrollViewer>
+                    <Border Padding="20,10,10,10" IsVisible="{Binding IsSummaryView}" >
+                        <md:MarkdownScrollViewer
+                            Markdown="{Binding Session.GeneralSummary}"
+                            SelectionEnabled="True"  >
+                            <md:MarkdownScrollViewer.Styles>
+                                <Style Selector="ctxt|CTextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource BrushOnSurface}"/>
+                                    <Setter Property="FontSize" Value="16"/>
+
+                                </Style>
+                                <Style Selector="ctxt|CTextBlock.Heading1">
+                                    <Setter Property="FontSize" Value="24"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                                <Style Selector="ctxt|CTextBlock.Heading2">
+                                    <Setter Property="FontSize" Value="20"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </md:MarkdownScrollViewer.Styles>
+                        </md:MarkdownScrollViewer>
+                    </Border>
 
                     <!-- 3. MODE: INFO (Metadata Editor) -->
-                    <ScrollViewer IsVisible="{Binding IsInfoView}" Padding="40">
+                    <ScrollViewer IsVisible="{Binding IsInfoView}" >
                         <StackPanel MaxWidth="600" HorizontalAlignment="Left" Spacing="25">
                             <TextBlock Text="Meeting Metadata" FontSize="22" FontWeight="Bold"/>
 
@@ -90,7 +108,7 @@
                             <!-- Script -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}"    >
                                 <TextBlock Text="SCRIPT ACTIONS" Classes="label-caps" Opacity="0.6"/>
-                                <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}"  
+                                <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}"
                                         IsVisible="{Binding !IsImprovingText}" IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AutoFix" Width="18"/>
@@ -111,7 +129,7 @@
                                         <TextBlock Text="Diarization and Refinement"/>
                                     </StackPanel>
                                 </Button>
-                                     <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsAIRef}"
+                                <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsAIRef}"
                                         HorizontalAlignment="Stretch" Background="#332020">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="#ffb4ab"/>
