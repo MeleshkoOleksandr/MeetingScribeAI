@@ -57,9 +57,9 @@
                     <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch" 
                             Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
                     <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch"
-                            Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                            Command="{Binding DeleteParticipantCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                     <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" 
-                            Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                            Command="{Binding ClearParticipantsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
 
@@ -100,9 +100,9 @@
                     <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"  
                             Classes="btn-primary"/>
                     <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch" 
-                            Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                            Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                     <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" 
-                            Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                            Command="{Binding ClearGroupsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
 
