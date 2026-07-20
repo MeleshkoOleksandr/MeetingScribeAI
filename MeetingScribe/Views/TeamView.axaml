@@ -20,7 +20,7 @@
                         <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="Participants" Classes="card-title"/>
                     </StackPanel>
                     <!-- Search -->
-                    <TextBox Grid.Column="0"
+                    <TextBox Grid.Column="0" Text="{Binding ParticipantSearchText}"
                              PlaceholderText="Search mmbers..." Classes="lumina-input">
                         <TextBox.InnerLeftContent>
                             <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
@@ -31,7 +31,7 @@
 
             <!-- Participants list -->
             <ListBox Grid.Row="1"
-                     ItemsSource="{Binding Participants}"
+                     ItemsSource="{Binding FilteredParticipants}"
                      SelectedItem="{Binding SelectedParticipant}"
                      Classes="LuminaList">
                 <ListBox.ItemTemplate>
