@@ -4,60 +4,88 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:MeetingScribe.ViewModels"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.TeamView" x:DataType="vm:TeamViewModel">
-    <Grid ColumnDefinitions="*, 450">
+    <Grid ColumnDefinitions="*, 300">
 
-        <!-- LEFT PANEL: LISTS-->
-        <ScrollViewer Grid.Column="0" Padding="30">
-            <StackPanel Spacing="30">
+        <!-- LEFT SIDE: LIST -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto, Auto, *, Auto" Margin="0">
 
-                <!-- PARTICIPANTS SECTION -->
-                <StackPanel Spacing="15">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10">
-                            <icons:MaterialIcon Kind="AccountMultiple" Foreground="{StaticResource BrushPrimary}"/>
-                            <TextBlock Text="Participants" Classes="card-title"/>
-                        </StackPanel>
-                        <TextBox DockPanel.Dock="Right" Width="200" Watermark="Search..." Classes="lumina-input"/>
-                    </DockPanel>
+            <!-- Participants header -->
+            <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerLow}" Padding="10"
+                    BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
+                        <icons:MaterialIcon Margin="0,5" Kind="AccountMultiple" IconSize="20" Foreground="{StaticResource BrushPrimary}"/>
+                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="Participants" Classes="card-title"/>
+                    </StackPanel>
+                    <!-- Search -->
+                    <TextBox Grid.Column="0"
+                             PlaceholderText="Search mmbers..." Classes="lumina-input">
+                        <TextBox.InnerLeftContent>
+                            <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                </DockPanel>
+            </Border>
 
-                    <ListBox ItemsSource="{Binding Participants}" SelectedItem="{Binding SelectedParticipant}"
-                             Background="Transparent" BorderThickness="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="10">
-                                    <Grid ColumnDefinitions="Auto, *, Auto">
-                                        <Border Width="40" Height="40" CornerRadius="20" Background="#2D2D2D" Margin="0,0,15,0">
-                                            <TextBlock Text="{Binding Alias}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Position}" FontSize="12" Opacity="0.5"/>
-                                        </StackPanel>
-                                    </Grid>
+            <!-- Participants list -->
+            <ListBox ItemsSource="{Binding Participants}" SelectedItem="{Binding SelectedParticipant}"
+                     Background="Transparent" BorderThickness="0" Grid.Row="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="10">
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#2D2D2D" Margin="0,0,15,0">
+                                    <TextBlock Text="{Binding Alias}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Position}" FontSize="12" Opacity="0.5"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
-                    <!-- Participant Control Buttons-->
-                    <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
-                        <Button Grid.Column="0" Content="+ ADD" Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
-                        <Button Grid.Column="1" Content="DELETE" Classes="btn-secondary"/>
-                        <Button Grid.Column="2" Content="CLEAR" Classes="btn-secondary"/>
-                    </Grid>
-                </StackPanel>
+            <!-- Participant Control Buttons-->
+            <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
+                <Grid  ColumnDefinitions="*, *, *" >
+                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch" Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
+                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch" Classes="btn-secondary"/>
+                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" Classes="btn-secondary"/>
+                </Grid>
+            </Border>
 
-                <!-- GROUPS SECTION (similar to participants) -->
-                <StackPanel Spacing="15">
-                    <TextBlock Text="Groups" Classes="card-title"/>
-                    <ListBox ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
-                        <!-- Group list -->
-                    </ListBox>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+            <!-- Participants header -->
+            <Border Grid.Row="3" Background="{StaticResource BrushSurfaceContainerLow}" Padding="10"
+                    BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
+                        <icons:MaterialIcon Margin="0,5" Kind="AccountGroup" IconSize="20" Foreground="{StaticResource BrushSecondary}"/>
+                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushSecondary}" FontSize="20" Text="Groups" Classes="card-title"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Group list -->
+            <ListBox Grid.Row="4" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
+
+            </ListBox>
+
+            <!-- Group Control Buttons-->
+            <Border Grid.Row="5"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
+                <Grid  ColumnDefinitions="*, *, *" >
+                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"  Classes="btn-primary"/>
+                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch" Classes="btn-secondary"/>
+                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" Classes="btn-secondary"/>
+                </Grid>
+            </Border>
+
+        </Grid>
+
+
 
         <!-- RIGHT PANEL: EDITOR -->
         <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}"
