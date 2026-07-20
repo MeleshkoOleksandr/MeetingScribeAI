@@ -46,47 +46,10 @@
             </Grid>
             <TextBlock Grid.Row="1" Text="Archive" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
             <!-- List of Meetings -->
-            <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0"
+            <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0" Classes="LuminaList"
                      ItemsSource="{Binding FilteredMeetings}"
                      SelectedItem="{Binding SelectedMeeting}">
-
-            <ListBox.Resources>
-                <!-- REDEFINING SYSTEM HIGHLIGHT BRUSHES-->
-                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
-                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
-                <SolidColorBrush x:Key="SystemControlHighlightListAccentHighBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
-                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowPointerOverBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
-                <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="White" />
-             </ListBox.Resources>
-
-            <ListBox.Styles>
-                <Style Selector="ListBoxItem">
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Margin" Value="0,0,16,12"/>
-                    <Setter Property="Template">
-                        <ControlTemplate>
-                            <Border Name="MainBorder"  CornerRadius="8" ClipToBounds="True" Background="{TemplateBinding Background}" >
-                                <Grid ColumnDefinitions="4, *">
-                                    <Border Name="SelectionStripe" Grid.Column="0" Width="4" 
-                                            Background="{StaticResource BrushPrimary}"  
-                                            IsVisible="{TemplateBinding IsSelected}"/>                          
-                                    <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1" Padding="0"
-                                                      Content="{TemplateBinding Content}"
-                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                </Grid>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter>
-                </Style>
-
-                <Style Selector="ListBoxItem:selected">
-                    <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
-                </Style>
-                <Style Selector="ListBoxItem:pointerover:not(:selected)">
-                    <Setter Property="Background" Value="#1e2119"/>
-                </Style>
-            </ListBox.Styles>
+  
                 <ListBox.ItemTemplate>       
                     <DataTemplate>
                         <Border Padding="20,15" Background="Transparent">

@@ -272,7 +272,7 @@
     </Style>
 
     <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="#ff9da5"/> 
+        <Setter Property="Background" Value="#ff9da5"/>
         <Setter Property="Foreground" Value="#690005"/>
     </Style>
 
@@ -434,6 +434,64 @@
     <Style Selector="ToggleButton.tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{StaticResource BrushSurfaceBright}"/>
         <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <!-- ══════════════════════════════════════════
+    CUSTOM LISTBOX (Archive, Team, Groups)
+    ══════════════════════════════════════════ -->
+
+    <Style Selector="ListBox.LuminaList">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Style.Resources>
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentHighBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowPointerOverBrush" Color="{StaticResource ColorSurfaceContainerHigh}" />
+            <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="White" />
+        </Style.Resources>
+    </Style>
+
+    <Style Selector="ListBox.LuminaList ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Margin" Value="0,0,16,8"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="MainBorder"
+                        CornerRadius="8"
+                        ClipToBounds="True"
+                        Background="{TemplateBinding Background}">
+                    <Grid ColumnDefinitions="4, *">
+                 
+                        <Border Name="SelectionStripe"
+                                Grid.Column="0"
+                                Width="4"
+                                Background="{StaticResource BrushPrimary}"
+                                IsVisible="{TemplateBinding IsSelected}"/>
+
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Grid.Column="1"
+                                          Padding="0"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="ListBox.LuminaList ListBoxItem:selected">
+        <Setter Property="Background" Value="{StaticResource BrushSurfaceContainerHigh}"/>
+    </Style>
+
+    <Style Selector="ListBox.LuminaList ListBoxItem:pointerover:not(:selected)">
+        <Setter Property="Background" Value="#1e2119"/>
+    </Style>
+
+    <Style Selector="ListBox.LuminaList.Accent ListBoxItem /template/ Border#SelectionStripe">
+        <Setter Property="Background" Value="{StaticResource BrushSecondary}"/>
     </Style>
 
 </Styles>
