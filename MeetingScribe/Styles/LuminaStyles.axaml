@@ -198,7 +198,7 @@
         </Setter>
     </Style>
 
-    <!-- Эффект при наведении (делаем цвет чуть светлее) -->
+    <!-- Changing color on pointerover -->
     <Style Selector="Button.btn-accent:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#a1dbff"/>
         <Setter Property="Foreground" Value="{StaticResource BrushOnSecondary}"/>
@@ -213,6 +213,7 @@
         <Setter Property="CornerRadius"    Value="{StaticResource RadiusMd}"/>
         <Setter Property="Padding"         Value="20,14"/>
         <Setter Property="FontSize"        Value="{StaticResource FontSizeBodyMd}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Cursor"          Value="Hand"/>
     </Style>
     <Style Selector="Button.btn-secondary:pointerover /template/ ContentPresenter">
