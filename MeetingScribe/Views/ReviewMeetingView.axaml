@@ -124,8 +124,8 @@
                                 <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsImprovingText}"
                                         HorizontalAlignment="Stretch" Background="#332020">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="#ffb4ab"/>
-                                        <TextBlock Text="Cancel Process" Foreground="#ffb4ab"/>
+                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="{StaticResource ColorError}"/>
+                                        <TextBlock Text="Cancel Process" Foreground="{StaticResource ColorError}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}"
@@ -138,8 +138,8 @@
                                 <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsAIRef}"
                                         HorizontalAlignment="Stretch" Background="#332020">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="#ffb4ab"/>
-                                        <TextBlock Text="Cancel Process" Foreground="#ffb4ab"/>
+                                        <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="{StaticResource ColorError}"/>
+                                        <TextBlock Text="Cancel Process" Foreground="{StaticResource ColorError}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
