@@ -1,9 +1,12 @@
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
+
 using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.Enums;
 using MeetingScribe.Views;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,6 +121,18 @@ public partial class TeamViewModel : ViewModelBase
 
     // ------   Groups  ------
     // -----------------------
+    [RelayCommand]
+    private async Task AddGroup()
+    {
+        var dialog = new AddGroupWindow { DataContext = new AddGroupViewModel() };
+        var owner = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        var result = await dialog.ShowDialog<TeamGroup?>(owner!);
+
+        if (result != null)
+        {
+            Groups.Add(result); // AutoSaveToDisk will be called due to CollectionChanged event
+        }
+    }
 
     [RelayCommand]
     private async Task DeleteGroup()

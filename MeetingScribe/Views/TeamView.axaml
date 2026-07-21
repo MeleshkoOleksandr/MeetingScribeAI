@@ -21,7 +21,7 @@
                     </StackPanel>
                     <!-- Search -->
                     <TextBox Grid.Column="0" Text="{Binding ParticipantSearchText}"
-                             PlaceholderText="Search mmbers..." Classes="lumina-input">
+                             PlaceholderText="Search members..." Classes="lumina-input">
                         <TextBox.InnerLeftContent>
                             <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
                         </TextBox.InnerLeftContent>
@@ -30,7 +30,7 @@
             </Border>
 
             <!-- Participants list -->
-            <ListBox Grid.Row="1"
+            <ListBox Grid.Row="1" Margin="5,5,0,0"
                      ItemsSource="{Binding FilteredParticipants}"
                      SelectedItem="{Binding SelectedParticipant}"
                      Classes="LuminaList">
@@ -75,7 +75,7 @@
             </Border>
 
             <!-- Group list -->
-            <ListBox Grid.Row="4"
+            <ListBox Grid.Row="4" Margin="5,5,0,0"
                      ItemsSource="{Binding Groups}"
                      SelectedItem="{Binding SelectedGroup}"
                      Classes="LuminaList Accent">
@@ -98,7 +98,7 @@
             <Border Grid.Row="5"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
                 <Grid  ColumnDefinitions="*, *, *" >
                     <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"  
-                            Classes="btn-primary"/>
+                            Command="{Binding AddGroupCommand}" Classes="btn-primary"/>
                     <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch" 
                             Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                     <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" 

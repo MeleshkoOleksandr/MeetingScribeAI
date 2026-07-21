@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MeetingScribe.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="MeetingScribe.Views.AddGroupWindow"
+        x:DataType="vm:AddGroupViewModel"
+        Width="400" Height="450"
+        WindowStartupLocation="CenterOwner"
+        WindowDecorations="None"
+        Background="#1a1d15"
+        CornerRadius="12">
+
+    <Border BorderBrush="#2D2D2D" Padding="30" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
+        <Grid RowDefinitions="Auto, *, Auto" >
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,25">
+                <TextBlock Text="Create New Group" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Set up a new team category" FontSize="14" Opacity="0.5"/>
+            </StackPanel>
+
+            <!-- Content -->
+            <StackPanel Grid.Row="1" Spacing="20">
+                <!-- Name -->
+                <StackPanel Spacing="5">
+                    <TextBlock Text="GROUP NAME" Classes="label-caps"/>
+                    <TextBox Text="{Binding Name}" Classes="lumina-input" PlaceholderText="e.g. Engineering"/>
+                </StackPanel>
+
+                <!-- Icon Selection -->
+                <StackPanel Spacing="5">
+                    <TextBlock Text="GROUP ICON" Classes="label-caps"/>
+                    <ComboBox ItemsSource="{Binding AvailableIcons}"
+                              SelectedItem="{Binding SelectedIcon}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="system:String">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <icons:MaterialIcon Kind="{Binding}" Width="18"/>
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Color Picker -->
+                <StackPanel Spacing="10">
+                    <TextBlock Text="THEME COLOR" Classes="label-caps"/>
+                    <ColorPicker Color="{Binding SelectedColor}"
+                                 Palette="{StaticResource ColorPickerPalette}"
+                                 Width="340" Height="40"
+                                 HorizontalAlignment="Left"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Buttons -->
+            <Grid Grid.Row="2" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,20,0,0">
+                <Button Name="CancelBtn" Grid.Column="0" Content="Cancel" Classes="btn-ghost" HorizontalAlignment="Stretch"/>
+                <Button Name="CreateBtn" Grid.Column="1" Content="Create Group" Classes="btn-primary" HorizontalAlignment="Stretch"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

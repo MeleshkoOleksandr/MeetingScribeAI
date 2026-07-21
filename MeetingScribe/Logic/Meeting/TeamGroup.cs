@@ -8,4 +8,5 @@ public partial class TeamGroup : ObservableObject
     public Guid Id { get; set; } = Guid.NewGuid();
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private string _icon = "AccountGroup"; // MaterialIconKind
+    [ObservableProperty] private string _color = "#B7E97E";
 }
