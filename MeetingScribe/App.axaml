@@ -41,6 +41,7 @@
             <conv:BoolToStatusBrushConverter x:Key="BoolToStatusBrushConverter"/>
             <conv:PasswordIconConverter x:Key="PasswordIconConverter"/>
             <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
+            <conv:HexToColorConverter x:Key="HexToColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

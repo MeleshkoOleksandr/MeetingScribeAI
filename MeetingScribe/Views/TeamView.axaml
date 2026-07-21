@@ -138,7 +138,11 @@
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Text="TAG COLOR" Classes="label-caps"/>
-                            <TextBox Text="{Binding SelectedParticipant.TagColor}" Classes="lumina-input"/>
+                            <ColorPicker Color="{Binding SelectedParticipant.TagColor, Converter={StaticResource HexToColorConverter}}"
+                                         Palette="{StaticResource ColorPickerPalette}"
+                                         Width="120" Height="40"
+                                         HorizontalAlignment="Left"/>
+
                         </StackPanel>
                     </Grid>
 
@@ -151,7 +155,7 @@
                         <TextBlock Text="ASSIGNED GROUPS" Classes="label-caps" Opacity="0.6"/>
 
                         <WrapPanel Orientation="Horizontal">
-                            <!-- Список уже добавленных групп -->
+                            <!-- List of added teams -->
                             <ItemsControl ItemsSource="{Binding SelectedParticipantGroups}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -163,13 +167,13 @@
                                         <Border Classes="member-chip"
                                                 BorderBrush="{Binding Color, Converter={StaticResource HexToBrushConverter}}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <!-- Цветная точка группы -->
+                                                <!-- Team colored chip -->
                                                 <Ellipse Width="8" Height="8"
                                                          Fill="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
 
                                                 <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/>
 
-                                                <!-- Кнопка удаления из группы -->
+                                                <!-- Delete button -->
                                                 <Button Classes="chip-delete"
                                                         Command="{Binding $parent[UserControl].((vm:TeamViewModel)DataContext).RemoveGroupFromMemberCommand}"
                                                         CommandParameter="{Binding}">
