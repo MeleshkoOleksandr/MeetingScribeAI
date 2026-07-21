@@ -465,7 +465,7 @@
                         ClipToBounds="True"
                         Background="{TemplateBinding Background}">
                     <Grid ColumnDefinitions="4, *">
-                 
+
                         <Border Name="SelectionStripe"
                                 Grid.Column="0"
                                 Width="4"
@@ -493,6 +493,30 @@
 
     <Style Selector="ListBox.LuminaList.Accent ListBoxItem /template/ Border#SelectionStripe">
         <Setter Property="Background" Value="{StaticResource BrushSecondary}"/>
+    </Style>
+
+    <!-- ══════════════════════════════════════════
+    CUSTOM Chips for teams
+    ══════════════════════════════════════════ -->
+    <Style Selector="Border.member-chip">
+        <Setter Property="Background" Value="#25281e"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="15"/>
+        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="Margin" Value="0,0,8,8"/>
+    </Style>
+
+    <Style Selector="Button.chip-delete">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Opacity" Value="0.6"/>
+    </Style>
+    <Style Selector="Button.chip-delete:pointerover">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Foreground" Value="#ffb4ab"/>
     </Style>
 
 </Styles>

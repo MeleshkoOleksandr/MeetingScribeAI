@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:MeetingScribe.ViewModels"
+             xmlns:meet="using:MeetingScribe.Logic.Meeting"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.TeamView" x:DataType="vm:TeamViewModel">
@@ -54,11 +55,11 @@
             <!-- Participant Control Buttons-->
             <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
                 <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch" 
+                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"
                             Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
                     <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch"
                             Command="{Binding DeleteParticipantCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" 
+                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch"
                             Command="{Binding ClearParticipantsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
@@ -83,7 +84,7 @@
                     <DataTemplate>
                         <Border Padding="15,12">
                             <StackPanel Orientation="Horizontal" Spacing="15">
-                                <icons:MaterialIcon Kind="{Binding Icon}" Width="20" 
+                                <icons:MaterialIcon Kind="{Binding Icon}" Width="20"
                                                     Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
@@ -98,11 +99,11 @@
             <!-- Group Control Buttons-->
             <Border Grid.Row="5"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
                 <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"  
+                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"
                             Command="{Binding AddGroupCommand}" Classes="btn-primary"/>
-                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch" 
+                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch"
                             Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch" 
+                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch"
                             Command="{Binding ClearGroupsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
@@ -144,6 +145,71 @@
                     <StackPanel Spacing="8">
                         <TextBlock Text="POSITION" Classes="label-caps"/>
                         <TextBox Text="{Binding SelectedParticipant.Position}" Classes="lumina-input"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="10" Margin="0,15,0,0">
+                        <TextBlock Text="ASSIGNED GROUPS" Classes="label-caps" Opacity="0.6"/>
+
+                        <WrapPanel Orientation="Horizontal">
+                            <!-- Список уже добавленных групп -->
+                            <ItemsControl ItemsSource="{Binding SelectedParticipantGroups}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="member-chip"
+                                                BorderBrush="{Binding Color, Converter={StaticResource HexToBrushConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <!-- Цветная точка группы -->
+                                                <Ellipse Width="8" Height="8"
+                                                         Fill="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
+
+                                                <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/>
+
+                                                <!-- Кнопка удаления из группы -->
+                                                <Button Classes="chip-delete"
+                                                        Command="{Binding $parent[UserControl].((vm:TeamViewModel)DataContext).RemoveGroupFromMemberCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <icons:MaterialIcon Kind="Close" Width="12"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Add button (+) -->
+                            <Button Classes="btn-icon-round" Width="28" Height="28">
+                                <icons:MaterialIcon Kind="Plus" Width="16"/>
+
+                                <!-- A drop-down menu with a list of available groups -->
+                                <Button.Flyout>
+                                    <MenuFlyout ItemsSource="{Binding AvailableGroupsToJoin}">
+                                        <MenuFlyout.ItemContainerTheme>
+                                            <ControlTheme TargetType="MenuItem"
+                                                          BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                          x:DataType="meet:TeamGroup">
+
+                                                <Setter Property="Header" Value="{Binding Name}"/>
+                                                <!-- The command remains linked to the main ViewModel via $parent -->
+                                                <Setter Property="Command" Value="{Binding $parent[UserControl].((vm:TeamViewModel)DataContext).AddGroupToMemberCommand}"/>
+                                                <Setter Property="CommandParameter" Value="{Binding}"/>
+
+                                                <Setter Property="Icon">
+                                                    <Template>
+                                                        <icons:MaterialIcon Kind="{Binding Icon}" Width="16"
+                                                                            Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
+                                                    </Template>
+                                                </Setter>
+                                            </ControlTheme>
+                                        </MenuFlyout.ItemContainerTheme>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </WrapPanel>
                     </StackPanel>
 
                     <Button Content="SAVE ALL CHANGES" Command="{Binding SaveAllCommand}"

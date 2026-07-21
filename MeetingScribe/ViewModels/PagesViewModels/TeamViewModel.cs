@@ -23,6 +23,30 @@ public partial class TeamViewModel : ViewModelBase
     [ObservableProperty] private TeamGroup? _selectedGroup;
     [ObservableProperty] private string _participantSearchText = "";
 
+    //List of groups that the selected participant is a member of
+    public ObservableCollection<TeamGroup> SelectedParticipantGroups
+    {
+        get
+        {
+            if (SelectedParticipant == null) return new();
+
+            var list = Groups.Where(g => SelectedParticipant.GroupIds.Contains(g.Id)).ToList();
+            return new ObservableCollection<TeamGroup>(list);
+        }
+    }
+
+    // List of available groups that the selected participant
+    public ObservableCollection<TeamGroup> AvailableGroupsToJoin { get; } = new();
+
+    private void UpdateAvailableGroups()
+    {
+        AvailableGroupsToJoin.Clear();
+        if (SelectedParticipant is null) return;
+
+        foreach (var g in Groups.Where(g => !SelectedParticipant.GroupIds.Contains(g.Id)))
+            AvailableGroupsToJoin.Add(g);
+    }
+
     public TeamViewModel()
     {
         var (people, groups) = TeamStorageService.LoadData();
@@ -33,7 +57,14 @@ public partial class TeamViewModel : ViewModelBase
         Participants.CollectionChanged += (s, e) => OnPropertyChanged(nameof(FilteredParticipants));
         // If we adding list (Add, Remove, Clear - save changes to disk
         Participants.CollectionChanged += (s, e) => AutoSaveToDisk();
-        Groups.CollectionChanged += (s, e) => AutoSaveToDisk();
+        // Saving to disk and upadating the SelectedParticipantGroups when groups are changed
+        Groups.CollectionChanged += (s, e) =>
+        {
+            RefreshMemberGroups();
+            AutoSaveToDisk();
+        };
+        // Subcribe to changes in the Participants collection to auto-save to disk
+        Participants.CollectionChanged += (s, e) => AutoSaveToDisk();
     }
 
     private void AutoSaveToDisk()
@@ -148,5 +179,40 @@ public partial class TeamViewModel : ViewModelBase
         var res = await LuminaMessageBox.Show("Clear Groups?", "Delete all groups?", LuminaMessageBoxType.Danger);
         if (res == LuminaMessageBox.MessageBoxResult.Confirm) Groups.Clear();
     }
+
+
+    // Add member to group
+    [RelayCommand]
+    private void AddGroupToMember(TeamGroup group)
+    {
+        if (SelectedParticipant == null || group == null) return;
+
+        if (!SelectedParticipant.GroupIds.Contains(group.Id))
+        {
+            SelectedParticipant.GroupIds.Add(group.Id);
+            RefreshMemberGroups();
+            AutoSaveToDisk();
+        }
+    }
+
+    // Remove member from group
+    [RelayCommand]
+    private void RemoveGroupFromMember(TeamGroup group)
+    {
+        if (SelectedParticipant == null || group == null) return;
+
+        SelectedParticipant.GroupIds.Remove(group.Id);
+        RefreshMemberGroups();
+        AutoSaveToDisk();
+    }
+
+    private void RefreshMemberGroups()
+    {
+        UpdateAvailableGroups();
+        OnPropertyChanged(nameof(SelectedParticipantGroups));
+    }
+
+    // OnSelectedParticipantChanged we call refresh for group lists
+    partial void OnSelectedParticipantChanged(Participant? value) => RefreshMemberGroups();
 
 }
