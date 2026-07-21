@@ -83,7 +83,8 @@
                     <DataTemplate>
                         <Border Padding="15,12">
                             <StackPanel Orientation="Horizontal" Spacing="15">
-                                <icons:MaterialIcon Kind="{Binding Icon}" Width="20" Foreground="{StaticResource BrushSecondary}"/>
+                                <icons:MaterialIcon Kind="{Binding Icon}" Width="20" 
+                                                    Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                     <TextBlock Text="12 Members" FontSize="11" Opacity="0.4"/>

@@ -40,6 +40,7 @@
             <conv:PauseIconConverter x:Key="PauseIconConverter"/>
             <conv:BoolToStatusBrushConverter x:Key="BoolToStatusBrushConverter"/>
             <conv:PasswordIconConverter x:Key="PasswordIconConverter"/>
+            <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 
