@@ -39,7 +39,7 @@
                     <DataTemplate>
                         <Border Padding="15,10">
                             <Grid ColumnDefinitions="Auto, *">
-                                <Border Width="40" Height="40" CornerRadius="20" Background="#2D2D2D" Margin="0,0,15,0">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}" Margin="0,0,15,0">
                                     <TextBlock Text="{Binding Alias}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -122,7 +122,7 @@
 
                     <!-- Photo / Avatar -->
                     <Border Width="120" Height="120" CornerRadius="15" Background="#222" HorizontalAlignment="Left">
-                        <icons:MaterialIcon Kind="Account" Width="60" Height="60" Opacity="0.2"/>
+                        <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.2"/>
                     </Border>
 
                     <!-- Input fields -->
