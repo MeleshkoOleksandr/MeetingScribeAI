@@ -110,31 +110,32 @@
 
         </Grid>
 
-
-
         <!-- RIGHT PANEL: EDITOR -->
         <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerLow}"
                 BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="1,0,0,0">
             <Border Padding="30" >
                 <StackPanel IsVisible="{Binding SelectedParticipant, Converter={x:Static ObjectConverters.IsNotNull}}" Spacing="25">
 
-                    <TextBlock Text="MEMBER PROFILE" Classes="label-caps" Foreground="{StaticResource BrushSecondary}"/>
-
-                    <!-- Photo / Avatar -->
-                    <Border Width="120" Height="120" CornerRadius="15" Background="#222" HorizontalAlignment="Left">
-                        <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.2"/>
-                    </Border>
+                     <!-- Photo / Avatar -->
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="30" >
+                        <Border Grid.Column="0" Width="120" Height="120" CornerRadius="15" Background="#222"
+                                BorderBrush="{StaticResource ColorPrimary}" BorderThickness="3" HorizontalAlignment="Left">
+                            <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.2"/>
+                        </Border>
+                        <TextBlock Grid.Column="1" FontSize="20" TextWrapping="WrapWithOverflow" Text="{Binding SelectedParticipant.Name}" Classes="label-caps" />
+                    </Grid>
+                   
 
                     <!-- Input fields -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="FULL NAME" Classes="label-caps"/>
-                        <TextBox Text="{Binding SelectedParticipant.Name}" Classes="lumina-input"/>
+                        <TextBox Text="{Binding SelectedParticipant.Name , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                     </StackPanel>
 
                     <Grid ColumnDefinitions="*, *">
                         <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
                             <TextBlock Text="ALIAS" Classes="label-caps"/>
-                            <TextBox Text="{Binding SelectedParticipant.Alias}" Classes="lumina-input"/>
+                            <TextBox Text="{Binding SelectedParticipant.Alias , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Text="TAG COLOR" Classes="label-caps"/>
@@ -148,7 +149,7 @@
 
                     <StackPanel Spacing="8">
                         <TextBlock Text="POSITION" Classes="label-caps"/>
-                        <TextBox Text="{Binding SelectedParticipant.Position}" Classes="lumina-input"/>
+                        <TextBox Text="{Binding SelectedParticipant.Position , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                     </StackPanel>
 
                     <StackPanel Spacing="10" Margin="0,15,0,0">
@@ -215,9 +216,6 @@
                             </Button>
                         </WrapPanel>
                     </StackPanel>
-
-                    <Button Content="SAVE ALL CHANGES" Command="{Binding SaveAllCommand}"
-                            Classes="btn-primary" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
                 </StackPanel>
             </Border>
         </Border>

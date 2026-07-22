@@ -2,6 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using CommunityToolkit.Mvvm.Input;
+using Humanizer;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.Enums;
@@ -10,6 +11,7 @@ using MeetingScribe.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -138,18 +140,6 @@ public partial class TeamViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private async Task SaveAll()
-    {
-        // Saving current state to disk
-        AutoSaveToDisk();
-
-        await LuminaMessageBox.Show(
-            "Saved",
-            "All member details have been updated successfully.",
-            LuminaMessageBoxType.Message);
-    }
-
     // ------   Groups  ------
     // -----------------------
     [RelayCommand]
@@ -213,6 +203,26 @@ public partial class TeamViewModel : ViewModelBase
     }
 
     // OnSelectedParticipantChanged we call refresh for group lists
-    partial void OnSelectedParticipantChanged(Participant? value) => RefreshMemberGroups();
+    partial void OnSelectedParticipantChanged(Participant? oldValue, Participant? newValue)
+    {
+        //  1.Unsubscribe from the old participant to prevent memory leaks.
+        if (oldValue != null)
+        {
+            oldValue.PropertyChanged -= Participant_PropertyChanged;
+        }
+        // 2. Subscribe the newly selected participant
+        if (newValue != null)
+        {
+            newValue.PropertyChanged += Participant_PropertyChanged;
+        }
+        // Updating group lists
+        RefreshMemberGroups();
+    }
+
+    private void Participant_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Ignore technical properties if necessary, and save.
+        AutoSaveToDisk();
+    }
 
 }
