@@ -162,27 +162,28 @@ public partial class TeamViewModel : ViewModelBase
 
         try
         {
-            // 2. Пути
+            // Getting file path
             string sourcePath = files[0].Path.LocalPath;
             string photosDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Data", "Photos");
             Directory.CreateDirectory(photosDir);
 
-            // Имя файла: photo_ID.jpg (берем расширение оригинала)
-            string extension = Path.GetExtension(sourcePath);
-            string newFileName = $"photo_{SelectedParticipant.Id}{extension}";
+            // New file name based on participant alias
+            string newFileName = $"photo_{SelectedParticipant.Id}.jpg";
             string destinationPath = Path.Combine(photosDir, newFileName);
 
-            // 3. Копируем файл (перезаписываем если был)
-            File.Copy(sourcePath, destinationPath, true);
+            // Using ImageHelper for crop and resize
+            await Task.Run(() => ImageHelper.ResizeAndSavePhoto(sourcePath, destinationPath, 512));
 
-            // 4. Обновляем модель
+            // Updating UI
+            SelectedParticipant.PhotoFileName = null;
             SelectedParticipant.PhotoFileName = newFileName;
 
-            // Уведомляем UI (чтобы конвертер перечитал файл)
-            OnPropertyChanged(nameof(SelectedParticipant));
             AutoSaveToDisk();
         }
-        catch (Exception ex) { /* MessageBox с ошибкой */ }
+        catch (Exception ex)
+        {
+            await LuminaMessageBox.Show("Image Error", "Could not process image: " + ex.Message, LuminaMessageBoxType.Danger);
+        }
     }
 
     // ------   Groups  ------

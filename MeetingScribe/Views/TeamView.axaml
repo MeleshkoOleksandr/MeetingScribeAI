@@ -118,29 +118,27 @@
 
                     <!-- Photo / Avatar -->
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="30" >
-                        <!-- Контейнер Аватара -->
-                        <Panel Grid.Column="0">
+                        <!-- Avatar container -->
+                        <Panel Grid.Column="0" Width="120" Height="120" >
 
-                            <!-- СЛОЙ 1: Фон и обрезка картинки -->
-                            <Border CornerRadius="15" ClipToBounds="True" Background="#2D2D2D">
-                                <Panel>
-                                    <!-- Заглушка-иконка -->
-                                    <icons:MaterialIcon Kind="Account" Width="120" Height="120" Opacity="0.1"
+                            <!-- LAYER 1: Background and Image Cropping -->
+                            <Border CornerRadius="15" ClipToBounds="True"  Background="#2D2D2D">
+                                <Panel >
+                                    <!-- Icon Placeholder -->
+                                    <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.1"
                                                         IsVisible="{Binding SelectedParticipant.PhotoFileName, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-
-                                    <!-- Сама картинка -->
+                                    <!-- Photo-->
                                     <Image Source="{Binding SelectedParticipant.PhotoFileName, Converter={StaticResource PathToBitmapConverter}}"
                                            Stretch="UniformToFill"/>
                                 </Panel>
                             </Border>
-                            <!-- СЛОЙ 2: Внешняя рамка (рисуется ПОВЕРХ картинки) -->
-                            <!-- Мы ставим IsHitTestVisible="False", чтобы рамка не мешала кликать по картинке -->
+                            <!-- LAYER 2: Outer Frame -->
                             <Border CornerRadius="15"
                                     BorderBrush="{StaticResource BrushPrimary}"
                                     BorderThickness="2"
                                     IsHitTestVisible="False"/>
 
-                            <!-- СЛОЙ 3: Кнопка-бейдж (в углу) -->
+                            <!-- LAYER 3: Badge Button -->
                             <Button Command="{Binding ChangePhotoCommand}"
                                     VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                     Margin="0,0,-8,-8"
