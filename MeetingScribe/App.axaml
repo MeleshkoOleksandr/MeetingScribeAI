@@ -42,6 +42,7 @@
             <conv:PasswordIconConverter x:Key="PasswordIconConverter"/>
             <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
             <conv:HexToColorConverter x:Key="HexToColorConverter"/>
+            <conv:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

@@ -1,4 +1,5 @@
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -138,6 +140,49 @@ public partial class TeamViewModel : ViewModelBase
             Participants.Clear();
             SelectedParticipant = null;
         }
+    }
+
+    //Set avatar photo for selected user
+    [RelayCommand]
+    private async Task ChangePhoto()
+    {
+        if (SelectedParticipant == null) return;
+
+        // Open file
+        var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(ViewHelper.GetMainWindow());
+        if (topLevel == null) return;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Profile Photo",
+            FileTypeFilter = new[] { FilePickerFileTypes.ImageAll }
+        });
+
+        if (files.Count == 0) return;
+
+        try
+        {
+            // 2. Пути
+            string sourcePath = files[0].Path.LocalPath;
+            string photosDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Data", "Photos");
+            Directory.CreateDirectory(photosDir);
+
+            // Имя файла: photo_ID.jpg (берем расширение оригинала)
+            string extension = Path.GetExtension(sourcePath);
+            string newFileName = $"photo_{SelectedParticipant.Id}{extension}";
+            string destinationPath = Path.Combine(photosDir, newFileName);
+
+            // 3. Копируем файл (перезаписываем если был)
+            File.Copy(sourcePath, destinationPath, true);
+
+            // 4. Обновляем модель
+            SelectedParticipant.PhotoFileName = newFileName;
+
+            // Уведомляем UI (чтобы конвертер перечитал файл)
+            OnPropertyChanged(nameof(SelectedParticipant));
+            AutoSaveToDisk();
+        }
+        catch (Exception ex) { /* MessageBox с ошибкой */ }
     }
 
     // ------   Groups  ------

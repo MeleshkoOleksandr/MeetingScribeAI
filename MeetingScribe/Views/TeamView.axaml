@@ -116,15 +116,45 @@
             <Border Padding="30" >
                 <StackPanel IsVisible="{Binding SelectedParticipant, Converter={x:Static ObjectConverters.IsNotNull}}" Spacing="25">
 
-                     <!-- Photo / Avatar -->
+                    <!-- Photo / Avatar -->
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="30" >
-                        <Border Grid.Column="0" Width="120" Height="120" CornerRadius="15" Background="#222"
-                                BorderBrush="{StaticResource ColorPrimary}" BorderThickness="3" HorizontalAlignment="Left">
-                            <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.2"/>
-                        </Border>
+                        <!-- Контейнер Аватара -->
+                        <Panel Grid.Column="0">
+
+                            <!-- СЛОЙ 1: Фон и обрезка картинки -->
+                            <Border CornerRadius="15" ClipToBounds="True" Background="#2D2D2D">
+                                <Panel>
+                                    <!-- Заглушка-иконка -->
+                                    <icons:MaterialIcon Kind="Account" Width="120" Height="120" Opacity="0.1"
+                                                        IsVisible="{Binding SelectedParticipant.PhotoFileName, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+
+                                    <!-- Сама картинка -->
+                                    <Image Source="{Binding SelectedParticipant.PhotoFileName, Converter={StaticResource PathToBitmapConverter}}"
+                                           Stretch="UniformToFill"/>
+                                </Panel>
+                            </Border>
+                            <!-- СЛОЙ 2: Внешняя рамка (рисуется ПОВЕРХ картинки) -->
+                            <!-- Мы ставим IsHitTestVisible="False", чтобы рамка не мешала кликать по картинке -->
+                            <Border CornerRadius="15"
+                                    BorderBrush="{StaticResource BrushPrimary}"
+                                    BorderThickness="2"
+                                    IsHitTestVisible="False"/>
+
+                            <!-- СЛОЙ 3: Кнопка-бейдж (в углу) -->
+                            <Button Command="{Binding ChangePhotoCommand}"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                    Margin="0,0,-8,-8"
+                                    Width="38" Height="38" CornerRadius="12"
+                                    Background="{StaticResource BrushPrimary}"
+                                    BorderBrush="#1a1d15" BorderThickness="3"
+                                    Classes="btn-icon">
+                                <icons:MaterialIcon Kind="Plus" Width="18" Foreground="#1e3700"/>
+                            </Button>
+                        </Panel>
+
                         <TextBlock Grid.Column="1" FontSize="20" TextWrapping="WrapWithOverflow" Text="{Binding SelectedParticipant.Name}" Classes="label-caps" />
                     </Grid>
-                   
+
 
                     <!-- Input fields -->
                     <StackPanel Spacing="8">
