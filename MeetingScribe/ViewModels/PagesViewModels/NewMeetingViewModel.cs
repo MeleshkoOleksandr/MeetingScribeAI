@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 
@@ -100,11 +101,11 @@ public partial class NewMeetingViewModel : ViewModelBase
         {
             // 3. Exrcuting the parsing logic from AgendaParser
             string filePath = result[0].Path.LocalPath;
-            var (participants, topics) = AgendaParser.ParseMeetingAgenda(filePath);
+            var (participantsRaw, topics) = AgendaParser.ParseMeetingAgenda(filePath);
 
             // 4. Show the parsed data in the UI
             MeetingTopics = topics;
-            ParticipantsText = participants;
+            MatchPeopleInPlanWithTeam(participantsRaw);
 
             // Optional: If the description is empty, you can set a default description based on the agenda file name or other logic
             if (string.IsNullOrEmpty(Description))
@@ -114,6 +115,50 @@ public partial class NewMeetingViewModel : ViewModelBase
         {
             //  Parse error handling: Log the error and optionally show a message to the user
             System.Diagnostics.Debug.WriteLine($"Parsing error: {ex.Message}");
+        }
+    }
+
+    private void MatchPeopleInPlanWithTeam(string participantsRaw)
+    {
+        if (!string.IsNullOrWhiteSpace(participantsRaw))
+        {
+            // Split the string by a semicolon or a comma.
+            var parts = participantsRaw.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var part in parts)
+            {
+                string cleanPart = part.Trim();
+                if (string.IsNullOrEmpty(cleanPart)) continue;
+
+                // Extract the name and alias.
+                string namePart = cleanPart;
+                string aliasPart = "";
+
+                // The regular expression searches for text inside parentheses.
+                var match = Regex.Match(cleanPart, @"\(([^)]+)\)");
+                if (match.Success)
+                {
+                    aliasPart = match.Groups[1].Value.Trim(); // "Alias"
+                    namePart = cleanPart.Replace(match.Value, "").Trim(); // "Name
+                }
+
+                // Search for person in _allParticipants
+                var foundParticipant = _allParticipants.FirstOrDefault(p =>
+                    p.Name.Equals(namePart, StringComparison.OrdinalIgnoreCase) ||
+                    p.Alias.Equals(aliasPart, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(aliasPart) && p.Name.Contains(aliasPart, StringComparison.OrdinalIgnoreCase)));
+
+                if (foundParticipant != null)
+                {
+                    //  If found and it is not yet in the list of selected items, we add it.
+                    if (!SelectedParticipants.Any(sp => sp.Id == foundParticipant.Id))
+                    {
+                        SelectedParticipants.Add(foundParticipant);
+                    }
+                }
+            }
+            //  We update the list of available options(to remove the ones that have been added).
+            UpdateAvailableList();
         }
     }
 
