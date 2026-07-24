@@ -22,7 +22,8 @@ public partial class MeetingSession : ObservableObject
 
 
     public ObservableCollection<TranscriptLine> FullTranscript { get; set; } = new();   // Full transcription
-    public List<SpeakerParticipant> Participants { get; set; } = new();
+    [ObservableProperty]
+    private ObservableCollection<Participant> _participants = new();  // All participants who take part in meeting
 
     [ObservableProperty] private string? _generalSummary;
     public bool hasSummary => !string.IsNullOrEmpty(GeneralSummary);

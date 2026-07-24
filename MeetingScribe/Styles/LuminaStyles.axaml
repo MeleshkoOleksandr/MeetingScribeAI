@@ -518,5 +518,16 @@
         <Setter Property="Opacity" Value="1"/>
         <Setter Property="Foreground" Value="#ffb4ab"/>
     </Style>
+    <!-- ══════════════════════════════════════════
+    CUSTOM Chips for meeting members
+    ══════════════════════════════════════════ -->
+    <Style Selector="Border.participant-chip">
+        <Setter Property="Background" Value="#25281e"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="CornerRadius" Value="20"/> 
+        <Setter Property="Padding" Value="2,2,10,2"/>
+        <Setter Property="Margin" Value="0,0,8,8"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
 
 </Styles>

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MeetingScribe.Logic.Meeting;
+using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.ManifestReaders;
 
 using System;
@@ -29,11 +30,19 @@ public partial class NewMeetingViewModel : ViewModelBase
     [ObservableProperty] private string _meetingTopics = "";
     [ObservableProperty] private string _participantsText = "";
 
+    // All avalable people in participants.json
+    private List<Participant> _allParticipants = new();
+    // People who take part in meeting
+    public ObservableCollection<Participant> SelectedParticipants { get; } = new();
+    // List of persons available to join the meeting
+    public ObservableCollection<Participant> AvailableToJoin { get; } = new();
+
     public NewMeetingViewModel()
     {
         // Default name with date
         MeetingName = "New Meeting";
         LoadLanguages();
+        RefreshParticipantsFromBase();
     }
 
     [RelayCommand]
@@ -64,7 +73,8 @@ public partial class NewMeetingViewModel : ViewModelBase
         Name = MeetingName,
         Description = Description,
         MeetingTopics = MeetingTopics,
-        Language = SelectedLanguage?.Code ?? "auto" // Save the CODE (ru, en)
+        Language = SelectedLanguage?.Code ?? "auto", // Save the CODE (ru, en)
+        Participants = new ObservableCollection<Participant>(SelectedParticipants)
     };
 
 
@@ -106,4 +116,55 @@ public partial class NewMeetingViewModel : ViewModelBase
             System.Diagnostics.Debug.WriteLine($"Parsing error: {ex.Message}");
         }
     }
+
+    // -----------------------------------
+    // Participants list operations
+    // -----------------------------------
+
+    public void RefreshParticipantsFromBase()
+    {
+        // Loading fresh data from the file
+        var (people, _) = TeamStorageService.LoadData();
+        _allParticipants = people;
+        // Synchronization: if the selected participant was deleted from the database
+        var toRemove = SelectedParticipants.Where(sp => !_allParticipants.Any(p => p.Id == sp.Id)).ToList();
+        foreach (var r in toRemove) SelectedParticipants.Remove(r);
+        // Updating the list of available options   
+        UpdateAvailableList();
+    }
+
+    private void UpdateAvailableList()
+    {
+        AvailableToJoin.Clear();
+        //  We take everyone from the database who isn't already on the selected list.
+        var available = _allParticipants.Where(p =>
+            !SelectedParticipants.Any(sp => sp.Id == p.Id));
+
+        foreach (var p in available)
+        {
+            AvailableToJoin.Add(p);
+        }
+    }
+
+    [RelayCommand]
+    private void AddParticipant(Participant p)
+    {
+        if (p == null) return;
+        SelectedParticipants.Add(p);
+        UpdateAvailableList();
+    }
+
+    [RelayCommand]
+    private void RemoveParticipant(Participant p)
+    {
+        if (p == null) return;
+        SelectedParticipants.Remove(p);
+        UpdateAvailableList();
+    }
+
+    //private void RefreshLists()
+    //{
+    //    OnPropertyChanged(nameof(AvailableToJoin));
+    //}
+
 }

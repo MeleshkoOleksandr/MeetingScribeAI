@@ -88,6 +88,12 @@ public partial class MainWindowViewModel : ViewModelBase
             archiveVm.LoadArchive();
         }
 
+        // IF THE USER NAVIGATES TO THE "NEW MEETING" PAGE
+        if (value.Page is NewMeetingViewModel newMeetingVm)
+        {
+            newMeetingVm.RefreshParticipantsFromBase();
+        }
+
         CurrentPage = value.Page;
     }
 

@@ -127,7 +127,7 @@
                                     <!-- Icon Placeholder -->
                                     <icons:MaterialIcon Kind="Account" Width="100" Height="100" Opacity="0.1"
                                                         IsVisible="{Binding SelectedParticipant.PhotoFileName, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-                                    <!-- Photo-->
+                                    <!-- Photo -->
                                     <Image Source="{Binding SelectedParticipant.PhotoFileName, Converter={StaticResource PathToBitmapConverter}}"
                                            Stretch="UniformToFill"/>
                                 </Panel>

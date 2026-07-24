@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:MeetingScribe.Logic.Meeting"
              xmlns:vm="using:MeetingScribe.ViewModels"
              x:DataType="vm:NewMeetingViewModel"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
@@ -77,56 +78,83 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2" Classes="card" VerticalAlignment="Bottom">
-                <StackPanel Spacing="16">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="AccountMultipleOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
-                            <TextBlock Text="Participant List" Classes="card-title"/>
-                        </StackPanel>
-                        <Border DockPanel.Dock="Right" Classes="badge" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="+  Added"/>
-                        </Border>
-                    </DockPanel>
-                    <WrapPanel Orientation="Horizontal" >
+            <Border Grid.Row="2" Classes="card">
+                <StackPanel Spacing="15">
 
-                        <Border Classes="chip" >
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <Border Classes="avatar" Background="#3A6EA5">
-                                    <TextBlock Text="AM" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <Button Classes="btn-icon" Width="16" Height="16"
-                                        Padding="1" VerticalAlignment="Center">
-                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
+                    <!-- Заголовок -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <icons:MaterialIcon Kind="AccountMultipleOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
+                        <TextBlock Text="Participant List" Classes="card-title"/>
 
-                        <Border Classes="chip" >
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <Border Classes="avatar" Background="Green">
-                                    <TextBlock Text="LD" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <Button Classes="btn-icon" Width="16" Height="16"
-                                        Padding="1" VerticalAlignment="Center">
-                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
-                                </Button>
-                            </StackPanel>
+                        <Border Background="{StaticResource BrushPrimary}" CornerRadius="10" Padding="8,2" Margin="5,0">
+                            <TextBlock Padding="3,3,3,0" Text="{Binding SelectedParticipants.Count, StringFormat='\{0\} added'}"
+                                       FontSize="10" FontWeight="Bold" Foreground="#1e3700"/>
                         </Border>
+                    </StackPanel>
 
-                        <Border Classes="chip" Margin="3,3,3,3">
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <Border Classes="avatar" Background="IndianRed">
-                                    <TextBlock Text="FK" FontSize="10"  Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <Button Classes="btn-icon" Width="16" Height="16"
-                                        Padding="1" VerticalAlignment="Center">
-                                    <icons:MaterialIcon Kind="Close" Width="12" Height="12"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
+                    <!-- ОБЛАСТЬ ЧИПСОВ -->
+                    <WrapPanel Orientation="Horizontal">
+
+                        <!-- Список выбранных -->
+                        <ItemsControl ItemsSource="{Binding SelectedParticipants}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:Participant">
+                                    <Border Classes="participant-chip"
+                                            BorderBrush="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <!-- Мини-аватар или Алиас -->
+                                            <Panel Width="34" Height="34">
+                                                <Border CornerRadius="17" Background="#2D2D2D" ClipToBounds="True">
+                                                    <Panel>
+                                                        <TextBlock Text="{Binding Alias}" FontSize="10"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        <Image Source="{Binding PhotoFileName, Converter={StaticResource PathToBitmapConverter}}"
+                                                               Stretch="UniformToFill"/>
+                                                    </Panel>
+                                                </Border>
+                                            </Panel>
+
+                                            <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/>
+
+                                            <!-- Кнопка удаления -->
+                                            <Button Command="{Binding $parent[UserControl].((vm:NewMeetingViewModel)DataContext).RemoveParticipantCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="chip-delete">
+                                                <icons:MaterialIcon Kind="Close" Width="14"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- КНОПКА ДОБАВЛЕНИЯ (+) -->
+                        <Button Classes="btn-icon-round" Width="40" Height="40">
+                            <icons:MaterialIcon Kind="Plus" Width="20"/>
+                            <Button.Flyout>
+                                <MenuFlyout ItemsSource="{Binding AvailableToJoin}">
+                                    <MenuFlyout.ItemContainerTheme>
+                                        <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="models:Participant">
+                                            <Setter Property="Header" Value="{Binding Name}"/>
+                                            <Setter Property="Command" Value="{Binding $parent[UserControl].((vm:NewMeetingViewModel)DataContext).AddParticipantCommand}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                                            <Setter Property="Icon">
+                                                <Template>
+                                                    <icons:MaterialIcon Kind="AccountCircle"
+                                                                        Foreground="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}"/>
+                                                </Template>
+                                            </Setter>
+                                        </ControlTheme>
+                                    </MenuFlyout.ItemContainerTheme>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
 
                     </WrapPanel>
+
                 </StackPanel>
             </Border>
         </Grid>
