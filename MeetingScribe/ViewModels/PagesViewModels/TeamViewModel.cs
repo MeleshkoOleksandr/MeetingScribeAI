@@ -69,6 +69,8 @@ public partial class TeamViewModel : ViewModelBase
         };
         // Subcribe to changes in the Participants collection to auto-save to disk
         Participants.CollectionChanged += (s, e) => AutoSaveToDisk();
+        //Show correct number of memmbers in group on UI  
+        UpdateGroupMemberCounts();
     }
 
     private void AutoSaveToDisk()
@@ -245,6 +247,7 @@ public partial class TeamViewModel : ViewModelBase
     private void RefreshMemberGroups()
     {
         UpdateAvailableGroups();
+        UpdateGroupMemberCounts();
         OnPropertyChanged(nameof(SelectedParticipantGroups));
     }
 
@@ -271,4 +274,12 @@ public partial class TeamViewModel : ViewModelBase
         AutoSaveToDisk();
     }
 
+    private void UpdateGroupMemberCounts()
+    {
+        foreach (var group in Groups)
+        {
+            // We count the participants who have this group's ID in their GroupIds list.
+            group.MemberCount = Participants.Count(p => p.GroupIds.Contains(group.Id));
+        }
+    }
 }

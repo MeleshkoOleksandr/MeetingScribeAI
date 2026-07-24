@@ -81,7 +81,7 @@
             <Border Grid.Row="2" Classes="card">
                 <StackPanel Spacing="15">
 
-                    <!-- Заголовок -->
+                    <!-- Header -->
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <icons:MaterialIcon Kind="AccountMultipleOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
                         <TextBlock Text="Participant List" Classes="card-title"/>
@@ -92,10 +92,10 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- ОБЛАСТЬ ЧИПСОВ -->
+                    <!-- Chips area -->
                     <WrapPanel Orientation="Horizontal">
 
-                        <!-- Список выбранных -->
+                        <!-- Selected list -->
                         <ItemsControl ItemsSource="{Binding SelectedParticipants}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
@@ -105,7 +105,7 @@
                                     <Border Classes="participant-chip"
                                             BorderBrush="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <!-- Мини-аватар или Алиас -->
+                                            <!-- Mini avatar or aleas -->
                                             <Panel Width="34" Height="34">
                                                 <Border CornerRadius="17" Background="#2D2D2D" ClipToBounds="True">
                                                     <Panel>
@@ -119,7 +119,7 @@
 
                                             <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/>
 
-                                            <!-- Кнопка удаления -->
+                                            <!-- Delete button -->
                                             <Button Command="{Binding $parent[UserControl].((vm:NewMeetingViewModel)DataContext).RemoveParticipantCommand}"
                                                     CommandParameter="{Binding}"
                                                     Classes="chip-delete">
@@ -131,7 +131,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <!-- КНОПКА ДОБАВЛЕНИЯ (+) -->
+                        <!-- Add button (+) -->
                         <Button Classes="btn-icon-round" Width="40" Height="40">
                             <icons:MaterialIcon Kind="Plus" Width="20"/>
                             <Button.Flyout>

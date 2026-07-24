@@ -161,10 +161,4 @@ public partial class NewMeetingViewModel : ViewModelBase
         SelectedParticipants.Remove(p);
         UpdateAvailableList();
     }
-
-    //private void RefreshLists()
-    //{
-    //    OnPropertyChanged(nameof(AvailableToJoin));
-    //}
-
 }

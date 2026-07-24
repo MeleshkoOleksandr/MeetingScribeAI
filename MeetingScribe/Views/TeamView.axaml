@@ -88,7 +88,7 @@
                                                     Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="12 Members" FontSize="11" Opacity="0.4"/>
+                                    <TextBlock Text="{Binding MemberCount, StringFormat='\{0\} Members'}"  FontSize="11" Opacity="0.4"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
