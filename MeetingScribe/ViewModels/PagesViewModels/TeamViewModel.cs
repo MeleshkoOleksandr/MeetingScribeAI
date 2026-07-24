@@ -3,6 +3,8 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using CommunityToolkit.Mvvm.Input;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Humanizer;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
@@ -15,6 +17,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MeetingScribe.ViewModels;
@@ -89,9 +92,21 @@ public partial class TeamViewModel : ViewModelBase
             if (string.IsNullOrWhiteSpace(ParticipantSearchText))
                 return Participants;
 
+            string query = ParticipantSearchText.Trim();
+            // 1. Find the IDs of all groups whose names match the search query.
+            var matchingGroupIds = Groups
+                .Where(g => g.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(g => g.Id)
+                .ToList();
+            // 2. Filter the participants based on three criteria:
             return Participants.Where(p =>
-                p.Name.Contains(ParticipantSearchText, StringComparison.OrdinalIgnoreCase) ||
-                p.Alias.Contains(ParticipantSearchText, StringComparison.OrdinalIgnoreCase));
+                // A. Name Match
+                p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                // B. Alias ​​Match
+                p.Alias.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                // C.The participant is a member of the group whose name we found in step 1.
+                p.GroupIds.Any(id => matchingGroupIds.Contains(id))
+            ).ToList();
         }
     }
 
