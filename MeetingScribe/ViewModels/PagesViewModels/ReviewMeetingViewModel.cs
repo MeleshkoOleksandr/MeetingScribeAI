@@ -256,12 +256,18 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             await ConnectAiService();
             _processCts = new CancellationTokenSource();
 
+            //UI Flags
             IsProcessing = true;
             IsIndeterminate = true; // Enable indeterminate progress bar since we don't have a specific progress metric for this operation
             IsAIRef = true;
             _mainVm.IsGlobalBusy = true;
             ProcessingProgress = 0;
             CurrentTaskName = "AI is analyzing conversation flow...";
+
+            // We make participants list string for AI
+            string participantsList = string.Join(", ", Session.Participants.Select(p => $"{p.Name} ({p.Alias})"));
+            if (string.IsNullOrEmpty(participantsList))
+                participantsList = "Auto-detect from context (names not provided)";
 
             // Making chanks of the transcript to send to the AI service
             string rawTextFull = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
@@ -280,7 +286,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 string chunkText = string.Join("\n", chunks[i]);
 
                 // AI service call to analyze the chunk and return speaker-labeled lines
-                var result = await aiService.ProcessChunkAsync(chunkText, "Auto-detect", Session.Description, _processCts.Token);
+                var result = await aiService.ProcessChunkAsync(chunkText, participantsList, Session.Description, _processCts.Token);
 
                 if (result != null)
                 {

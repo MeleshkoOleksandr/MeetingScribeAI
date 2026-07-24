@@ -96,10 +96,13 @@ public class GeminiAiService : IAiService
         return $@"You are a professional meeting assistant.
         IMPORTANT: You are processing a SEGMENT of a larger meeting. 
         CONTEXT: {context}
-        PARTICIPANTS: {participants}
+        LIST OF EXPECTED PARTICIPANTS: {participants}
         TASK:
              1. CLEANUP: Fix grammar, remove filler words ('umm', 'uh', 'like'). Fix technical terms.
-             2. DIARIZATION: Identify speakers. Use names from the list if possible. Be consistent.
+             2. DIARIZATION: Identify speakers. Based on the conversation context and the LIST OF EXPECTED PARTICIPANTS, identify who is speaking.
+                - If you are absolutely sure of the name, use the full name from the list.
+                - If you are unsure, use 'Speaker 1', 'Speaker 2', etc.
+                - DO NOT invent names that are not in the list or the transcript.
              3. CONSOLIDATE: This is crucial. The raw transcript is fragmented into very short pieces. 
                 You MUST MERGE consecutive segments from the same speaker into single, long, coherent paragraphs. 
                 Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
