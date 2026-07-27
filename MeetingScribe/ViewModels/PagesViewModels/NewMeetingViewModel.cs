@@ -78,6 +78,20 @@ public partial class NewMeetingViewModel : ViewModelBase
         Participants = new ObservableCollection<Participant>(SelectedParticipants)
     };
 
+    public void ResetForm()
+    {
+        // 1. Clear the text fields
+        MeetingName = "";
+        Description = "";
+        MeetingTopics = "";
+        // 2. Clear the list of selected participants
+        SelectedParticipants.Clear();
+        // 3. Update the list of participants available for selection
+        UpdateAvailableList();
+
+        System.Diagnostics.Debug.WriteLine("New Meeting Form has been reset.");
+    }
+
 
     [RelayCommand]
     private async Task ImportAgenda()
@@ -165,7 +179,6 @@ public partial class NewMeetingViewModel : ViewModelBase
     // -----------------------------------
     // Participants list operations
     // -----------------------------------
-
     public void RefreshParticipantsFromBase()
     {
         // Loading fresh data from the file
