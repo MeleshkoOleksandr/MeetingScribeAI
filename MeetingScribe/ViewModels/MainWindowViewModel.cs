@@ -164,6 +164,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             // Initialization via the manager
             _currentSession = await _meetingManager.InitializeMeeting(setupPage.GetSessionData(), CurrentSettings);
+            // Reset the NewMeetingViewModel state for next session
+            setupPage.ResetForm();
 
             // Create the Live Page (ActiveMeetingViewModel)
             var activeVm = new ActiveMeetingViewModel(_currentSession.Name, _currentSession.Language);
@@ -244,7 +246,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Description = _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
-            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService,  whisperPath, CurrentSettings , this)
+            Page = new ReviewMeetingViewModel(_currentSession, _transcriptionService,  whisperPath, CurrentSettings , this, CloseMeetingReview)
         };
 
         PageList.AddTemporaryItem(reviewPage);
@@ -296,7 +298,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
 
-        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings , this);
+        var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings , this, CloseMeetingReview);
         var reviewPage = new NavigationItem
         {
             Label = "Review: " + session.Name,
