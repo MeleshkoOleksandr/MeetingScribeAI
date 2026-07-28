@@ -295,8 +295,8 @@ public partial class MainWindowViewModel : ViewModelBase
         string selectedPath = result[0].Path.LocalPath;
 
         // Create Session (Transcoding happens here)
-        // Show a "Loading" status if you want
         var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, setupPage.GetSessionData(), CurrentSettings);
+        setupPage.ResetForm();
 
         //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
