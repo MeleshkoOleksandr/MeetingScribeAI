@@ -264,6 +264,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task LoadMeetingFromFile()
     {
+        // Check if we are currently on the New Meeting setup page
+        if (CurrentPage is not NewMeetingViewModel setupPage) return;
+
         //  Get Storage Provider from the App
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             return;
@@ -293,7 +296,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Create Session (Transcoding happens here)
         // Show a "Loading" status if you want
-        var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, CurrentSettings);
+        var session = await _meetingManager.CreateSessionFromAudioFile(selectedPath, setupPage.GetSessionData(), CurrentSettings);
 
         //  Navigate to Review
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);

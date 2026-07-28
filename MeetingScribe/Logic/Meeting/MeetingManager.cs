@@ -30,10 +30,7 @@ public class MeetingManager
         CurrentSession = currentSession;
 
         // 1. Create a folder
-        string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
-        _currentFolderPath = Path.Combine(archiveRoot, CurrentSession.Name);
-        Directory.CreateDirectory(_currentFolderPath);
-        CurrentSession.FolderPath = _currentFolderPath;
+        CreateSessionFolfer(CurrentSession);
 
         // 2. Configure the log files
         _fullAudioWriter = new WaveFileWriter(Path.Combine(_currentFolderPath, "full_record.wav"), new WaveFormat(16000, 16, 1));
@@ -48,6 +45,14 @@ public class MeetingManager
         await _transcriptionService.InitializeAsync(whisperPath, CurrentSession.Language);
 
         return CurrentSession;
+    }
+
+    private void CreateSessionFolfer(MeetingSession currentSession)
+    {
+        string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
+        _currentFolderPath = Path.Combine(archiveRoot, currentSession.Name);
+        Directory.CreateDirectory(_currentFolderPath);
+        currentSession.FolderPath = _currentFolderPath;
     }
 
     public void Start() => _transcriptionService.Start();
@@ -77,33 +82,23 @@ public class MeetingManager
     }
 
 
-    public async Task<MeetingSession> CreateSessionFromAudioFile(string sourceFilePath, AppSettings settings)
+    public async Task<MeetingSession> CreateSessionFromAudioFile(string sourceFilePath, MeetingSession currentSession, AppSettings settings)
     {
-        // 1. Create Metadata
-        var session = new MeetingSession
-        {
-            Name = Path.GetFileNameWithoutExtension(sourceFilePath),
-            Language = settings.TranscriptionLanguage,
-            StartTime = DateTime.Now
-        };
+        // Use data from NewMeetingView
+        CurrentSession = currentSession;
+        //  Create a folder
+        CreateSessionFolfer(CurrentSession);
 
-        // 2. Prepare Folder
-        string archiveRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Meeting Archive");
-        string folderName = $"[{DateTime.Now:yy-MM-dd}] - {session.Name}";
-        string sessionFolder = Path.Combine(archiveRoot, folderName);
-        Directory.CreateDirectory(sessionFolder);
-        session.FolderPath = sessionFolder;
-
-        // 3. Transcode to standard format (16kHz, Mono, 16-bit)
+        // Transcode to standard format (16kHz, Mono, 16-bit)
         // Whisper works best with this specific format
-        string targetPath = Path.Combine(sessionFolder, "boosted_record.wav");
+        string targetPath = Path.Combine(CurrentSession.FolderPath, "boosted_record.wav");
 
         await Task.Run(() =>
         {
             using (var reader = new AudioFileReader(sourceFilePath))
             {
                 // Setting up meeting duration
-                session.Duration = reader.TotalTime;
+                CurrentSession.Duration = reader.TotalTime;
                 // Resample to 16000Hz and convert to Mono
                 var outFormat = new WaveFormat(16000, 16, 1);
                 using (var resampler = new MediaFoundationResampler(reader, outFormat))
@@ -115,11 +110,11 @@ public class MeetingManager
             }
         });
 
-        // 4. Save Initial JSON (Metadata only)
-        string jsonPath = Path.Combine(sessionFolder, "session_data.json");
-        string json = JsonSerializer.Serialize(session, new JsonSerializerOptions { WriteIndented = true });
+        // Save Initial JSON (Metadata only)
+        string jsonPath = Path.Combine(CurrentSession.FolderPath, "session_data.json");
+        string json = JsonSerializer.Serialize(CurrentSession, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(jsonPath, json);
 
-        return session;
+        return CurrentSession;
     }
 }
