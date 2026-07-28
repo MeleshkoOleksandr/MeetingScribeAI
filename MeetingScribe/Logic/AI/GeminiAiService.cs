@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MeetingScribe.Logic.Meeting;
 using System;
 using System.Collections.Generic;
@@ -93,32 +95,47 @@ public class GeminiAiService : IAiService
 
     private string BuildCombinedPrompt(string raw, string participants, string context)
     {
-        return $@"You are a professional meeting assistant.
-        IMPORTANT: You are processing a SEGMENT of a larger meeting. 
-        CONTEXT: {context}
-        LIST OF EXPECTED PARTICIPANTS: {participants}
-        TASK:
-             1. CLEANUP: Fix grammar, remove filler words ('umm', 'uh', 'like'). Fix technical terms.
-             2. DIARIZATION: Identify speakers. Based on the conversation context and the LIST OF EXPECTED PARTICIPANTS, identify who is speaking.
-                - If you are absolutely sure of the name, use the full name from the list.
-                - If you are unsure, use 'Speaker 1', 'Speaker 2', etc.
-                - DO NOT invent names that are not in the list or the transcript.
-             3. CONSOLIDATE: This is crucial. The raw transcript is fragmented into very short pieces. 
-                You MUST MERGE consecutive segments from the same speaker into single, long, coherent paragraphs. 
-                Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
-             4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
-             5. SUMMARIZING: Summarize key points and decisions from THIS segment.
+        return $@"You are a professional meeting assistant specializing in verbatim transcript post-processing.
+                IMPORTANT: You are processing a SEGMENT of a larger meeting. 
+                CONTEXT: {context}
+                LIST OF EXPECTED PARTICIPANTS: {participants}
 
-        RETURN FORMAT (Strict JSON):
-        {{
-          ""lines"": [
-            {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
-          ],
-          ""segmentSummary"": ""Summary of what happened in this part...""
-        }}
+                TASK:
+                1. CLEANUP (STRICT VERBATIM): Remove filler words ('umm', 'uh', 'like', 'sì', 'ecco', 'diciamo così'), stuttering, and accidental word repetitions (e.g., if a speaker says 'che è un po\' di potenza, che è un po\' di potenza', keep it only once). Fix obvious speech-to-text typos in technical terms. 
+                   CRITICAL: DO NOT paraphrase, DO NOT summarize the text inside the 'Text' field, DO NOT improve grammar if it changes the speaker's original phrasing, and DO NOT use sophisticated vocabulary. Keep the original words, word order, and spoken style exactly as they are.
 
-        RAW DATA:
-        {raw}";
+                2. DIARIZATION: Identify speakers. Based on the conversation context and the LIST OF EXPECTED PARTICIPANTS, identify who is speaking.
+                   - If you are absolutely sure of the name, use the full name from the list.
+                   - If you are unsure, use 'Speaker 1', 'Speaker 2', etc.
+                   - DO NOT invent names that are not in the list or the transcript.
+
+                3. CONSOLIDATE: The raw transcript is fragmented into very short time-coded lines. You MUST MERGE consecutive lines from the same speaker into single, long paragraphs. 
+                   CRITICAL: 'Merging' means simply gluing the original text pieces together into a continuous text block after doing the CLEANUP. Do not rewrite the sentence structures during consolidation.
+                   Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
+
+                4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
+
+                5. SUMMARIZING (FACT-PRESERVING DIGEST): Create a comprehensive, dense but complete summary of THIS segment specifically optimized for later consolidation into a final meeting summary.
+                   CRITICAL: Do not generalize. You must preserve:
+                   - Key discusion topics and points
+                   - Specific numbers, metrics, dates, and deadlines (e.g., ""SIR meeting on August 4th and 6th"").
+                   - Names of projects, documents, and tools 
+                   - Names of people mentioned and their roles or actions 
+                   - Action items, decisions, and specific problems raised.
+
+                STRICT CONSTRAINT:
+                The 'Text' field must contain the EXACT spoken words of the speaker (minus fillers/duplications). It must remain in the original language (Italian in this case). Never turn spoken, slightly chaotic speech into formal written business prose.
+
+                RETURN FORMAT (Strict JSON):
+                {{
+                  ""lines"": [
+                    {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
+                  ],
+                  ""segmentSummary"": ""Summary of what happened in this part...""
+                }}
+
+                RAW DATA:
+                {raw}";
     }
 
     private AiResponseChunk? ParseCombinedResponse(string json)
