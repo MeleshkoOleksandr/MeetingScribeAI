@@ -72,6 +72,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // Flag to indicate if the user has started heavy and long tasks (like transcription or AI processing)
     [ObservableProperty] private bool _isGlobalBusy;
 
+    // Flag to indicate if there are unread critical errors in the log
+    [ObservableProperty] private bool _hasUnreadErrors;
+
     #endregion
 
 
@@ -145,6 +148,15 @@ public partial class MainWindowViewModel : ViewModelBase
             // Return to the Archive page after closing the review
             Navigate(PageNames.Archive);
         }
+    }
+
+    [RelayCommand]
+    private void OpenLogs()
+    {
+        HasUnreadErrors = false;
+        // Переход на страницу логов (создадим её ниже)
+        var logsPage = PageList.GetByTarget(PageNames.Logs);
+        if (logsPage != null) Navigate(logsPage);
     }
 
     #endregion
@@ -340,6 +352,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Navigate(PageNames.New);
         SetupTranscriptionStreaming();
+
+        LogService.Instance.OnCriticalError += () => HasUnreadErrors = true;
+
         // Initialize the MeetingManager with the transcription service
         _meetingManager = new MeetingManager(_transcriptionService);
         // Initialize the Archive page with the callback to open a meeting review

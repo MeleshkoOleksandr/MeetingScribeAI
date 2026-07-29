@@ -165,13 +165,19 @@
 
                     <!-- Right side icons (Notifications/Help) from your mockup -->
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                        <Button Classes="btn-icon">
-                            <icons:MaterialIcon Kind="BellOutline" Width="18" Height="18"/>
+                        <Button Classes="btn-icon" Command="{Binding OpenLogsCommand}">
+                            <Panel>
+                                <icons:MaterialIcon Kind="BellOutline" Width="18" Height="18"
+                                                    Foreground="{Binding HasUnreadErrors, Converter={StaticResource LogLevelToBrushConverter}}"/>
+                                <!-- Red indicator dot -->
+                                <Ellipse Width="8" Height="8" Fill="#FF5252"
+                                         Margin="10,-10,0,0" IsVisible="{Binding HasUnreadErrors}"/>
+                            </Panel>
                         </Button>
-                        <Button Classes="btn-icon">
-                            <icons:MaterialIcon Kind="HelpCircleOutline" Width="18" Height="18"/>
-                        </Button>
-                    </StackPanel>
+                            <Button Classes="btn-icon">
+                                <icons:MaterialIcon Kind="HelpCircleOutline" Width="18" Height="18"/>
+                            </Button>
+                        </StackPanel>
                 </DockPanel>
             </Border>
 

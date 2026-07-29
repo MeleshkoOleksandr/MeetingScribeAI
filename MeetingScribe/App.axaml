@@ -43,6 +43,7 @@
             <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
             <conv:HexToColorConverter x:Key="HexToColorConverter"/>
             <conv:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
+            <conv:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

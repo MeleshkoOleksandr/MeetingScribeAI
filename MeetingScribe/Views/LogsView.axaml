@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MeetingScribe.LogsView"
+             x:DataType="vm:LogsViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- Header / Search -->
+        <Border Grid.Row="0" Padding="20" Background="{StaticResource BrushSurfaceContainerLow}">
+            <DockPanel>
+                <TextBox Text="{Binding SearchQuery}" Width="300" PlaceholderText="Search logs..." Classes="lumina-input" DockPanel.Dock="Left">
+                    <TextBox.InnerLeftContent><icons:MaterialIcon Kind="Search" Margin="10,0"/></TextBox.InnerLeftContent>
+                </TextBox>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Spacing="10">
+                    <Button Content="Export Log" Classes="btn-secondary"/>
+                    <Button Content="Clear Log" Command="{Binding ClearLogsCommand}" Classes="btn-secondary"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Log List -->
+        <ScrollViewer Grid.Row="1" Background="#050505">
+            <ItemsControl ItemsSource="{Binding FilteredEntries}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#1a1a1a" BorderThickness="0,0,0,1" Padding="15,10">
+                            <StackPanel Spacing="5">
+                                <StackPanel Orientation="Horizontal" Spacing="15">
+                                    <TextBlock Text="{Binding TimeLabel}" Foreground="Gray" FontFamily="Consolas"/>
+
+                                    <!-- Badge -->
+                                    <Border Background="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
+                                            Padding="6,1" CornerRadius="4">
+                                        <TextBlock Text="{Binding Level}" FontSize="10" FontWeight="Bold" Foreground="Black"/>
+                                    </Border>
+
+                                    <TextBlock Text="{Binding Message}" Foreground="White" FontWeight="SemiBold"/>
+                                </StackPanel>
+
+                                <!-- StackTrace (Optional) -->
+                                <Border IsVisible="{Binding StackTrace, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        Background="#120000" Padding="10" Margin="40,5,0,0" CornerRadius="4">
+                                    <TextBlock Text="{Binding StackTrace}" Foreground="#ffb4ab" FontSize="11" FontFamily="Consolas"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

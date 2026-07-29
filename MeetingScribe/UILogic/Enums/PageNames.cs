@@ -7,5 +7,6 @@ public enum PageNames
     Settings,
     Team,
     Recording,
-    Review
+    Review,
+    Logs,
 }
