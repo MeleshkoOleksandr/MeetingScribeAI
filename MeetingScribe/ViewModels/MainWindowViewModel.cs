@@ -155,8 +155,16 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         HasUnreadErrors = false;
         // Переход на страницу логов (создадим её ниже)
-        var logsPage = PageList.GetByTarget(PageNames.Logs);
-        if (logsPage != null) Navigate(logsPage);
+        var logsPage = new NavigationItem
+        {
+            Label = "Activity Log",
+            Icon = "BellOutline",
+            Target = PageNames.Logs,
+            Page = new LogsViewModel()
+        };
+        // Add to the dynamic sidebar list and navigate to it
+        PageList.AddTemporaryItem(logsPage);
+        Navigate(logsPage);
     }
 
     #endregion

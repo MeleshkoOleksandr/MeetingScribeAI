@@ -5,7 +5,7 @@
              xmlns:vm="using:MeetingScribe.ViewModels"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="MeetingScribe.LogsView"
+             x:Class="MeetingScribe.Views.LogsView"
              x:DataType="vm:LogsViewModel">
 
     <Grid RowDefinitions="Auto, *">

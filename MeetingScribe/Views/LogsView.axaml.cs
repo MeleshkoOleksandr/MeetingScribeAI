@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace MeetingScribe;
+namespace MeetingScribe.Views;
 
 public partial class LogsView : UserControl
 {
