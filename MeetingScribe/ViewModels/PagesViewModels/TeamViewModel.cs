@@ -74,6 +74,8 @@ public partial class TeamViewModel : ViewModelBase
         Participants.CollectionChanged += (s, e) => AutoSaveToDisk();
         //Show correct number of memmbers in group on UI  
         UpdateGroupMemberCounts();
+        //Select first participant in the list if available as default
+        SelectedParticipant = Participants.FirstOrDefault();
     }
 
     private void AutoSaveToDisk()
