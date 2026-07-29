@@ -1,11 +1,14 @@
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using MeetingScribe.Logic.Services;
+using MeetingScribe.UILogic.Enums;
 using MeetingScribe.ViewModels;
 using MeetingScribe.Views;
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MeetingScribe
 {
@@ -25,6 +28,18 @@ namespace MeetingScribe
                     DataContext = new MainWindowViewModel(),
                 };
             }
+
+            // Handling Raw Errors in Threads
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                LogService.Instance.Log("Unhandled UI Exception", LogLevel.Critical, e.ExceptionObject.ToString());
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                LogService.Instance.Log("Unhandled Task Exception", LogLevel.Critical, e.Exception.ToString());
+                e.SetObserved();
+            };
 
             base.OnFrameworkInitializationCompleted();
         }
