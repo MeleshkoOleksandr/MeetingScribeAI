@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
+using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using MeetingScribe.UILogic.ManifestReaders;
 using System;
@@ -55,7 +56,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"JSON Load Error: {ex.Message}");
+            LogService.Instance.LogError($"Failed to load models_manifest.json: {ex.Message}");
         }
     }
 

@@ -154,17 +154,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void OpenLogs()
     {
         HasUnreadErrors = false;
-        // Переход на страницу логов (создадим её ниже)
-        var logsPage = new NavigationItem
-        {
-            Label = "Activity Log",
-            Icon = "BellOutline",
-            Target = PageNames.Logs,
-            Page = new LogsViewModel()
-        };
-        // Add to the dynamic sidebar list and navigate to it
-        PageList.AddTemporaryItem(logsPage);
-        Navigate(logsPage);
+        Navigate(PageNames.Logs);
     }
 
     #endregion
@@ -222,11 +212,12 @@ public partial class MainWindowViewModel : ViewModelBase
             IsRecording = true;
             IsPaused = false;
 
+            LogService.Instance.LogInfo($"Meeting '{_currentSession.Name}' started at {_startTime}.");
         }
         catch (Exception ex)
         {
             // Log or show error (e.g., if models are missing or GPU failed)
-            System.Diagnostics.Debug.WriteLine($"Error starting meeting: {ex.Message}");
+            LogService.Instance.LogError($"Error starting meeting: {ex.Message}");
         }
     }
 
@@ -271,14 +262,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
         PageList.AddTemporaryItem(reviewPage);
         Navigate(reviewPage);
+        LogService.Instance.LogInfo($"Meeting '{_currentSession.Name}' stopped and saved.");
     }
 
     [RelayCommand]
     private void TogglePause()
     {
+        //TODO: Implement proper pause/resume logic in the TranscriptionService. For now, we just toggle the state and stop/start the service.
         IsPaused = !IsPaused;
         if (IsPaused) _transcriptionService.Stop(); // Pause logic can be refined later
         else _transcriptionService.Start();
+
+        LogService.Instance.LogInfo($"Meeting '{_currentSession.Name}' {(IsPaused ? "paused" : "resumed")}.");
     }
 
     [RelayCommand]
@@ -335,6 +330,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         //  Trigger auto-processing
         _ = reviewVm.ImproveRecognitionCommand.ExecuteAsync(null);
+        LogService.Instance.LogInfo($"Loaded meeting from file '{selectedPath}' and started review.");
     }
 
     private void SetupTranscriptionStreaming()
@@ -367,5 +363,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _meetingManager = new MeetingManager(_transcriptionService);
         // Initialize the Archive page with the callback to open a meeting review
         (PageList.GetByTarget(PageNames.Archive).Page as ArchiveViewModel).InitArchiveViewModel(OpenMeetingReview);
+
+        LogService.Instance.LogInfo("App initialized.");
     }
 }

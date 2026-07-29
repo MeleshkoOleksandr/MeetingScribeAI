@@ -336,11 +336,11 @@ public class TranscriptionService : IDisposable
             }
             catch (OperationCanceledException)
             {
-                System.Diagnostics.Debug.WriteLine("User cancelled the process.");
+                LogService.Instance.LogInfo("User cancelled the process.");    
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Safe dispose failed: {ex.Message}");
+                LogService.Instance.LogError($"Safe dispose failed: {ex.Message}");
             }
             finally
             {

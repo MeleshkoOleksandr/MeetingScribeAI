@@ -1,6 +1,8 @@
 using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MeetingScribe.Logic.Meeting;
+using MeetingScribe.Logic.Services;
+using MeetingScribe.UILogic.Enums;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -59,7 +61,7 @@ public class GeminiAiService : IAiService
                 // Server is bisy or rate-limited, retry after delay
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Gemini 503 (Busy). Retry {i + 1}/{maxRetries}...");
+                    LogService.Instance.Log($"Gemini 503 (Busy). Retry {i + 1}/{maxRetries}...", LogLevel.Warning);             
                     await Task.Delay(delayMs);
                     delayMs *= 2;
                     continue;
@@ -71,7 +73,7 @@ public class GeminiAiService : IAiService
                 // Logging the response for debugging purposes
                 if (!response.IsSuccessStatusCode)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Gemini API Error {response.StatusCode}: {responseJson}");
+                    LogService.Instance.Log($"Gemini API Error {response.StatusCode}: {responseJson}", LogLevel.Critical); 
                     return null;
                 }
 
@@ -80,12 +82,12 @@ public class GeminiAiService : IAiService
             }
             catch (OperationCanceledException)
             {
-                System.Diagnostics.Debug.WriteLine("User cancelled the AI process.");
+                LogService.Instance.Log("AI process was cancelled by the user.", LogLevel.Info);
                 return null;
             }
             catch (Exception ex)
             {
-                if (i == maxRetries - 1) throw; // If it's the last attempt, rethrow the exception
+                if (i == maxRetries - 1) LogService.Instance.LogException(ex,"Last Api call returned with Error"); // If it's the last attempt
                 await Task.Delay(delayMs);
             }
 
@@ -165,7 +167,7 @@ public class GeminiAiService : IAiService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error parsing Combined JSON: {ex.Message}");
+            LogService.Instance.LogException(ex, "Error parsing Combined JSON response");
             return null;
         }
     }
@@ -257,7 +259,7 @@ public class GeminiAiService : IAiService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error stitching summaries: {ex.Message}");
+            LogService.Instance.LogException(ex, "Error stitching summaries");
             return "Error during summary generation.";
         }
     }

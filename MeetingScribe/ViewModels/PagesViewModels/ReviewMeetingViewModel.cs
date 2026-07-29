@@ -103,10 +103,12 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             IsDirty = false; // Reset the dirty flag after saving
 
+            LogService.Instance.LogInfo($"Session data saved to {jsonPath}.");
             await LuminaMessageBox.Show("Success", "All changes have been saved to the archive.", LuminaMessageBoxType.Message);
         }
         catch (Exception ex)
         {
+            LogService.Instance.LogError($"Failed to save session data: {ex.Message}");
             await LuminaMessageBox.Show("Error", $"Could not save changes: {ex.Message}", LuminaMessageBoxType.Danger);
         }
     }
@@ -212,9 +214,11 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             CurrentTaskName = "Transcription successfully refined!";
             ProcessingProgress = 100;
+            LogService.Instance.LogInfo("Transcription refinement completed successfully.");
         }
         catch (Exception ex)
         {
+            LogService.Instance.LogError($"Error during transcription refinement: {ex.Message}");
             CurrentTaskName = $"Failed: {ex.Message}";
         }
         finally
@@ -242,6 +246,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         IsImprovingText = false;
         IsAIRef = false;
         _mainVm.IsGlobalBusy = false;
+        LogService.Instance.LogInfo("User requested cancellation of the current operation.");
     }
 
     // --- Appoint the speakers (Semantic Diarization) ---
@@ -297,6 +302,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 if (_processCts.IsCancellationRequested) { return;}
                 //Make pause between chunks to avoid overwhelming the AI service
                 await Task.Delay(1000);
+                LogService.Instance.LogInfo($"Chunk {i + 1}/{chunks.Count} processed successfully.");
             }
 
             // Refresh the UI with the new speaker-labeled transcript
@@ -308,6 +314,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 Session.HasAIImprovements = true;
                 IsDirty = true;
                 CurrentTaskName = "Diarization & Chunk summaries complete!";
+                LogService.Instance.LogInfo("Diarization and chunk summaries completed successfully.");
             });
         }
         finally 
@@ -337,13 +344,16 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     private async Task GenerateFinalSummary()
     {
         await makeSammary(SammaryTypes.GeneralSummary);
-      
+        LogService.Instance.LogInfo("Final summary generated successfully.");
+
+
     }
 
     [RelayCommand]
     private async Task GenerateTemplateSummary()
     {
         await makeSammary(SammaryTypes.TemplateSammary);
+        LogService.Instance.LogInfo("Template summary generated successfully.");
     }
 
     private async Task<bool> makeSammary(SammaryTypes sammaryType)

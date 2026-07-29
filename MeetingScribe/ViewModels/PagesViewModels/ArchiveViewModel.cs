@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MeetingScribe.Logic.Meeting;
+using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.Enums;
 using MeetingScribe.Views;
 
@@ -104,7 +105,7 @@ public partial class ArchiveViewModel : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error on reading archive meeting from file: {ex.Message}");
+                    LogService.Instance.LogError($"Error on reading archive meeting from file: {ex.Message}");
                 }
             }
         }
@@ -148,13 +149,13 @@ public partial class ArchiveViewModel : ViewModelBase
                     SelectedMeeting = null;
                     RefreshSelection();
 
-                    System.Diagnostics.Debug.WriteLine($"Meeting deleted: {pathToDelete}");
+                    LogService.Instance.LogInfo($"Meeting deleted: {pathToDelete}");
                 }
             }
             catch (Exception ex)
             {
                 // Some error occurred while deleting the meeting, log the error message
-                System.Diagnostics.Debug.WriteLine($"Error deleting meeting: {ex.Message}");
+                LogService.Instance.LogError($"Error deleting meeting: {ex.Message}");
             }
         }
     }

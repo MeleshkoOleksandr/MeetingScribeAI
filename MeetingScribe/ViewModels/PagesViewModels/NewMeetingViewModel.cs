@@ -89,7 +89,7 @@ public partial class NewMeetingViewModel : ViewModelBase
         // 3. Update the list of participants available for selection
         UpdateAvailableList();
 
-        System.Diagnostics.Debug.WriteLine("New Meeting Form has been reset.");
+        LogService.Instance.LogInfo("New Meeting Form has been reset.");
     }
 
 
@@ -128,7 +128,7 @@ public partial class NewMeetingViewModel : ViewModelBase
         catch (Exception ex)
         {
             //  Parse error handling: Log the error and optionally show a message to the user
-            System.Diagnostics.Debug.WriteLine($"Parsing error: {ex.Message}");
+            LogService.Instance.LogError($"Failed to parse agenda file: {ex.Message}");
         }
     }
 

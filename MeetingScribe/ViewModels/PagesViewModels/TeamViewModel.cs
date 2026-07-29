@@ -82,7 +82,6 @@ public partial class TeamViewModel : ViewModelBase
     {
         // Wrire to file when participants or groups are changed
         TeamStorageService.SaveData(Participants, Groups);
-        System.Diagnostics.Debug.WriteLine("Structure auto-saved to disk.");
     }
 
     // ------   Filters  ------
@@ -201,6 +200,7 @@ public partial class TeamViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            LogService.Instance.LogError($"Error processing image for participant {SelectedParticipant.Name}: {ex.Message}");
             await LuminaMessageBox.Show("Image Error", "Could not process image: " + ex.Message, LuminaMessageBoxType.Danger);
         }
     }

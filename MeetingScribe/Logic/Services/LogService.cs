@@ -28,12 +28,23 @@ public class LogService
         Log($"{contextMessage}: {ex.Message}", LogLevel.Critical, ex.StackTrace);
     }
 
+    public void LogInfo(string contextMessage)
+    {
+        Log(contextMessage, LogLevel.Info);
+    }
+
+    public void LogError(string contextMessage)
+    {
+        Log(contextMessage, LogLevel.Warning);
+    }
+
     public void Log(string message, LogLevel level = LogLevel.Info, string? stackTrace = null)
     {
         var entry = new LogEntry { Message = message, Level = level, StackTrace = stackTrace };
 
         // Add to collection (for UI)
-        Avalonia.Threading.Dispatcher.UIThread.Post(() => {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
             Entries.Insert(0, entry); //Newest at the top
             if (level != LogLevel.Info) OnCriticalError?.Invoke();
         });
