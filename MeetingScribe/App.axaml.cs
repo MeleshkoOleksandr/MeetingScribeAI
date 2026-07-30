@@ -32,7 +32,9 @@ namespace MeetingScribe
             // Handling Raw Errors in Threads
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                LogService.Instance.Log("Unhandled UI Exception", LogLevel.Critical, e.ExceptionObject.ToString());
+                var ex = e.ExceptionObject as Exception;
+                LogService.Instance.Log("Unhandled System Exception", LogLevel.Critical, ex?.ToString());
+
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
@@ -40,7 +42,7 @@ namespace MeetingScribe
                 LogService.Instance.Log("Unhandled Task Exception", LogLevel.Critical, e.Exception.ToString());
                 e.SetObserved();
             };
-
+    
             base.OnFrameworkInitializationCompleted();
         }
     }

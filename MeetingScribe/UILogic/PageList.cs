@@ -18,10 +18,12 @@ public class PageList
             IsStartUp = true, Page = new NewMeetingViewModel() },
         new NavigationItem { Label = "Meeting Archive", Icon = "ArchiveOutline", Target = PageNames.Archive, Description = "View history" ,
             IsStartUp = true , Page = new ArchiveViewModel() },
-        new NavigationItem { Label = "Settings", Icon = "CogOutline", Target = PageNames.Settings, Description = "Configuration",
-            IsStartUp = true , Page = new SettingsViewModel()},
         new NavigationItem { Label = "Team", Icon = "AccountMultipleOutline", Target = PageNames.Team, Description = "Participant list",
             IsStartUp = true , Page =  new TeamViewModel() },
+        new NavigationItem { Label = "Settings", Icon = "CogOutline", Target = PageNames.Settings, Description = "Configuration",
+            IsStartUp = true , Page = new SettingsViewModel()},
+        new NavigationItem { Label = "Activity Log", Icon = "BellOutline", Target = PageNames.Logs, Description = "User activity",
+            IsStartUp = true , Page = new LogsViewModel()},
     };
 
     // Temporary items (appear/disappear)

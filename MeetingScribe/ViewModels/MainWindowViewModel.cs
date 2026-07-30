@@ -97,6 +97,12 @@ public partial class MainWindowViewModel : ViewModelBase
             newMeetingVm.RefreshParticipantsFromBase();
         }
 
+        // IF THE USER NAVIGATES TO THE "NEW MEETING" PAGE
+        if (value.Page is LogsViewModel logsView)
+        {
+            HasUnreadErrors = false;
+        }
+
         CurrentPage = value.Page;
     }
 
@@ -153,7 +159,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void OpenLogs()
     {
-        HasUnreadErrors = false;
+        
         Navigate(PageNames.Logs);
     }
 
@@ -217,7 +223,7 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             // Log or show error (e.g., if models are missing or GPU failed)
-            LogService.Instance.LogError($"Error starting meeting: {ex.Message}");
+            LogService.Instance.Log("Error starting meeting:" + ex.Message, LogLevel.Warning, ex.StackTrace);
         }
     }
 
