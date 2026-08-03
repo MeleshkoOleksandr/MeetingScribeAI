@@ -1,5 +1,5 @@
 using System;
-using MeetingScribe.UILogic.Enums;
+using MeetingScribe.Enums;
 
 namespace MeetingScribe.Logic.Services;
 

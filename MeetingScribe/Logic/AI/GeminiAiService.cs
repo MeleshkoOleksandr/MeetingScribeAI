@@ -1,8 +1,8 @@
 using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Spreadsheet;
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
-using MeetingScribe.UILogic.Enums;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;

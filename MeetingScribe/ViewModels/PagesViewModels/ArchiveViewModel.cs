@@ -1,9 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
-using MeetingScribe.UILogic.Enums;
 using MeetingScribe.Views;
 
 using System;

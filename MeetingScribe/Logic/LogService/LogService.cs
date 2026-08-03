@@ -2,7 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using MeetingScribe.UILogic.Enums;
+using MeetingScribe.Enums;
 
 namespace MeetingScribe.Logic.Services;
 

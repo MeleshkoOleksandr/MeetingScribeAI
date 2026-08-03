@@ -1,3 +1,3 @@
-namespace MeetingScribe.UILogic.Enums;
+namespace MeetingScribe.Enums;
 
 public enum LogLevel { Info, Warning, Critical }

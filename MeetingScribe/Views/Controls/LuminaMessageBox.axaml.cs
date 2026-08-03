@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Material.Icons;
 using System.Threading.Tasks;
-using MeetingScribe.UILogic.Enums;
+using MeetingScribe.Enums;
 
 namespace MeetingScribe.Views;
 

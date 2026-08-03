@@ -6,11 +6,10 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
-using MeetingScribe.UILogic.Enums;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -101,9 +100,27 @@ public partial class MainWindowViewModel : ViewModelBase
         if (value.Page is LogsViewModel logsView)
         {
             HasUnreadErrors = false;
+            LogService.Instance.LogInfo("User navigated to the Activity Log page, marking errors as read.");
+            LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Warning);
+            LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Critical);
+
+            CurrentPage = value.Page;
+
+            try
+            {
+                throw new InvalidOperationException("Whisper Processor is not initialized. Call InitializeAsync first.");
+            }
+            catch (Exception ex)
+            {
+
+                LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Critical, ex.StackTrace);
+            }
+            
+
         }
 
         CurrentPage = value.Page;
+ 
     }
 
     // Logic for programmatic navigation

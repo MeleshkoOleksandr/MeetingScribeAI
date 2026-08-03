@@ -6,9 +6,9 @@ using CommunityToolkit.Mvvm.Input;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Humanizer;
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
-using MeetingScribe.UILogic.Enums;
 using MeetingScribe.Views;
 
 using System;

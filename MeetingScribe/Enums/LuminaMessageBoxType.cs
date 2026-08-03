@@ -1,4 +1,4 @@
-namespace MeetingScribe.UILogic.Enums;
+namespace MeetingScribe.Enums;
 
 public enum LuminaMessageBoxType
 {

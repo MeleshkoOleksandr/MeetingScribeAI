@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MeetingScribe.UILogic.Enums;
+namespace MeetingScribe.Enums;
 
 public enum ReviewMode
 { 
