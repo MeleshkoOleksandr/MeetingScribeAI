@@ -21,8 +21,11 @@ public partial class LogsViewModel : ViewModelBase
     // Search query for filtering logs
     [ObservableProperty] private string _searchQuery = "";
 
+    [ObservableProperty] private bool _isHistoryMode; // false = Session, true = All
+
     // Link to the main log entries collection
     public ObservableCollection<LogEntry> AllEntries => LogService.Instance.Entries;
+    public ObservableCollection<LogListItem> DisplayItems { get; } = new();
 
     // Filtered log entries based on the search query
     public IEnumerable<LogEntry> FilteredEntries
@@ -45,10 +48,34 @@ public partial class LogsViewModel : ViewModelBase
         AllEntries.CollectionChanged += (s, e) => OnPropertyChanged(nameof(FilteredEntries));
     }
 
-    // Notify the UI when the search string changes
-    partial void OnSearchQueryChanged(string value)
+    partial void OnIsHistoryModeChanged(bool value) => RefreshDisplayList();
+    partial void OnSearchQueryChanged(string value) => RefreshDisplayList();
+
+    public void RefreshDisplayList()
     {
-        OnPropertyChanged(nameof(FilteredEntries));
+        // Taking the data source
+        var source = IsHistoryMode
+            ? LogService.Instance.LoadAllLogsFromDisk()
+            : LogService.Instance.Entries.ToList();
+
+        // Filtering based on the search query
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+            source = source.Where(e => e.Message.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        // Group by date and add headings
+        DisplayItems.Clear();
+        DateTime? lastDate = null;
+
+        foreach (var entry in source.OrderByDescending(x => x.Timestamp))
+        {
+            if (lastDate == null || entry.Timestamp.Date != lastDate.Value.Date)
+            {
+                lastDate = entry.Timestamp.Date;
+                DisplayItems.Add(new DateHeader { Date = lastDate.Value });
+            }
+       
+                DisplayItems.Add(entry);
+        }
     }
 
     [RelayCommand]

@@ -4,7 +4,7 @@ using System;
 
 namespace MeetingScribe.Logic.Services;
 
-public partial class LogEntry : ObservableObject
+public partial class LogEntry : LogListItem
 {
     public DateTime Timestamp { get; set; } = DateTime.Now;
     public string TimeLabel => Timestamp.ToString("HH:mm:ss");

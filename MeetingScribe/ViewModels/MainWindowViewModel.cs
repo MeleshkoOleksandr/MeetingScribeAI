@@ -99,28 +99,11 @@ public partial class MainWindowViewModel : ViewModelBase
         // IF THE USER NAVIGATES TO THE "NEW MEETING" PAGE
         if (value.Page is LogsViewModel logsView)
         {
-            HasUnreadErrors = false;
-            LogService.Instance.LogInfo("User navigated to the Activity Log page, marking errors as read.");
-            LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Warning);
-            LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Critical);
-
-            CurrentPage = value.Page;
-
-            try
-            {
-                throw new InvalidOperationException("Whisper Processor is not initialized. Call InitializeAsync first.");
-            }
-            catch (Exception ex)
-            {
-
-                LogService.Instance.Log($"Gemini 503 (Busy). Retry 6/7...", LogLevel.Critical, ex.StackTrace);
-            }
-            
-
+            HasUnreadErrors = false;  
+            logsView.RefreshDisplayList();
         }
 
         CurrentPage = value.Page;
- 
     }
 
     // Logic for programmatic navigation
