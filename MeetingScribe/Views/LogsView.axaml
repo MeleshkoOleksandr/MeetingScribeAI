@@ -9,19 +9,14 @@
              x:Class="MeetingScribe.Views.LogsView"
              x:Name="RootLogsView"
              x:DataType="vm:LogsViewModel">
-
     <Grid RowDefinitions="Auto, *">
 
         <!-- Header / Search -->
         <Border Grid.Row="0" Padding="20" Background="{StaticResource BrushSurfaceContainerLow}">
             <Grid ColumnDefinitions="*, Auto, Auto">
-
-
-
                 <TextBox Grid.Column="0" Text="{Binding SearchQuery}" PlaceholderText="Search logs..." Classes="lumina-input" DockPanel.Dock="Left">
                     <TextBox.InnerLeftContent><icons:MaterialIcon Kind="Search" Margin="10,0"/></TextBox.InnerLeftContent>
                 </TextBox>
-
                 <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerHigh}"
                         CornerRadius="6" Width="190" Margin="20,0,20,0" Padding="6,0">
                     <Grid ColumnDefinitions="*, *">
@@ -31,12 +26,11 @@
                                       IsChecked="{Binding IsHistoryMode}"/>
                     </Grid>
                 </Border>
-
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">     
                     <Button Classes="btn-secondary" Command="{Binding ClearLogsCommand}" HorizontalAlignment="Stretch" Background="#332020">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <icons:MaterialIcon Kind="TrashCanOutline" Foreground="{StaticResource ColorError}"/>
-                            <TextBlock Text="Clear Log" Foreground="{StaticResource ColorError}"/>
+                            <TextBlock Text="Clear Session" Foreground="{StaticResource ColorError}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

@@ -73,8 +73,7 @@ public partial class LogsViewModel : ViewModelBase
                 lastDate = entry.Timestamp.Date;
                 DisplayItems.Add(new DateHeader { Date = lastDate.Value });
             }
-       
-                DisplayItems.Add(entry);
+            DisplayItems.Add(entry);
         }
     }
 
@@ -90,6 +89,8 @@ public partial class LogsViewModel : ViewModelBase
         {
             LogService.Instance.Entries.Clear();
             OnPropertyChanged(nameof(FilteredEntries));
+            RefreshDisplayList();
+            IsHistoryMode = false;
         }
     }
 
