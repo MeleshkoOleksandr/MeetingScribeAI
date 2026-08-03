@@ -1,6 +1,6 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using MeetingScribe.UILogic.Enums;
+using MeetingScribe.Enums;
 using System;
 using System.Globalization;
 
@@ -15,7 +15,7 @@ public class LogLevelToBrushConverter : IValueConverter
             return level switch
             {
                 LogLevel.Critical => Brush.Parse("#ffb4ab"), // Red
-                LogLevel.Warning => Brush.Parse("#ffcaef"), // Orange
+                LogLevel.Warning => Brush.Parse("#81CFFF"), // Blue
                 _ => Brush.Parse("#8d9382") // Gray
             };
         }

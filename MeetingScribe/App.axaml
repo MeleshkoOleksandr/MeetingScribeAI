@@ -47,6 +47,7 @@
             <conv:HexToColorConverter x:Key="HexToColorConverter"/>
             <conv:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
             <conv:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter"/>
+            <conv:AlertIconToggleConverter x:Key="AlertIconToggleConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

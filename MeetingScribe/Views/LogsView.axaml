@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:log="clr-namespace:MeetingScribe.Logic.Services"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.LogsView"
@@ -27,25 +28,51 @@
         <ScrollViewer Grid.Row="1" Background="#050505">
             <ItemsControl ItemsSource="{Binding FilteredEntries}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="log:LogEntry">
                         <Border BorderBrush="#1a1a1a" BorderThickness="0,0,0,1" Padding="15,10">
                             <StackPanel Spacing="5">
-                                <StackPanel Orientation="Horizontal" Spacing="15">
-                                    <TextBlock Text="{Binding TimeLabel}" Foreground="Gray" FontFamily="Consolas"/>
+                                <Grid ColumnDefinitions="80, 75, *, Auto">
+                                    <!-- 1. Time -->
+                                    <TextBlock Grid.Column="0" Text="{Binding TimeLabel}" FontSize="15"
+                                               Foreground="Gray" FontFamily="Consolas" VerticalAlignment="Center"/>
 
-                                    <!-- Badge -->
-                                    <Border Background="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
-                                            Padding="6,1" CornerRadius="4">
-                                        <TextBlock Text="{Binding Level}" FontSize="10" FontWeight="Bold" Foreground="Black"/>
+                                    <!-- 2. Log level -->
+                                    <Border Grid.Column="1" Margin="0,0,15,0"
+                                            Background="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
+                                            Padding="6,1" CornerRadius="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Level}" FontSize="12" FontWeight="Bold" Foreground="Black"/>
                                     </Border>
 
-                                    <TextBlock Text="{Binding Message}" Foreground="White" FontWeight="SemiBold"/>
-                                </StackPanel>
+                                    <!-- 3. Message -->
+                                    <TextBlock Grid.Column="2" Text="{Binding Message}" 
+                                               Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}" 
+                                               VerticalAlignment="Center" TextWrapping="Wrap"/>
 
-                                <!-- StackTrace (Optional) -->
-                                <Border IsVisible="{Binding StackTrace, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                        Background="#120000" Padding="10" Margin="40,5,0,0" CornerRadius="4">
-                                    <TextBlock Text="{Binding StackTrace}" Foreground="#ffb4ab" FontSize="11" FontFamily="Consolas"/>
+                                    <!-- 4. Expand button -->
+                                    <ToggleButton Grid.Column="3"
+                                                  IsChecked="{Binding IsExpanded}"
+                                                  IsVisible="{Binding HasStackTrace}"
+                                                  Classes="btn-expand"
+                                                  ToolTip.Tip="Toggle StackTrace">
+                                        <icons:MaterialIcon Kind="{Binding IsExpanded, Converter={StaticResource AlertIconToggleConverter}}"
+                                                           Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
+                                                            Width="18"/>
+                                    </ToggleButton>
+                                </Grid>
+
+                                <!--  STACKTRACE AREA -->
+                                <Border IsVisible="{Binding IsExpanded}"
+                                        Background="#120000" Padding="12"
+                                        Margin="40,5,0,5" CornerRadius="4"
+                                        BorderBrush="#331111" BorderThickness="1">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="DEBUG INFO / STACK TRACE:" FontSize="10" Foreground="#ffb4ab" Opacity="0.5" FontWeight="Bold"/>
+                                        <SelectableTextBlock Text="{Binding StackTrace}"
+                                                             Foreground="#ffb4ab"
+                                                             FontSize="11"
+                                                             FontFamily="Consolas"
+                                                             TextWrapping="Wrap"/>
+                                    </StackPanel>
                                 </Border>
                             </StackPanel>
                         </Border>
