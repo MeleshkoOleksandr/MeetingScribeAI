@@ -1,8 +1,8 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Services;
-using MeetingScribe.UILogic.Enums;
 using MeetingScribe.ViewModels;
 using MeetingScribe.Views;
 
@@ -16,6 +16,13 @@ namespace MeetingScribe
     {
         public override void Initialize()
         {
+            // Register handler before the window is created
+            Avalonia.Threading.Dispatcher.UIThread.UnhandledException += (s, e) =>
+            {
+                LogService.Instance.Log("Unhandled UI Exception", LogLevel.Critical, e.Exception.ToString());
+                e.Handled = true; 
+            };
+
             AvaloniaXamlLoader.Load(this);
         }
 
@@ -34,7 +41,6 @@ namespace MeetingScribe
             {
                 var ex = e.ExceptionObject as Exception;
                 LogService.Instance.Log("Unhandled System Exception", LogLevel.Critical, ex?.ToString());
-
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
@@ -42,7 +48,7 @@ namespace MeetingScribe
                 LogService.Instance.Log("Unhandled Task Exception", LogLevel.Critical, e.Exception.ToString());
                 e.SetObserved();
             };
-    
+
             base.OnFrameworkInitializationCompleted();
         }
     }
