@@ -1,3 +1,5 @@
+using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeetingScribe.Enums;
@@ -83,6 +85,30 @@ public partial class LogsViewModel : ViewModelBase
         catch (Exception ex)
         {
             LogService.Instance.Log("Failed to export logs", LogLevel.Warning, ex.Message);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CopyEntryToClipboard(LogEntry entry)
+    {
+        if (entry == null) return;
+
+        // Building a string for copy
+        string textToCopy = $"[{entry.TimeLabel}] {entry.Level.ToString().ToUpper()}: {entry.Message}";
+        if (entry.HasStackTrace)
+        {
+            textToCopy += $"\n\nStack Trace:\n{entry.StackTrace}";
+        }
+
+        // Access the clipboard through the main window
+        var mainWindow = ViewHelper.GetMainWindow();
+        if (mainWindow != null)
+        {
+            var clipboard = TopLevel.GetTopLevel(mainWindow)?.Clipboard;
+            if (clipboard != null)
+            {
+                await clipboard.SetTextAsync(textToCopy);
+            }
         }
     }
 }

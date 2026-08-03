@@ -7,6 +7,7 @@
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.LogsView"
+             x:Name="RootLogsView"
              x:DataType="vm:LogsViewModel">
 
     <Grid RowDefinitions="Auto, *">
@@ -31,7 +32,7 @@
                     <DataTemplate x:DataType="log:LogEntry">
                         <Border BorderBrush="#1a1a1a" BorderThickness="0,0,0,1" Padding="15,10">
                             <StackPanel Spacing="5">
-                                <Grid ColumnDefinitions="80, 75, *, Auto">
+                                <Grid ColumnDefinitions="80, 75, *, Auto, Auto">
                                     <!-- 1. Time -->
                                     <TextBlock Grid.Column="0" Text="{Binding TimeLabel}" FontSize="15"
                                                Foreground="Gray" FontFamily="Consolas" VerticalAlignment="Center"/>
@@ -44,9 +45,11 @@
                                     </Border>
 
                                     <!-- 3. Message -->
-                                    <TextBlock Grid.Column="2" Text="{Binding Message}" 
-                                               Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}" 
-                                               VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                    <SelectableTextBlock  Grid.Column="2" Text="{Binding Message}"
+                                                          Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
+                                                          VerticalAlignment="Center" TextWrapping="Wrap"/>
+
+
 
                                     <!-- 4. Expand button -->
                                     <ToggleButton Grid.Column="3"
@@ -55,9 +58,21 @@
                                                   Classes="btn-expand"
                                                   ToolTip.Tip="Toggle StackTrace">
                                         <icons:MaterialIcon Kind="{Binding IsExpanded, Converter={StaticResource AlertIconToggleConverter}}"
-                                                           Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
+                                                            Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
                                                             Width="18"/>
                                     </ToggleButton>
+
+                                    <!-- 5. Copy button -->
+                                    <Button Grid.Column="4"
+                                            Classes="btn-icon"
+                                            Margin="10,0"
+                                            Command="{Binding #RootLogsView.((vm:LogsViewModel)DataContext).CopyEntryToClipboardCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Copy to clipboard">
+                                        <icons:MaterialIcon Kind="ContentCopy" Width="16" Opacity="0.5"/>
+                                    </Button>
+
+
                                 </Grid>
 
                                 <!--  STACKTRACE AREA -->
