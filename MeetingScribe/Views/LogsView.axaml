@@ -14,26 +14,33 @@
 
         <!-- Header / Search -->
         <Border Grid.Row="0" Padding="20" Background="{StaticResource BrushSurfaceContainerLow}">
-            <DockPanel>
+            <Grid ColumnDefinitions="*, Auto, Auto">
 
-                <Border DockPanel.Dock="Left" Background="{StaticResource BrushSurfaceContainerHigh}" 
-                        CornerRadius="8" Padding="3" Width="200" Margin="0,0,20,0">
+
+
+                <TextBox Grid.Column="0" Text="{Binding SearchQuery}" PlaceholderText="Search logs..." Classes="lumina-input" DockPanel.Dock="Left">
+                    <TextBox.InnerLeftContent><icons:MaterialIcon Kind="Search" Margin="10,0"/></TextBox.InnerLeftContent>
+                </TextBox>
+
+                <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerHigh}"
+                        CornerRadius="6" Width="190" Margin="20,0,20,0" Padding="6,0">
                     <Grid ColumnDefinitions="*, *">
-                        <ToggleButton Grid.Column="0" Content="Session" Classes="tab" 
+                        <ToggleButton Grid.Column="0" Content="Session" Classes="tab"
                                       IsChecked="{Binding !IsHistoryMode}"/>
-                        <ToggleButton Grid.Column="1" Content="History" Classes="tab" 
+                        <ToggleButton Grid.Column="1" Content="History" Classes="tab"
                                       IsChecked="{Binding IsHistoryMode}"/>
                     </Grid>
                 </Border>
 
-                <TextBox Text="{Binding SearchQuery}" Width="300" PlaceholderText="Search logs..." Classes="lumina-input" DockPanel.Dock="Left">
-                    <TextBox.InnerLeftContent><icons:MaterialIcon Kind="Search" Margin="10,0"/></TextBox.InnerLeftContent>
-                </TextBox>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Spacing="10">
-                    <Button Content="Export Log" Classes="btn-secondary"/>
-                    <Button Content="Clear Log" Command="{Binding ClearLogsCommand}" Classes="btn-secondary"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">     
+                    <Button Classes="btn-secondary" Command="{Binding ClearLogsCommand}" HorizontalAlignment="Stretch" Background="#332020">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <icons:MaterialIcon Kind="TrashCanOutline" Foreground="{StaticResource ColorError}"/>
+                            <TextBlock Text="Clear Log" Foreground="{StaticResource ColorError}"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <!-- Log List -->
@@ -41,11 +48,11 @@
             <ItemsControl ItemsSource="{Binding DisplayItems}">
                 <ItemsControl.DataTemplates>
 
-                     <!-- TEMPLATE Data separator -->
+                    <!-- TEMPLATE Data separator -->
                     <DataTemplate DataType="log:DateHeader">
                         <Grid ColumnDefinitions="*, Auto, *" Margin="0,30,0,20">
                             <Separator Grid.Column="0" Background="#1a1a1a" Height="1" VerticalAlignment="Center" Margin="40,0,20,0"/>
-                            <TextBlock Grid.Column="1" Text="{Binding DateLabel}" 
+                            <TextBlock Grid.Column="1" Text="{Binding DateLabel}"
                                        FontSize="11" Foreground="Gray" FontWeight="Bold" Opacity="0.6"/>
                             <Separator Grid.Column="2" Background="#1a1a1a" Height="1" VerticalAlignment="Center" Margin="20,0,40,0"/>
                         </Grid>
