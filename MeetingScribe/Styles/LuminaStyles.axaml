@@ -545,5 +545,24 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
     </Style>
-
+    <!-- ══════════════════════════════════════════
+    Mini-Tabs for summary page
+    ══════════════════════════════════════════ -->
+    <Style Selector="RadioButton.mini-tab">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Root" Background="Transparent" CornerRadius="18" Padding="15,6">
+                    <TextBlock Text="{TemplateBinding Content}"
+                               FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource BrushOnSurfaceVariant}"/>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="RadioButton.mini-tab:checked /template/ Border#Root">
+        <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+    </Style>
+    <Style Selector="RadioButton.mini-tab:checked TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource BrushOnPrimary}"/>
+    </Style>
 </Styles>

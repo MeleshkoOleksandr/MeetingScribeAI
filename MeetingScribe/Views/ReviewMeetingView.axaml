@@ -40,26 +40,48 @@
                     </Border>
 
                     <!-- 2. MODE: SUMMARY (Markdown) -->
-                    <Border Padding="20,10,10,10" IsVisible="{Binding IsSummaryView}" >
-                        <md:MarkdownScrollViewer
-                            Markdown="{Binding Session.GeneralSummary}"
-                            SelectionEnabled="True"  >
-                            <md:MarkdownScrollViewer.Styles>
-                                <Style Selector="ctxt|CTextBlock">
-                                    <Setter Property="Foreground" Value="{StaticResource BrushOnSurface}"/>
-                                    <Setter Property="FontSize" Value="16"/>
+                    <Border IsVisible="{Binding IsSummaryView}" Padding="20,10,20,20">
+                        <Grid RowDefinitions="Auto, *">
 
-                                </Style>
-                                <Style Selector="ctxt|CTextBlock.Heading1">
-                                    <Setter Property="FontSize" Value="24"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                </Style>
-                                <Style Selector="ctxt|CTextBlock.Heading2">
-                                    <Setter Property="FontSize" Value="20"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                </Style>
-                            </md:MarkdownScrollViewer.Styles>
-                        </md:MarkdownScrollViewer>
+                            <!-- ВНУТРЕННИЕ ТАБЫ (General / Template) -->
+                            <!-- Видны только если сгенерированы оба типа саммари -->
+                            <Border Grid.Row="0"
+                                    IsVisible="{Binding Session.ShowSummaryTabs}"
+                                    HorizontalAlignment="Center"
+                                    Background="{StaticResource BrushSurfaceContainerHigh}"
+                                    CornerRadius="20" Padding="3" Margin="0,0,0,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Content="General"
+                                                 IsChecked="{Binding SelectedSummaryTab, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
+                                                 Classes="mini-tab"/>
+                                    <RadioButton Content="Corporate Template"
+                                                 IsChecked="{Binding SelectedSummaryTab, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}"
+                                                 Classes="mini-tab"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ОТОБРАЖЕНИЕ MARKDOWN -->
+                            <md:MarkdownScrollViewer Grid.Row="1"
+                                Markdown="{Binding CurrentSummaryText}"
+                                SelectionEnabled="True"  >
+                                <md:MarkdownScrollViewer.Styles>
+                                    <Style Selector="ctxt|CTextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource BrushOnSurface}"/>
+                                        <Setter Property="FontSize" Value="16"/>
+
+                                    </Style>
+                                    <Style Selector="ctxt|CTextBlock.Heading1">
+                                        <Setter Property="FontSize" Value="24"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </Style>
+                                    <Style Selector="ctxt|CTextBlock.Heading2">
+                                        <Setter Property="FontSize" Value="20"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </Style>
+                                </md:MarkdownScrollViewer.Styles>
+                            </md:MarkdownScrollViewer>
+
+                        </Grid>
                     </Border>
 
                     <!-- 3. MODE: INFO (Metadata Editor) -->
@@ -78,7 +100,7 @@
                                          AcceptsReturn="True" MinHeight="100" TextWrapping="Wrap" Classes="lumina-input"/>
                             </StackPanel>
 
-                               <StackPanel Spacing="6">
+                            <StackPanel Spacing="6">
                                 <TextBlock Text="Meeting Topics" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.MeetingTopics}"
                                          AcceptsReturn="True" MinHeight="150" TextWrapping="Wrap" Classes="lumina-input"/>
@@ -156,7 +178,7 @@
                                 <Button Classes="btn-accent" Command="{Binding GenerateTemplateSummaryCommand}"  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
-                                        <TextBlock Text="Template Summary (it)"/>
+                                        <TextBlock Text="Template Summary"/>
                                     </StackPanel>
                                 </Button>
 

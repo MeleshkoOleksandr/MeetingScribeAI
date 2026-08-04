@@ -48,6 +48,7 @@
             <conv:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
             <conv:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter"/>
             <conv:AlertIconToggleConverter x:Key="AlertIconToggleConverter"/>
+            <conv:IntToBoolConverter x:Key="IntToBoolConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

@@ -46,6 +46,17 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isImprovingText; // Flag to indicate if text improvement is in progress
     [ObservableProperty] private bool _isAIRef; // Flag to indicate ai refinement is in progress
 
+    ///   ---   Summaries
+    // 0 = General, 1 = Template
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentSummaryText))]
+    private int _selectedSummaryTab = 0;  //Summary tab selection index for UI binding
+    // The property MarkdownViewer is binded to
+    public string? CurrentSummaryText => SelectedSummaryTab == 0
+        ? Session.GeneralSummary
+        : Session.TemplateSummary;
+
+
     public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, MainWindowViewModel mainVm, Action<ReviewMeetingViewModel>? onCloseRequest = null)
     {
         _session = session;
@@ -53,6 +64,10 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         _transcriptionService = transcriptionService;
         _onCloseRequest = onCloseRequest;
         Settings = settings;
+
+        //Select the meeting summary to show on UI
+        if (Session.TemplateSummary != null) SelectedSummaryTab = 1;
+        if (Session.GeneralSummary != null) SelectedSummaryTab = 0;
 
         _mainVm = mainVm;
         // Propertie that block buttons when long-running operations are in progress
@@ -299,7 +314,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                     Session.SegmentSummaries.Add(result.SegmentSummary);
                 }
                 //If current task was cancelled, break the loop
-                if (_processCts.IsCancellationRequested) { return;}
+                if (_processCts.IsCancellationRequested) { return; }
                 //Make pause between chunks to avoid overwhelming the AI service
                 await Task.Delay(1000);
                 LogService.Instance.LogInfo($"Chunk {i + 1}/{chunks.Count} processed successfully.");
@@ -317,8 +332,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 LogService.Instance.LogInfo("Diarization and chunk summaries completed successfully.");
             });
         }
-        finally 
-        { 
+        finally
+        {
             IsProcessing = false;
             IsIndeterminate = false;
             IsAIRef = false;
@@ -334,7 +349,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
     #region Sammary mode
 
-    private enum SammaryTypes
+    private enum SummaryTypes
     {
         GeneralSummary,
         TemplateSammary
@@ -343,22 +358,42 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateFinalSummary()
     {
-        await makeSammary(SammaryTypes.GeneralSummary);
-        LogService.Instance.LogInfo("Final summary generated successfully.");
-
-
+        var result = await makeSammary(SummaryTypes.GeneralSummary);
+        if (result != null)
+        {
+            Session.GeneralSummary = result;
+            SelectedSummaryTab = 0;
+            RefreshSummaryUI();
+            LogService.Instance.LogInfo("Final summary generated successfully.");
+        }
     }
 
     [RelayCommand]
     private async Task GenerateTemplateSummary()
     {
-        await makeSammary(SammaryTypes.TemplateSammary);
-        LogService.Instance.LogInfo("Template summary generated successfully.");
+        var result = await makeSammary(SummaryTypes.TemplateSammary);
+        if (result != null)
+        {
+            Session.TemplateSummary = result;
+            SelectedSummaryTab = 1;
+            RefreshSummaryUI();
+            LogService.Instance.LogInfo("Template summary generated successfully.");
+        }
     }
 
-    private async Task<bool> makeSammary(SammaryTypes sammaryType)
+    private void RefreshSummaryUI()
     {
+        OnPropertyChanged(nameof(CurrentSummaryText));
+        OnPropertyChanged(nameof(Session.ShowSummaryTabs));
+        IsDirty = true;
+    }
+
+    private async Task<string?> makeSammary(SummaryTypes sammaryType)
+    {
+        string result = "";
+
         await ConnectAiService();
+        if (aiService == null) return null;
 
         // Check if we have any segment summaries to work with
         if (!Session.HasAIImprovements || Session.SegmentSummaries.Count == 0)
@@ -366,7 +401,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             var res = await LuminaMessageBox.Show("Step Missing",
                 "Please run 'Diarization and Refinement' first to prepare data for summary.",
                 LuminaMessageBoxType.Message);
-            return false;
+            return null;
         }
 
         try
@@ -376,29 +411,30 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             CurrentTaskName = "Synthesizing final meeting protocol...";
 
             // Sendind the segment summaries to the AI service for final summary generation
-            string finalMarkdown = "";
             switch (sammaryType)
             {
-                case SammaryTypes.GeneralSummary:
-                    finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
+                case SummaryTypes.GeneralSummary:
+                    result = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
                     break;
-                case SammaryTypes.TemplateSammary:
-                    finalMarkdown = await aiService.TemplateSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
+                case SummaryTypes.TemplateSammary:
+                    result = await aiService.TemplateSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
                     break;
                 default:
                     break;
             }
-      
-            if (!string.IsNullOrEmpty(finalMarkdown))
+
+            if (!string.IsNullOrEmpty(result))
             {
-                Session.GeneralSummary = finalMarkdown;
-                Session.HasSummary = true;
                 IsTranscriptionView = false;
+            }
+            else
+            {
+                return null;
             }
         }
         finally { IsProcessing = false; }
 
-        return true;
+        return result;
     }
 
     #endregion
