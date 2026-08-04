@@ -124,6 +124,8 @@ public class GeminiAiService : IAiService
                    - Names of projects, documents, and tools 
                    - Names of people mentioned and their roles or actions 
                    - Action items, decisions, and specific problems raised.
+                
+                6. Do not translate the meeting transcription. The result and summary must be in the same language as the input data. 
 
                 STRICT CONSTRAINT:
                 The 'Text' field must contain the EXACT spoken words of the speaker (minus fillers/duplications). It must remain in the original language (Italian in this case). Never turn spoken, slightly chaotic speech into formal written business prose.
@@ -172,15 +174,20 @@ public class GeminiAiService : IAiService
         }
     }
 
-    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode)
     {
         // Stitching summaries together with the meeting agenda for context
         string combinedPartials = string.Join("\n\n---\n\n", partialSummaries);
 
+        string langInstruction = GetLanguageInstruction(langCode);
+
         // Making a prompt for the AI to make summaries
         string prompt = $@"You are a professional meeting minutes assistant.
-                        Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol in Markdown format.
-    
+
+                        {langInstruction}
+
+                        TASK: Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol in Markdown format.
+                                     
                         AGENDA CONTEXT: {meetingAgenda}
     
                         STRUCTURE:
@@ -196,14 +203,24 @@ public class GeminiAiService : IAiService
         return await SendSammaryPromt(prompt);
     }
 
-    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode)
     {
         // Stitching summaries together with the meeting agenda for context
         string combinedPartials = string.Join("\n\n---\n\n", partialSummaries);
 
+        string langInstruction = GetLanguageInstruction(langCode);
+
         // Making a prompt for company tenplate summaries
-        string prompt = $@"Sei un assistente professionale esperto nella stesura di verbali di riunione aziendali.
-                        Basandoti sui riassunti parziali forniti, redigi un verbale ufficiale in lingua ITALIANA seguendo rigorosamente questa struttura:
+        string prompt = $@"You are a professional meeting minutes assistant.
+
+                        {langInstruction}
+
+                        INITIAL CONTEXT (Agenda): {meetingAgenda}
+    
+                        SUMMARIES OF SEGMENTS TO BE PROCESSED:
+                        {combinedPartials}
+
+                        TASK: Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol strictly following this structure            
 
                         # VERBALE DI RIUNIONE: [Meeting Name]
     
@@ -219,13 +236,29 @@ public class GeminiAiService : IAiService
                         ## 4. Eventuali
                         (Riassumi varie ed eventuali, comunicazioni minori o punti sollevati alla fine della riunione)
 
-                        ---
-                        CONTESTO INIZIALE (Agenda): {meetingAgenda}
-    
-                        RIASSUNTI DEI SEGMENTI DA ELABORARE:
-                        {combinedPartials}";
+                        ";
 
         return await SendSammaryPromt(prompt);
+    }
+
+    private string GetLanguageInstruction(string langCode)
+    {
+        if (string.IsNullOrEmpty(langCode) || langCode == "auto")
+            return "Detect the meeting language and write the summary in that language.";
+
+        string langName = langCode switch
+        {
+            "it" => "ITALIAN",
+            "ru" => "RUSSIAN",
+            "en" => "ENGLISH",
+            "de" => "GERMAN",
+            "fr" => "FRENCH",
+            "es" => "Spanish",
+            "ua" => "Ukrainian",
+            _ => langCode // For other languages, just return the code
+        };
+
+        return $"IMPORTANT: The entire summary, including all headings and bullet points, MUST be written in {langName}.";
     }
 
     private async Task<string> SendSammaryPromt(string prompt)

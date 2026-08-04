@@ -61,12 +61,12 @@ public class ChatGptService : IAiService
         return null;
     }
 
-    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    public async Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode)
     {
         return null;
     }
 
-    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda)
+    public async Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode)
     {
         return null;
     }

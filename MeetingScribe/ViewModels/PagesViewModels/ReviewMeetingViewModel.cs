@@ -380,10 +380,10 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             switch (sammaryType)
             {
                 case SammaryTypes.GeneralSummary:
-                    finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description);
+                    finalMarkdown = await aiService.StitchSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
                     break;
                 case SammaryTypes.TemplateSammary:
-                    finalMarkdown = await aiService.TemplateSummariesAsync(Session.SegmentSummaries, Session.Description);
+                    finalMarkdown = await aiService.TemplateSummariesAsync(Session.SegmentSummaries, Session.Description, Session.Language);
                     break;
                 default:
                     break;
