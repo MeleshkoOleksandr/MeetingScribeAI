@@ -388,6 +388,17 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         IsDirty = true;
     }
 
+    partial void OnSelectedSummaryTabChanged(int value)
+    {
+        OnPropertyChanged(nameof(CurrentSummaryText));
+        // Workaround: Sometimes crashes due to a DynamicResource race (Color → IBrush).
+        // We force a re-render during the next dispatcher cycle.
+        Dispatcher.UIThread.Post(() =>
+        {
+            OnPropertyChanged(nameof(CurrentSummaryText));
+        }, DispatcherPriority.Background);
+    }
+
     private async Task<string?> makeSammary(SummaryTypes sammaryType)
     {
         string result = "";
