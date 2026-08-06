@@ -190,11 +190,12 @@ public class GeminiAiService : IAiService
                                      
                         AGENDA CONTEXT: {meetingAgenda}
     
-                        STRUCTURE:
-                        # [Meeting Name] - Summary Protocol
-                        ## Executive Summary (2-3 powerful sentences)
+                        (Important: All headings in the final result must be in the same language as the main text)
+                        STRUCTURE: 
+                        # [Meeting Name]
+                        ## Executive Summary (3-6 powerful sentences)
                         ## Key Discussion Points & Decisions
-                        ## Action Items (Format as: [ ] Task | Assigned to | Deadline)
+                        ## Action Items (Format as: Task | Assigned to | Deadline)
                         ## Next Steps
 
                         PARTIAL SUMMARIES TO SYNTHESIZE:
@@ -222,6 +223,8 @@ public class GeminiAiService : IAiService
 
                         TASK: Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol strictly following this structure            
 
+                        (Important: All headings in the final result must be in the same language as the main text)
+                        STRUCTURE: 
                         # VERBALE DI RIUNIONE: [Meeting Name]
     
                         ## 1. Informazioni dalla Direzione
@@ -235,7 +238,6 @@ public class GeminiAiService : IAiService
 
                         ## 4. Eventuali
                         (Riassumi varie ed eventuali, comunicazioni minori o punti sollevati alla fine della riunione)
-
                         ";
 
         return await SendSammaryPromt(prompt);

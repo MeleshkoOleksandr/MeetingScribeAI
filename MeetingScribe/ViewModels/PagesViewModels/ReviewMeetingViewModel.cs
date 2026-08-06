@@ -364,6 +364,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             Session.GeneralSummary = result;
             SelectedSummaryTab = 0;
             RefreshSummaryUI();
+            OnSelectedSummaryTabChanged(0);
             LogService.Instance.LogInfo("Final summary generated successfully.");
         }
     }
@@ -377,6 +378,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             Session.TemplateSummary = result;
             SelectedSummaryTab = 1;
             RefreshSummaryUI();
+            OnSelectedSummaryTabChanged(0);
             LogService.Instance.LogInfo("Template summary generated successfully.");
         }
     }
