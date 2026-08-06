@@ -192,7 +192,7 @@
                                     </StackPanel>
                                 </Button>
 
-                                <Button Classes="btn-secondary" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
+                                <Button Classes="btn-secondary" Command="{Binding SaveSummaryCommand}" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="FileWordOutline" Width="18"/>
                                         <TextBlock Text="Export to Word"/>

@@ -13,6 +13,8 @@
     <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
     <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
+    <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Gen.docx" />
+    <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Template.docx" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-base.bin" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-large-v3-turbo-q8_0.bin" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-large-v3-turbo.bin" />
@@ -33,6 +35,8 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+    <PackageReference Include="DocX" Version="5.2.0" />
+    <PackageReference Include="Markdig" Version="1.3.2" />
     <PackageReference Include="Markdown.Avalonia.Tight" Version="12.0.0-a2" />
     <PackageReference Include="Material.Icons.Avalonia" Version="3.0.2" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.1" />
@@ -42,6 +46,15 @@
     <PackageReference Include="ThingLing.Avalonia.Controls.MessageBox" Version="2.0.0" />
     <PackageReference Include="Whisper.net" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\Template\VerbaleRiunione_Gen.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Template\VerbaleRiunione_Template.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

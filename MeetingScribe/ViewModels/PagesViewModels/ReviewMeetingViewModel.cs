@@ -383,6 +383,12 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private async Task SaveSummary()
+    {
+        MeetingSummarySaver.SaveGeneralSummary(Session.GeneralSummary, Session.Name, Session.StartTime.ToString("dd.MM.yyyy"));
+    }
+
     private void RefreshSummaryUI()
     {
         OnPropertyChanged(nameof(CurrentSummaryText));
