@@ -25,7 +25,6 @@ obj/
 /Exports/
 *.wav
 *.mp3
-*.docx
 
 ## --- API Keys & Secrets ---
 appsettings.json
