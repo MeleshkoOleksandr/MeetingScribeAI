@@ -2,55 +2,53 @@ using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
-using Xceed.Drawing;
-
 
 namespace MeetingScribe.Logic.Services;
 
 public static class MeetingSummarySaver
 {
+    // Colors used for H1 / H2 headings.
+    private static readonly Xceed.Drawing.Color HeadingColorH1 = Xceed.Drawing.Color.Parse(183, 233, 126);
+    private static readonly Xceed.Drawing.Color HeadingColorH2 = Xceed.Drawing.Color.Parse(129, 207, 255);
+
     public static void SaveGeneralSummary(string rawMarkdown, string meetingName, string meetingDate)
     {
-
-        // 2. Декодируем и очищаем текст (Markdig / PlainText conversion)
-        // Преобразуем Markdown в простой форматированный текст для вставки в Word (или HTML при необходимости)
-        //string plainTextSummary = ConvertMarkdownToPlainText(rawMarkdown);
-
         var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", "VerbaleRiunione_Gen.docx");
-        //var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", $"Verbale_{DateTime.Now:yyyyMMdd_HHmm}.docx");
         string outputPath = $"Verbale_{DateTime.Now:yyyyMMdd_HHmm}.docx";
 
-        // 4. Заполнение шаблона и сохранение
+        if (!File.Exists(templatePath))
+        {
+            // Fail loudly with a clear message instead of letting DocX.Load throw
+            // a generic "file not found" exception deep inside a third-party library.
+            throw new FileNotFoundException($"Template not found: {templatePath}");
+        }
+
         FillAndSaveTemplate(templatePath, outputPath, meetingName, meetingDate, rawMarkdown);
 
         Console.WriteLine($"Файл успешно сохранен: {outputPath}");
     }
 
-
-    static void FillAndSaveTemplate(string templatePath, string outputPath, string meetingName, string date, string markdownContent)
+    private static void FillAndSaveTemplate(string templatePath, string outputPath, string meetingName, string date, string markdownContent)
     {
         using (var doc = DocX.Load(templatePath))
         {
-            // 1. Заменяем обычные текстовые метаданные
             doc.ReplaceText("{MEETING_NAME}", meetingName);
             doc.ReplaceText("{DATE}", date);
-        
+
             var targetParagraph = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains("{TEXT}"));
             if (targetParagraph != null)
             {
-                // Очищаем входную строку markdown от начальных пробелов и переносов (включая \xa0 / &nbsp;)
+                // Strip leading whitespace / non-breaking spaces the model sometimes emits.
                 string cleanMarkdown = markdownContent.TrimStart('\r', '\n', ' ', '\t', '\xa0');
 
-                // Вставляем блоки
-                AppendMarkdownToDocX(doc, targetParagraph, cleanMarkdown);
+                AppendMarkdownToDocX(targetParagraph, cleanMarkdown);
 
-                // Удаляем сам пустой параграф {TEXT}, чтобы от него не оставалось лишнего переноса
+                // Remove the now-empty {TEXT} placeholder paragraph itself.
                 targetParagraph.Remove(false);
             }
 
@@ -58,135 +56,185 @@ public static class MeetingSummarySaver
         }
     }
 
-    private static void AppendMarkdownToDocX(DocX doc, Paragraph insertAfterParagraph, string markdown)
+    /// <summary>
+    /// Walks the parsed markdown tree and inserts each block right after <paramref name="insertAfterParagraph"/>,
+    /// advancing an "anchor" pointer as it goes. This keeps blocks in the original order and preserves any
+    /// template content that comes AFTER the {TEXT} placeholder (e.g. a signature block), which the previous
+    /// implementation (doc.InsertParagraph() / doc.InsertTable()) did not — those always appended to the very
+    /// end of the document, regardless of where the placeholder actually was.
+    /// </summary>
+    private static void AppendMarkdownToDocX(Paragraph insertAfterParagraph, string markdown)
     {
-        // Подключаем расширения Markdig (включая поддержки таблиц Pipe Tables)
         var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
         var markdownDoc = Markdig.Markdown.Parse(markdown, pipeline);
 
-        Paragraph currentParagraph = insertAfterParagraph;
+        Paragraph anchor = insertAfterParagraph;
 
         foreach (var block in markdownDoc)
         {
-            // --- 1. Заголовки (H1, H2, H3...) ---
             if (block is HeadingBlock heading)
             {
-                currentParagraph = doc.InsertParagraph();
-
-                // Форматирование текста внутри заголовка (Bold, Italic)
-                AppendInlinesToParagraph(currentParagraph, heading.Inline);
-
-                // Стилизуем размер и цвета заголовков
-                switch (heading.Level)
-                {
-                    case 1:
-                        currentParagraph.FontSize(18).Bold().Color(Xceed.Drawing.Color.Parse(183, 233, 126)).SpacingBefore(12).SpacingAfter(6);
-                        break;
-                    case 2:
-                        currentParagraph.FontSize(14).Bold().Color(Xceed.Drawing.Color.Parse(129, 207, 255)).SpacingBefore(10).SpacingAfter(4);
-                        break;
-                    case 3:
-                    default:
-                        currentParagraph.FontSize(12).Bold().Color(Xceed.Drawing.Color.DimGray).SpacingBefore(8).SpacingAfter(2);
-                        break;
-                }
+                anchor = InsertHeading(anchor, heading);
             }
-            // --- 2. Обычные абзацы ---
             else if (block is ParagraphBlock paragraphBlock)
             {
-                currentParagraph = doc.InsertParagraph();
-                currentParagraph.FontSize(11).SpacingAfter(4);
-                AppendInlinesToParagraph(currentParagraph, paragraphBlock.Inline);
+                anchor = InsertParagraphBlock(anchor, paragraphBlock);
             }
-            // --- 3. Списки (Маркированные) ---
             else if (block is ListBlock listBlock)
             {
-                foreach (var item in listBlock)
-                {
-                    if (item is ListItemBlock listItem)
-                    {
-                        foreach (var subBlock in listItem)
-                        {
-                            if (subBlock is ParagraphBlock subPara)
-                            {
-                                currentParagraph = doc.InsertParagraph();
-                                currentParagraph.FontSize(11).SpacingAfter(2);
-
-                                // Добавляем маркер списка (буллит)
-                                currentParagraph.Append("• ").Bold();
-                                AppendInlinesToParagraph(currentParagraph, subPara.Inline);
-                                currentParagraph.IndentationBefore = 15; // Небольшой отступ
-                            }
-                        }
-                    }
-                }
+                anchor = InsertList(anchor, listBlock);
             }
-            // --- 4. Таблицы ---
             else if (block is Markdig.Extensions.Tables.Table tableBlock)
             {
-                int rowCount = tableBlock.Count;
-                int colCount = tableBlock.FirstOrDefault() is Markdig.Extensions.Tables.TableRow r ? r.Count : 0;
-
-                if (rowCount > 0 && colCount > 0)
-                {
-                    var docTable = doc.AddTable(rowCount, colCount);
-                    docTable.Design = TableDesign.TableGrid;
-                    docTable.Alignment = Alignment.center;
-
-                    for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
-                    {
-                        var markdownRow = (Markdig.Extensions.Tables.TableRow)tableBlock[rowIndex];
-                        for (int colIndex = 0; colIndex < colCount; colIndex++)
-                        {
-                            var cell = markdownRow[colIndex] as Markdig.Extensions.Tables.TableCell;
-                            string cellText = GetInlineText(cell);
-                            var cellParagraph = docTable.Rows[rowIndex].Cells[colIndex].Paragraphs[0];
-                            cellParagraph.Append(cellText);
-
-                            // Заголовок таблицы делаем жирным и с серым фоном
-                            if (rowIndex == 0 || markdownRow.IsHeader)
-                            {
-                                cellParagraph.Bold();
-                                docTable.Rows[rowIndex].Cells[colIndex].FillColor = Xceed.Drawing.Color.LightGray;
-                            }
-                        }
-                    }
-
-                    doc.InsertTable(docTable);
-                    currentParagraph = doc.InsertParagraph(); // Отступ после таблицы
-                }
+                anchor = InsertTable(anchor, tableBlock);
             }
+            // Other markdown constructs (blockquotes, code fences, thematic breaks, links)
+            // are not produced by the summarizer today, so they're intentionally skipped.
+            // Add another "else if" branch here if that ever changes.
         }
     }
 
-    // Вспомогательный метод: рендерит жирный шрифт, курсив и обычный текст внутри строки
-    private static void AppendInlinesToParagraph(Paragraph p, ContainerInline inlines)
+    private static Paragraph InsertHeading(Paragraph anchor, HeadingBlock heading)
     {
-        if (inlines == null) return;
+        var p = anchor.InsertParagraphAfterSelf(string.Empty);
+        AppendInlinesToParagraph(p, heading.Inline);
+
+        switch (heading.Level)
+        {
+            case 1:
+                p.FontSize(18).Bold().Color(HeadingColorH1).SpacingBefore(12).SpacingAfter(6);
+                break;
+            case 2:
+                p.FontSize(14).Bold().Color(HeadingColorH2).SpacingBefore(10).SpacingAfter(4);
+                break;
+            default:
+                p.FontSize(12).Bold().Color(Xceed.Drawing.Color.DimGray).SpacingBefore(8).SpacingAfter(2);
+                break;
+        }
+
+        return p;
+    }
+
+    private static Paragraph InsertParagraphBlock(Paragraph anchor, ParagraphBlock paragraphBlock)
+    {
+        var p = anchor.InsertParagraphAfterSelf(string.Empty);
+        p.FontSize(11).SpacingAfter(4);
+        AppendInlinesToParagraph(p, paragraphBlock.Inline);
+        return p;
+    }
+
+    private static Paragraph InsertList(Paragraph anchor, ListBlock listBlock)
+    {
+        int itemNumber = 1;
+
+        foreach (var item in listBlock)
+        {
+            if (item is not ListItemBlock listItem)
+            {
+                continue;
+            }
+
+            foreach (var subBlock in listItem)
+            {
+                if (subBlock is not ParagraphBlock subPara)
+                {
+                    continue;
+                }
+
+                string marker = listBlock.IsOrdered ? $"{itemNumber}. " : "• ";
+
+                var p = anchor.InsertParagraphAfterSelf(string.Empty);
+                p.FontSize(11).SpacingAfter(2);
+                p.IndentationBefore = 15;
+
+                p.Append(marker).Bold();
+                AppendInlinesToParagraph(p, subPara.Inline);
+
+                anchor = p;
+            }
+
+            itemNumber++;
+        }
+
+        return anchor;
+    }
+
+    private static Paragraph InsertTable(Paragraph anchor, Markdig.Extensions.Tables.Table tableBlock)
+    {
+        int rowCount = tableBlock.Count;
+        int colCount = tableBlock.FirstOrDefault() is Markdig.Extensions.Tables.TableRow firstRow ? firstRow.Count : 0;
+
+        if (rowCount == 0 || colCount == 0)
+        {
+            return anchor;
+        }
+
+        var table = anchor.InsertTableAfterSelf(rowCount, colCount);
+        table.Design = TableDesign.TableGrid;
+        table.Alignment = Alignment.center;
+
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+        {
+            var markdownRow = (Markdig.Extensions.Tables.TableRow)tableBlock[rowIndex];
+
+            for (int colIndex = 0; colIndex < colCount; colIndex++)
+            {
+                var cell = markdownRow[colIndex] as Markdig.Extensions.Tables.TableCell;
+                var cellParagraph = table.Rows[rowIndex].Cells[colIndex].Paragraphs[0];
+                cellParagraph.Append(GetInlineText(cell));
+
+                if (rowIndex == 0 || markdownRow.IsHeader)
+                {
+                    cellParagraph.Bold();
+                    table.Rows[rowIndex].Cells[colIndex].FillColor = Xceed.Drawing.Color.LightGray;
+                }
+            }
+        }
+
+        // A table needs a paragraph right after it so later content (and our anchor
+        // pointer) has somewhere valid to attach to.
+        // NOTE: if your installed Xceed.Words.NET version doesn't expose
+        // Table.InsertParagraphAfterSelf, replace the line below with:
+        //     var spacer = doc.InsertParagraph();  // (falls back to end-of-document, like before)
+        var spacer = table.InsertParagraphAfterSelf(string.Empty);
+        return spacer;
+    }
+
+    /// <summary>
+    /// Renders inline markdown (bold / italic / line breaks) into a Word paragraph.
+    /// Rewritten to be recursive so nested emphasis (e.g. "**bold *and italic***")
+    /// is handled correctly, and so DelimiterCount == 3 (i.e. ***bold italic***) is no
+    /// longer silently dropped, which is what the original if/else chain did.
+    /// </summary>
+    private static void AppendInlinesToParagraph(Paragraph p, ContainerInline inlines, Formatting inherited = null)
+    {
+        if (inlines == null)
+        {
+            return;
+        }
 
         foreach (var inline in inlines)
         {
             if (inline is LiteralInline literal)
             {
-                p.Append(literal.Content.ToString());
+                if (inherited != null)
+                {
+                    p.Append(literal.Content.ToString(), inherited);
+                }
+                else
+                {
+                    p.Append(literal.Content.ToString());
+                }
             }
             else if (inline is EmphasisInline emphasis)
             {
-                // Выясняем, курсив или жирный шрифт (**bold** / *italic*)
-                bool isBold = emphasis.DelimiterCount == 2;
-                bool isItalic = emphasis.DelimiterCount == 1;
-
-                foreach (var subInline in emphasis)
+                var formatting = new Formatting
                 {
-                    if (subInline is LiteralInline subLiteral)
-                    {
-                        var formatting = new Formatting();
-                        if (isBold) formatting.Bold = true;
-                        if (isItalic) formatting.Italic = true;
+                    Bold = (inherited?.Bold ?? false) || emphasis.DelimiterCount is 2 or 3,
+                    Italic = (inherited?.Italic ?? false) || emphasis.DelimiterCount is 1 or 3,
+                };
 
-                        p.Append(subLiteral.Content.ToString(), formatting);
-                    }
-                }
+                AppendInlinesToParagraph(p, emphasis, formatting);
             }
             else if (inline is LineBreakInline)
             {
@@ -195,20 +243,47 @@ public static class MeetingSummarySaver
         }
     }
 
-    // Извлечение текста из ячейки таблицы
+    /// <summary>
+    /// Extracts plain text from a table cell for use in Word table cells.
+    /// BUG FIX: the original version only read direct LiteralInline children, so any
+    /// bold/italic text inside a table cell (e.g. "**Scadenza**") was silently dropped.
+    /// This version recurses into EmphasisInline so nothing gets lost.
+    /// </summary>
     private static string GetInlineText(Markdig.Extensions.Tables.TableCell cell)
     {
-        if (cell == null) return string.Empty;
-        var para = cell.FirstOrDefault() as ParagraphBlock;
-        if (para?.Inline == null) return string.Empty;
+        if (cell == null)
+        {
+            return string.Empty;
+        }
 
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        foreach (var inline in para.Inline)
+        var para = cell.FirstOrDefault() as ParagraphBlock;
+        if (para?.Inline == null)
+        {
+            return string.Empty;
+        }
+
+        return ExtractPlainText(para.Inline);
+    }
+
+    private static string ExtractPlainText(ContainerInline inlines)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var inline in inlines)
         {
             if (inline is LiteralInline literal)
+            {
                 sb.Append(literal.Content.ToString());
+            }
+            else if (inline is EmphasisInline emphasis)
+            {
+                sb.Append(ExtractPlainText(emphasis));
+            }
+            else if (inline is LineBreakInline)
+            {
+                sb.Append(' ');
+            }
         }
         return sb.ToString();
     }
-
 }
