@@ -1,17 +1,16 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
-
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
@@ -19,7 +18,7 @@ namespace MeetingScribe.Logic.Services;
 
 public static class MeetingSummarySaver
 {
-    // Colors used for H1 / H2 headings.
+    // Colors used for H1 / H2 headings. Defined once so they are easy to tweak
     private static readonly Xceed.Drawing.Color HeadingColorH1 = Xceed.Drawing.Color.Parse(183, 233, 126);
     private static readonly Xceed.Drawing.Color HeadingColorH2 = Xceed.Drawing.Color.Parse(129, 207, 255);
 
@@ -33,18 +32,116 @@ public static class MeetingSummarySaver
             return;
         }
 
-        var topLevel = TopLevel.GetTopLevel(ownerWindow);
-        if (topLevel?.StorageProvider is not { } storageProvider)
+        string outputPath = await PickSaveFileAsync(ownerWindow, $"Verbale_Gen_{meetingDate}.docx");
+        if (outputPath == null)
         {
-            LogService.Instance.LogInfo("StorageProvider is not available on this platform.");
+            // User cancelled the dialog — nothing to save or open.
             return;
         }
 
-        var suggestedFileName = $"Verbale_{meetingDate}.docx";
-   
+        FillAndSaveTemplate(templatePath, outputPath, meetingName, meetingDate, rawMarkdown);
+        LogService.Instance.LogInfo($"Summary file is saved : {outputPath}");
+        OpenFile(outputPath);
+    }
+
+    /// <summary>
+    /// Saves the "structured" verbale (Direzione / Gestionale / Operativa / Eventuali) template.
+    /// </summary>
+    public static async Task SaveTemplateSummaryAsync(string rawMarkdown, string meetingDate, string present, string absent, string topics, Window ownerWindow)
+    {
+        var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", "VerbaleRiunione_Template.docx");
+
+        if (!File.Exists(templatePath))
+        {
+            throw new FileNotFoundException($"Template not found: {templatePath}");
+        }
+
+        string outputPath = await PickSaveFileAsync(ownerWindow, $"Verbale_{meetingDate}.docx");
+        if (outputPath == null)
+        {
+            return;
+        }
+
+        // rawMarkdown looks like:
+        //   ## 1. Informazioni dalla Direzione
+        //   ...content...
+        //   ## 2. Parte Gestionale
+        //   ...content...
+        // Split it into { 1: "...", 2: "...", 3: "...", 4: "..." } so each part can go
+        // into its own placeholder ({DEREZ}, {GEST}, {OPER}, {EVENT}).
+        var sections = SplitMarkdownIntoNumberedSections(rawMarkdown);
+
+        using (var doc = DocX.Load(templatePath))
+        {
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{DATE}", NewValue = meetingDate });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{PARTS}", NewValue = present });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{ASSEN}", NewValue = absent });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TOPICS}", NewValue = topics });
+
+            ReplacePlaceholderWithMarkdown(doc, "{DEREZ}", sections.GetValueOrDefault(1, string.Empty));
+            ReplacePlaceholderWithMarkdown(doc, "{GEST}", sections.GetValueOrDefault(2, string.Empty));
+            ReplacePlaceholderWithMarkdown(doc, "{OPER}", sections.GetValueOrDefault(3, string.Empty));
+            ReplacePlaceholderWithMarkdown(doc, "{EVENT}", sections.GetValueOrDefault(4, string.Empty));
+
+            doc.SaveAs(outputPath);
+        }
+
+        Console.WriteLine($"Файл успешно сохранен: {outputPath}");
+
+        OpenFile(outputPath);
+    }
+
+    /// <summary>
+    /// Splits a markdown document into sections keyed by the number in headings shaped like
+    /// "## 1. Some Title". The heading line itself is dropped — only the content between one
+    /// numbered heading and the next (or end of string) is kept.
+    /// </summary>
+    private static Dictionary<int, string> SplitMarkdownIntoNumberedSections(string markdown)
+    {
+        var sections = new Dictionary<int, string>();
+
+        // Matches "## 1." / "##  2." etc. at the start of a line; RegexOptions.Multiline
+        // makes ^ match after every \n, not just at the start of the whole string.
+        var headingRegex = new Regex(@"^##\s*(\d+)\.", RegexOptions.Multiline);
+        var matches = headingRegex.Matches(markdown);
+
+        for (int i = 0; i < matches.Count; i++)
+        {
+            var match = matches[i];
+            if (!int.TryParse(match.Groups[1].Value, out int sectionNumber))
+            {
+                continue;
+            }
+
+            // Content starts on the line right after the heading...
+            int contentStart = markdown.IndexOf('\n', match.Index);
+            contentStart = contentStart == -1 ? markdown.Length : contentStart + 1;
+
+            // ...and runs up to the next numbered heading (or end of the document).
+            int contentEnd = i + 1 < matches.Count ? matches[i + 1].Index : markdown.Length;
+
+            sections[sectionNumber] = markdown[contentStart..contentEnd].Trim();
+        }
+
+        return sections;
+    }
+
+    /// <summary>
+    /// Shows the Avalonia "Save file" dialog and returns the chosen local path,
+    /// or null if the user cancelled. Shared by every SaveXxxSummaryAsync method.
+    /// </summary>
+    private static async Task<string> PickSaveFileAsync(Window ownerWindow, string suggestedFileName)
+    {
+        var topLevel = TopLevel.GetTopLevel(ownerWindow);
+        if (topLevel?.StorageProvider is not { } storageProvider)
+        {
+            LogService.Instance.LogError("StorageProvider is not available on this platform.");
+            return "";
+        }
+
         var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Salva verbale riunione",
+            Title = "Save meeting summary",
             SuggestedFileName = suggestedFileName,
             DefaultExtension = "docx",
             FileTypeChoices = new[]
@@ -56,23 +153,11 @@ public static class MeetingSummarySaver
             }
         });
 
-        if (file is null)
-        {
-            // User cancelled the dialog — nothing to save or open.
-            return;
-        }
-
-        string outputPath = file.Path.LocalPath;
-
-        FillAndSaveTemplate(templatePath, outputPath, meetingName, meetingDate, rawMarkdown);
-
-        Console.WriteLine($"Файл успешно сохранен: {outputPath}");
-
-        OpenFile(outputPath);
+        return file?.Path.LocalPath;
     }
 
     // Opens the saved .docx with whatever application the OS has associated with
-    // that extension (Word, LibreOffice, etc.). 
+    // that extension (Word, LibreOffice, etc.).
     private static void OpenFile(string path)
     {
         try
@@ -81,7 +166,7 @@ public static class MeetingSummarySaver
         }
         catch (Exception ex)
         {
-            LogService.Instance.LogError($"Failed to open file {path}: {ex.Message}");
+            Console.WriteLine($"Не удалось открыть файл автоматически: {ex.Message}");
         }
     }
 
@@ -89,25 +174,53 @@ public static class MeetingSummarySaver
     {
         using (var doc = DocX.Load(templatePath))
         {
-            doc.ReplaceText("{MEETING_NAME}", meetingName);
-            doc.ReplaceText("{DATE}", date);
-
-            var targetParagraph = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains("{TEXT}"));
-            if (targetParagraph != null)
+            // ReplaceText(string, string) is obsolete in newer Xceed.Words.NET versions;
+            // the recommended replacement takes a StringReplaceTextOptions object instead.
+            doc.ReplaceText(new StringReplaceTextOptions
             {
-                // Strip leading whitespace / non-breaking spaces the model sometimes emits.
-                string cleanMarkdown = markdownContent.TrimStart('\r', '\n', ' ', '\t', '\xa0');
+                SearchValue = "{MEETING_NAME}",
+                NewValue = meetingName
+            });
+            doc.ReplaceText(new StringReplaceTextOptions
+            {
+                SearchValue = "{DATE}",
+                NewValue = date
+            });
 
-                AppendMarkdownToDocX(targetParagraph, cleanMarkdown);
-
-                // Remove the now-empty {TEXT} placeholder paragraph itself.
-                targetParagraph.Remove(false);
-            }
+            ReplacePlaceholderWithMarkdown(doc, "{TEXT}", markdownContent);
 
             doc.SaveAs(outputPath);
         }
     }
 
+    /// <summary>
+    /// Finds the paragraph containing <paramref name="placeholder"/>, inserts the rendered
+    /// markdown right after it, then removes the (now empty) placeholder paragraph.
+    /// Shared by FillAndSaveTemplate ({TEXT}) and SaveTemplateSummaryAsync ({DEREZ}/{GEST}/{OPER}/{EVENT}).
+    /// </summary>
+    private static void ReplacePlaceholderWithMarkdown(DocX doc, string placeholder, string markdown)
+    {
+        var targetParagraph = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains(placeholder));
+        if (targetParagraph == null)
+        {
+            return;
+        }
+
+        // Strip leading whitespace / non-breaking spaces the model sometimes emits.
+        string cleanMarkdown = (markdown ?? string.Empty).TrimStart('\r', '\n', ' ', '\t', '\xa0');
+
+        AppendMarkdownToDocX(targetParagraph, cleanMarkdown);
+
+        targetParagraph.Remove(false);
+    }
+
+    /// <summary>
+    /// Walks the parsed markdown tree and inserts each block right after <paramref name="insertAfterParagraph"/>,
+    /// advancing an "anchor" pointer as it goes. This keeps blocks in the original order and preserves any
+    /// template content that comes AFTER the {TEXT} placeholder (e.g. a signature block), which the previous
+    /// implementation (doc.InsertParagraph() / doc.InsertTable()) did not — those always appended to the very
+    /// end of the document, regardless of where the placeholder actually was.
+    /// </summary>
     private static void AppendMarkdownToDocX(Paragraph insertAfterParagraph, string markdown)
     {
         var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
@@ -320,6 +433,7 @@ public static class MeetingSummarySaver
                 sb.Append(' ');
             }
         }
+
         return sb.ToString();
     }
 }

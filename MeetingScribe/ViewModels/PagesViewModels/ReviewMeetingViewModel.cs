@@ -389,7 +389,21 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     private async Task SaveSummary()
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-        MeetingSummarySaver.SaveGeneralSummaryAsync(Session.GeneralSummary, Session.Name, Session.StartTime.ToString("dd.MM.yyyy"), desktop.MainWindow);
+
+        if (SelectedSummaryTab == 0)
+        {
+            MeetingSummarySaver.SaveGeneralSummaryAsync(Session.GeneralSummary, Session.Name, Session.StartTime.ToString("dd.MM.yyyy"), desktop.MainWindow);
+        }
+        else
+        {
+            var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(Session);
+            MeetingSummarySaver.SaveTemplateSummaryAsync(Session.TemplateSummary, Session.StartTime.ToString("dd.MM.yyyy"), present, absent, Session.MeetingTopics, desktop.MainWindow);
+        }
+
+      
+
+
+       
     }
 
     private void RefreshSummaryUI()

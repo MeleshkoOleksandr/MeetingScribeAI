@@ -36,6 +36,7 @@ public class AgendaParser
             bool readingParticipants = false;
             bool readingTopics = false;
 
+            int counter = 1;
             foreach (var p in paragraphs)
             {
                 // Extract clean text from the paragraph
@@ -92,7 +93,7 @@ public class AgendaParser
                         text.StartsWith("Informazioni dalla Direzione", StringComparison.OrdinalIgnoreCase) ||
                         text.StartsWith("Eventuali", StringComparison.OrdinalIgnoreCase))
                     { 
-                        topicsBuilder.AppendLine(" - " + text);
+                        topicsBuilder.AppendLine(counter++.ToString() +". " + text);
                         continue;
                     }
                     // Append topics to the string builder,
