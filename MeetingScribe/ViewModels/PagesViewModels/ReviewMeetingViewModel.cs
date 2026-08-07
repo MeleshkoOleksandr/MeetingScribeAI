@@ -1,9 +1,10 @@
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using Avalonia;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
+
 using MeetingScribe.Enums;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
@@ -11,6 +12,7 @@ using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using MeetingScribe.Views;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -386,7 +388,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveSummary()
     {
-        MeetingSummarySaver.SaveGeneralSummary(Session.GeneralSummary, Session.Name, Session.StartTime.ToString("dd.MM.yyyy"));
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        MeetingSummarySaver.SaveGeneralSummaryAsync(Session.GeneralSummary, Session.Name, Session.StartTime.ToString("dd.MM.yyyy"), desktop.MainWindow);
     }
 
     private void RefreshSummaryUI()

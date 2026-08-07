@@ -1,10 +1,17 @@
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
@@ -16,21 +23,66 @@ public static class MeetingSummarySaver
     private static readonly Xceed.Drawing.Color HeadingColorH1 = Xceed.Drawing.Color.Parse(183, 233, 126);
     private static readonly Xceed.Drawing.Color HeadingColorH2 = Xceed.Drawing.Color.Parse(129, 207, 255);
 
-    public static void SaveGeneralSummary(string rawMarkdown, string meetingName, string meetingDate)
+    public static async Task SaveGeneralSummaryAsync(string rawMarkdown, string meetingName, string meetingDate, Window ownerWindow)
     {
         var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", "VerbaleRiunione_Gen.docx");
-        string outputPath = $"Verbale_{DateTime.Now:yyyyMMdd_HHmm}.docx";
 
         if (!File.Exists(templatePath))
         {
-            // Fail loudly with a clear message instead of letting DocX.Load throw
-            // a generic "file not found" exception deep inside a third-party library.
-            throw new FileNotFoundException($"Template not found: {templatePath}");
+            LogService.Instance.LogError($"Template not found: {templatePath}");
+            return;
         }
+
+        var topLevel = TopLevel.GetTopLevel(ownerWindow);
+        if (topLevel?.StorageProvider is not { } storageProvider)
+        {
+            LogService.Instance.LogInfo("StorageProvider is not available on this platform.");
+            return;
+        }
+
+        var suggestedFileName = $"Verbale_{meetingDate}.docx";
+   
+        var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Salva verbale riunione",
+            SuggestedFileName = suggestedFileName,
+            DefaultExtension = "docx",
+            FileTypeChoices = new[]
+            {
+                new FilePickerFileType("Word Document")
+                {
+                    Patterns = new[] { "*.docx" }
+                }
+            }
+        });
+
+        if (file is null)
+        {
+            // User cancelled the dialog — nothing to save or open.
+            return;
+        }
+
+        string outputPath = file.Path.LocalPath;
 
         FillAndSaveTemplate(templatePath, outputPath, meetingName, meetingDate, rawMarkdown);
 
         Console.WriteLine($"Файл успешно сохранен: {outputPath}");
+
+        OpenFile(outputPath);
+    }
+
+    // Opens the saved .docx with whatever application the OS has associated with
+    // that extension (Word, LibreOffice, etc.). 
+    private static void OpenFile(string path)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.LogError($"Failed to open file {path}: {ex.Message}");
+        }
     }
 
     private static void FillAndSaveTemplate(string templatePath, string outputPath, string meetingName, string date, string markdownContent)
@@ -56,13 +108,6 @@ public static class MeetingSummarySaver
         }
     }
 
-    /// <summary>
-    /// Walks the parsed markdown tree and inserts each block right after <paramref name="insertAfterParagraph"/>,
-    /// advancing an "anchor" pointer as it goes. This keeps blocks in the original order and preserves any
-    /// template content that comes AFTER the {TEXT} placeholder (e.g. a signature block), which the previous
-    /// implementation (doc.InsertParagraph() / doc.InsertTable()) did not — those always appended to the very
-    /// end of the document, regardless of where the placeholder actually was.
-    /// </summary>
     private static void AppendMarkdownToDocX(Paragraph insertAfterParagraph, string markdown)
     {
         var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
@@ -193,18 +238,12 @@ public static class MeetingSummarySaver
 
         // A table needs a paragraph right after it so later content (and our anchor
         // pointer) has somewhere valid to attach to.
-        // NOTE: if your installed Xceed.Words.NET version doesn't expose
-        // Table.InsertParagraphAfterSelf, replace the line below with:
-        //     var spacer = doc.InsertParagraph();  // (falls back to end-of-document, like before)
         var spacer = table.InsertParagraphAfterSelf(string.Empty);
         return spacer;
     }
 
     /// <summary>
     /// Renders inline markdown (bold / italic / line breaks) into a Word paragraph.
-    /// Rewritten to be recursive so nested emphasis (e.g. "**bold *and italic***")
-    /// is handled correctly, and so DelimiterCount == 3 (i.e. ***bold italic***) is no
-    /// longer silently dropped, which is what the original if/else chain did.
     /// </summary>
     private static void AppendInlinesToParagraph(Paragraph p, ContainerInline inlines, Formatting inherited = null)
     {
@@ -245,9 +284,6 @@ public static class MeetingSummarySaver
 
     /// <summary>
     /// Extracts plain text from a table cell for use in Word table cells.
-    /// BUG FIX: the original version only read direct LiteralInline children, so any
-    /// bold/italic text inside a table cell (e.g. "**Scadenza**") was silently dropped.
-    /// This version recurses into EmphasisInline so nothing gets lost.
     /// </summary>
     private static string GetInlineText(Markdig.Extensions.Tables.TableCell cell)
     {
