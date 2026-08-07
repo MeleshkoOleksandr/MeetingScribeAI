@@ -53,10 +53,31 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentSummaryText))]
     private int _selectedSummaryTab = 0;  //Summary tab selection index for UI binding
+
     // The property MarkdownViewer is binded to
-    public string? CurrentSummaryText => SelectedSummaryTab == 0
-        ? Session.GeneralSummary
-        : Session.TemplateSummary;
+    public string? CurrentSummaryText
+    {
+        get => SelectedSummaryTab == 0 ? Session.GeneralSummary : Session.TemplateSummary;
+        set
+        {
+            //  The setter determines where to write the data
+            if (SelectedSummaryTab == 0)
+            {
+                Session.GeneralSummary = value;
+            }
+            else
+            {
+                Session.TemplateSummary = value;
+            }
+            // Please be advised that the value has changed
+            OnPropertyChanged(nameof(CurrentSummaryText));
+            // We mark the session as “modified” so that the save logic works
+            IsDirty = true;
+        }
+    }
+
+    [ObservableProperty] private bool _isEditMode;
+    [ObservableProperty] private string _editModeText = "Edit Summary";
 
 
     public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, MainWindowViewModel mainVm, Action<ReviewMeetingViewModel>? onCloseRequest = null)
@@ -398,12 +419,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         {
             var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(Session);
             MeetingSummarySaver.SaveTemplateSummaryAsync(Session.TemplateSummary, Session.StartTime.ToString("dd.MM.yyyy"), present, absent, Session.MeetingTopics, desktop.MainWindow);
-        }
-
-      
-
-
-       
+        }    
     }
 
     private void RefreshSummaryUI()
@@ -471,6 +487,21 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         finally { IsProcessing = false; }
 
         return result;
+    }
+
+    [RelayCommand]
+    private void ToggleEditMode()
+    {
+        EditModeText = "Stop Edit";
+        _mainVm.IsGlobalBusy = true;
+        IsEditMode = !IsEditMode;
+
+        if (!IsEditMode)
+        {
+            OnSelectedSummaryTabChanged(0);
+            _mainVm.IsGlobalBusy = false;
+            EditModeText = "Edit Summary";
+        }
     }
 
     #endregion

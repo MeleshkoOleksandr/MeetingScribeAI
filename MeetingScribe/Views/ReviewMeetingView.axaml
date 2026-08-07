@@ -60,7 +60,8 @@
                             </Border>
 
                             <!-- MARKDOWN -->
-                            <md:MarkdownScrollViewer Grid.Row="1"
+                            <!-- VIEW MODE (IsEditMode = FALSE) -->
+                            <md:MarkdownScrollViewer Grid.Row="1" IsVisible="{Binding !IsEditMode}"
                                                      Markdown="{Binding CurrentSummaryText}"
                                                      SelectionEnabled="True"  >
                                 <md:MarkdownScrollViewer.Styles>
@@ -75,7 +76,7 @@
                                         <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}"/>
                                         <Setter Property="FontSize" Value="28"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="LineHeight" Value="38"/> 
+                                        <Setter Property="LineHeight" Value="38"/>
                                         <Setter Property="Margin" Value="0,10,0,10"/>
                                     </Style>
                                     <Style Selector="ctxt|CTextBlock.Heading2">
@@ -90,6 +91,20 @@
                                     </Style>
                                 </md:MarkdownScrollViewer.Styles>
                             </md:MarkdownScrollViewer>
+
+                            <!-- Edit MODE (IsEditMode = TRUE) -->
+                            <TextBox IsVisible="{Binding IsEditMode}" Grid.Row="1" 
+                                     Text="{Binding CurrentSummaryText, Mode=TwoWay}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     FontFamily="Consolas, Monospace"
+                                     FontSize="15"
+                                     Padding="20"
+                                     BorderThickness="1"
+                                     BorderBrush="{StaticResource BrushOutlineVariant}"
+                                     Background="#0C0F09"
+                                     Classes="lumina-input"/>
+
 
                         </Grid>
                     </Border>
@@ -191,6 +206,14 @@
                                         <TextBlock Text="Template Summary"/>
                                     </StackPanel>
                                 </Button>
+                                <Button Classes="btn-secondary" Command="{Binding ToggleEditModeCommand}"  HorizontalAlignment="Stretch"  >
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="TextBoxEditOutline" Width="18"/>
+                                        <TextBlock Text="{Binding EditModeText}"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Border Grid.Row="1" Background="{StaticResource BrushOutlineVariant}"  Height="1" Margin="15,10" Opacity="0.6"/>
 
                                 <Button Classes="btn-secondary" Command="{Binding SaveSummaryCommand}" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
