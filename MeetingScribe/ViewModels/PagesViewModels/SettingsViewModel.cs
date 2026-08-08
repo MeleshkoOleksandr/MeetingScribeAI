@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MeetingScribe.Enums;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
 using MeetingScribe.Logic.Services;
@@ -29,10 +30,15 @@ public partial class SettingsViewModel : ViewModelBase
     // Current API key for the selected provider, loaded from SecretsManager
     [ObservableProperty] private string _currentApiKey = "";
 
+    // UI localization
+    public List<LanguageInfo> Languages => LocalizationManager.Instance.AvailableLanguages;
+    [ObservableProperty] private LanguageInfo? _selectedUiLanguage;
+
     public SettingsViewModel()
     {
         LoadManifests();
         LoadAiProviders();
+        SelectedUiLanguage = Languages.FirstOrDefault(l => l.Code == LocalizationManager.Instance.CurrentLanguage);
     }
 
     private void LoadManifests()
@@ -114,5 +120,14 @@ public partial class SettingsViewModel : ViewModelBase
     private void TogglePasswordVisibility()
     {
         IsApiKeyVisible = !IsApiKeyVisible;
+    }
+
+    partial void OnSelectedUiLanguageChanged(LanguageInfo? value)
+    {
+        if (value != null)
+        {
+            LocalizationManager.Instance.LoadLanguage(value.Code);
+
+        }
     }
 }

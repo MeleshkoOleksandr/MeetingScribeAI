@@ -21,10 +21,14 @@
 
                         <StackPanel Spacing="5">
                             <TextBlock Text="INTERFACE LANGUAGE" Classes="label-caps"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                      SelectedIndex="1">
-                                <ComboBoxItem >Italiano</ComboBoxItem>
-                                <ComboBoxItem >English</ComboBoxItem>
+                            <ComboBox ItemsSource="{Binding Languages}"
+                                      SelectedItem="{Binding SelectedUiLanguage}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
                     </StackPanel>

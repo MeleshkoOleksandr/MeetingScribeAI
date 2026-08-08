@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="Assets\I18n\en.json" />
+    <AvaloniaResource Remove="Assets\I18n\it.json" />
     <AvaloniaResource Remove="Assets\Manifests\ai_providers.json" />
     <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
     <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
@@ -49,6 +51,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Assets\I18n\en.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\I18n\it.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Template\VerbaleRiunione_Gen.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
