@@ -7,6 +7,16 @@
     "view_LuminaMsg_Confirm": "Confirm",
     "view_LuminaMsg_Gotit": "Got it",
 
+    "______AddGroupWindow.axaml": "AddGroup",
+    "view_AddGroup_Title": "Create New Group",
+    "view_AddGroup_Subtitle": "Set up a new team category",
+    "view_AddGroup_GroupName": "GROUP NAME",
+    "view_AddGroup_GroupNamePlaceholder": "e.g. Engineering",
+    "view_AddGroup_GroupIcon": "GROUP ICON",
+    "view_AddGroup_ThemeColor": "THEME COLOR",
+    "view_AddGroup_Cancel": "Cancel",
+    "view_AddGroup_CreateGroup": "Create Group",
+
     "______NewMeetingView.axaml": "NewMeet",
     "view_NewMeet_MeetingDetails": "Meeting Details",
     "view_NewMeet_MeetingName": "MEETING NAME",
