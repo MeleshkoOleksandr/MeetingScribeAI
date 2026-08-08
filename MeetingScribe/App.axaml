@@ -49,6 +49,7 @@
             <conv:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter"/>
             <conv:AlertIconToggleConverter x:Key="AlertIconToggleConverter"/>
             <conv:IntToBoolConverter x:Key="IntToBoolConverter"/>
+            <conv:LocalizeFormatConverter x:Key="LocalizeFormatConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="using:MeetingScribe.Logic.Meeting"
              xmlns:vm="using:MeetingScribe.ViewModels"
+             xmlns:loc="using:MeetingScribe.UILogic"
              x:DataType="vm:NewMeetingViewModel"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
@@ -16,13 +17,13 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <icons:MaterialIcon Kind="ClipboardTextOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Text="Meeting Details" Classes="card-title"/>
+                        <TextBlock Text="{loc:L view_NewMeet_MeetingDetails}" Classes="card-title"/>
                     </StackPanel>
                     <StackPanel Spacing="6">
-                        <TextBlock Text="MEETING NAME" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input"  PlaceholderText="Enter meeting name…"  Text="{Binding MeetingName}">
+                        <TextBlock Text="{loc:L view_NewMeet_MeetingName}" Classes="label-caps"/>
+                        <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_EnterMeetingName}" Text="{Binding MeetingName}">
                             <TextBox.InnerRightContent>
-                                <Button Command="{Binding AddCurrentDateCommand}"  ToolTip.Tip="Add current date to name"
+                                <Button Command="{Binding AddCurrentDateCommand}" ToolTip.Tip="{loc:L view_NewMeet_AddCurrentDateToolTip}"
                                         Classes="btn-icon" Margin="0,0,5,0" Cursor="Hand">
                                     <icons:MaterialIcon Kind="CalendarPlus" Width="20" Foreground="{StaticResource BrushPrimary}"/>
                                 </Button>
@@ -30,11 +31,11 @@
                         </TextBox>
                     </StackPanel>
                     <StackPanel Spacing="6">
-                        <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input" PlaceholderText="Add a description…" Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                        <TextBlock Text="{loc:L view_NewMeet_Description}" Classes="label-caps"/>
+                        <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_AddDescription}" Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                     </StackPanel>
                     <StackPanel Spacing="6">
-                        <TextBlock Text="LANGUAGE" Classes="label-caps"/>
+                        <TextBlock Text="{loc:L view_NewMeet_Language}" Classes="label-caps"/>
                         <ComboBox Classes="lumina-combo"
                                   HorizontalAlignment="Stretch"
                                   ItemsSource="{Binding Languages}"
@@ -44,7 +45,6 @@
                                     <TextBlock Text="{Binding Name}" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
-
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>
@@ -53,15 +53,15 @@
             <Border Grid.Row="1" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10">
                 <Grid RowDefinitions="Auto, *">
                     <StackPanel Grid.Row="0" Spacing="16" Margin="0,0,0,16">
-                        <DockPanel  LastChildFill="False">
+                        <DockPanel LastChildFill="False">
                             <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
                                 <icons:MaterialIcon Kind="FormatListBulletedSquare" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
-                                <TextBlock Text="Meeting Topics" Classes="card-title"/>
+                                <TextBlock Text="{loc:L view_NewMeet_MeetingTopics}" Classes="card-title"/>
                             </StackPanel>
                             <!--Loading an agenda from a .docx file-->
                             <Button DockPanel.Dock="Right"
                                     Classes="btn-icon-round"
-                                    ToolTip.Tip="Import from .docx Agenda"
+                                    ToolTip.Tip="{loc:L view_NewMeet_ImportAgendaToolTip}"
                                     Command="{Binding ImportAgendaCommand}">
                                 <icons:MaterialIcon Kind="FileDocumentPlusOutline" Width="17" Height="17"/>
                             </Button>
@@ -70,7 +70,7 @@
 
 
                     <TextBox Grid.Row="1" Classes="lumina-input"
-                             PlaceholderText="Enter key topics to discuss..."
+                             PlaceholderText="{loc:L view_NewMeet_EnterKeyTopics}"
                              AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalAlignment="Stretch"
                              VerticalContentAlignment="Top"
@@ -84,11 +84,17 @@
                     <!-- Header -->
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <icons:MaterialIcon Kind="AccountMultipleOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Text="Participant List" Classes="card-title"/>
+                        <TextBlock Text="{loc:L view_NewMeet_ParticipantList}" Classes="card-title"/>
 
                         <Border Background="{StaticResource BrushPrimary}" CornerRadius="10" Padding="8,2" Margin="5,0">
-                            <TextBlock Padding="3,3,3,0" Text="{Binding SelectedParticipants.Count, StringFormat='\{0\} added'}"
-                                       FontSize="10" FontWeight="Bold" Foreground="#1e3700"/>
+                            <TextBlock Padding="3,3,3,0" FontSize="10" FontWeight="Bold" Foreground="#1e3700">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource LocalizeFormatConverter}">
+                                        <Binding Source="view_NewMeet_ParticipantsAdded" />
+                                        <Binding Path="SelectedParticipants.Count" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </Border>
                     </StackPanel>
 
@@ -164,14 +170,14 @@
                     Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartMeetingCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <icons:MaterialIcon Kind="Microphone" Width="20" Height="20" Foreground="{StaticResource BrushOnPrimary}"/>
-                    <TextBlock Text="Start Recording" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource BrushOnPrimary}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L view_NewMeet_StartRecording}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource BrushOnPrimary}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
             <Button Grid.Column="1" Classes="btn-accent" HorizontalAlignment="Stretch" Height="50" Margin="0,10,0,0"
                     Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).LoadMeetingFromFileCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                     <icons:MaterialIcon Kind="Waveform" Width="20" Height="20" Foreground="{StaticResource ColorOnSecondary}"/>
-                    <TextBlock Text="Load from file" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource ColorOnSecondary}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L view_NewMeet_LoadFromFile}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource ColorOnSecondary}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
         </Grid>

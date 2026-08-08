@@ -1,7 +1,20 @@
 {
     "__LanguageName": "English",
-    "Test": "Test_En",
-    "NewMeeting_Title": "New Meeting",
-    "Button_Record": "Start Recording",
-    "Settings_Title": "Settings"
+
+    "______NewMeetingView.axaml": "NewMeet",
+    "view_NewMeet_MeetingDetails": "Meeting Details",
+    "view_NewMeet_MeetingName": "MEETING NAME",
+    "view_NewMeet_EnterMeetingName": "Enter meeting name…",
+    "view_NewMeet_AddCurrentDateToolTip": "Add current date to name",
+    "view_NewMeet_Description": "DESCRIPTION",
+    "view_NewMeet_AddDescription": "Add a description…",
+    "view_NewMeet_Language": "LANGUAGE",
+    "view_NewMeet_MeetingTopics": "Meeting Topics",
+    "view_NewMeet_ImportAgendaToolTip": "Import from .docx Agenda",
+    "view_NewMeet_EnterKeyTopics": "Enter key topics to discuss...",
+    "view_NewMeet_ParticipantList": "Participant List",
+    "view_NewMeet_ParticipantsAdded": "{0} added",
+    "view_NewMeet_StartRecording": "Start Recording",
+    "view_NewMeet_LoadFromFile": "Load from file"
+
 }
