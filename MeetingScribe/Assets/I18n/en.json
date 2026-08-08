@@ -74,6 +74,21 @@
     "view_Review_TemplateSummary": "Template Summary",
     "view_Review_ExportWord": "Export to Word",
     "view_Review_SaveChanges": "Save Changes",
-    "view_Review_CloseReview": "Close Review"
+    "view_Review_CloseReview": "Close Review",
+
+    "______SettingsView.axaml": "Settings",
+    "view_Settings_GeneralSettings": "General Settings",
+    "view_Settings_InterfaceLanguage": "INTERFACE LANGUAGE",
+    "view_Settings_AIIntelligence": "AI Intelligence",
+    "view_Settings_AIProvider": "AI SERVICE PROVIDER",
+    "view_Settings_ApiKey": "API KEY",
+    "view_Settings_EnterApiKey": "Enter API key...",
+    "view_Settings_KeySavedLocally": "Key is saved locally in secrets.json",
+    "view_Settings_SpeechRecognition": "Speech Recognition",
+    "view_Settings_VadSensitivity": "VAD SENSITIVITY:",
+    "view_Settings_PauseDuration": "PAUSE DURATION:",
+    "view_Settings_MicBoost": "MIC BOOST (Gain):",
+    "view_Settings_RealTimeModel": "REAL TIME RECOGNITION MODEL",
+    "view_Settings_AccurateModel": "ACCURATE MODEL"
 
 }
