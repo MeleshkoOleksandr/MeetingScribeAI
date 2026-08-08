@@ -7,6 +7,7 @@
              xmlns:controls="clr-namespace:MeetingScribe.Views.Controls;assembly=MeetingScribe"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:uilogic="using:MeetingScribe.UILogic"
+             xmlns:loc="using:MeetingScribe.UILogic"
              xmlns:vm="using:MeetingScribe.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.ReviewMeetingView"
@@ -50,10 +51,10 @@
                                     Background="{StaticResource BrushSurfaceContainerHigh}"
                                     CornerRadius="20" Padding="3" Margin="0,0,0,15">
                                 <StackPanel Orientation="Horizontal">
-                                    <RadioButton Content="General"
+                                    <RadioButton Content="{loc:L view_Review_TabGeneral}"
                                                  IsChecked="{Binding SelectedSummaryTab, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
                                                  Classes="mini-tab"/>
-                                    <RadioButton Content="Corporate Template"
+                                    <RadioButton Content="{loc:L view_Review_TabCorpTemplate}"
                                                  IsChecked="{Binding SelectedSummaryTab, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}"
                                                  Classes="mini-tab"/>
                                 </StackPanel>
@@ -112,21 +113,21 @@
                     <!-- 3. MODE: INFO (Metadata Editor) -->
                     <ScrollViewer IsVisible="{Binding IsInfoView}" Padding="20" >
                         <StackPanel  Spacing="25">
-                            <TextBlock Text="Meeting Metadata" FontSize="22" FontWeight="Bold"/>
+                            <TextBlock Text="{loc:L view_Review_MetadataTitle}" FontSize="22" FontWeight="Bold"/>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="MEETING NAME" Classes="label-caps"/>
+                                <TextBlock Text="{loc:L view_Review_MeetingName}" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.Name}" Classes="lumina-input"/>
                             </StackPanel>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="DESCRIPTION" Classes="label-caps"/>
+                                <TextBlock Text="{loc:L view_Review_Description}" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.Description}"
                                          AcceptsReturn="True" MinHeight="100" TextWrapping="Wrap" Classes="lumina-input"/>
                             </StackPanel>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Meeting Topics" Classes="label-caps"/>
+                                <TextBlock Text="{loc:L view_Review_MeetingTopics}" Classes="label-caps"/>
                                 <TextBox Text="{Binding Session.MeetingTopics}"
                                          AcceptsReturn="True" MinHeight="150" TextWrapping="Wrap" Classes="lumina-input"/>
                             </StackPanel>
@@ -147,9 +148,9 @@
                     <StackPanel Grid.Row="0">
                         <Border Background="{StaticResource BrushSurfaceContainerHigh}" Margin="10" CornerRadius="10" Padding="10">
                             <Grid ColumnDefinitions="*, *, *">
-                                <ToggleButton Grid.Column="0" Content="Script" IsChecked="{Binding IsTranscriptionView}" Classes="tab"/>
-                                <ToggleButton Grid.Column="1" Content="Summary" IsChecked="{Binding IsSummaryView}" Classes="tab"/>
-                                <ToggleButton Grid.Column="2" Content="Info" IsChecked="{Binding IsInfoView}" Classes="tab"/>
+                                <ToggleButton Grid.Column="0" Content="{loc:L view_Review_MainTabScript}" IsChecked="{Binding IsTranscriptionView}" Classes="tab"/>
+                                <ToggleButton Grid.Column="1" Content="{loc:L view_Review_MainTabSummary}" IsChecked="{Binding IsSummaryView}" Classes="tab"/>
+                                <ToggleButton Grid.Column="2" Content="{loc:L view_Review_MainTabInfo}" IsChecked="{Binding IsInfoView}" Classes="tab"/>
                             </Grid>
                         </Border>
                     </StackPanel>
@@ -160,50 +161,50 @@
                         <StackPanel Spacing="20">
                             <!-- Script -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsTranscriptionView}"    >
-                                <TextBlock Text="SCRIPT ACTIONS" Classes="label-caps" Opacity="0.6"/>
+                                <TextBlock Text="{loc:L view_Review_ScriptActions}" Classes="label-caps" Opacity="0.6"/>
                                 <Button Classes="btn-secondary" Command="{Binding ImproveRecognitionCommand}"
                                         IsVisible="{Binding !IsImprovingText}" IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AutoFix" Width="18"/>
-                                        <TextBlock Text="Improve Recognition"/>
+                                        <TextBlock Text="{loc:L view_Review_ImproveRecognition}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsImprovingText}"
                                         HorizontalAlignment="Stretch" Background="#332020">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="{StaticResource ColorError}"/>
-                                        <TextBlock Text="Cancel Process" Foreground="{StaticResource ColorError}"/>
+                                        <TextBlock Text="{loc:L view_Review_CancelProcess}" Foreground="{StaticResource ColorError}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" Command="{Binding SplitBySpeakersCommand}"
                                         IsVisible="{Binding !IsAIRef}" IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="AccountConvert" Width="18"/>
-                                        <TextBlock Text="Diarization and Refinement"/>
+                                        <TextBlock Text="{loc:L view_Review_Diarization}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" Command="{Binding CancelCurrentActionCommand}" IsVisible="{Binding IsAIRef}"
                                         HorizontalAlignment="Stretch" Background="#332020">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="CloseCircleOutline" Foreground="{StaticResource ColorError}"/>
-                                        <TextBlock Text="Cancel Process" Foreground="{StaticResource ColorError}"/>
+                                        <TextBlock Text="{loc:L view_Review_CancelProcess}" Foreground="{StaticResource ColorError}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
 
                             <!-- Summary -->
                             <StackPanel Spacing="10" IsVisible="{Binding IsSummaryView}">
-                                <TextBlock Text="AI SUMMARY" Classes="label-caps" Opacity="0.6"/>
+                                <TextBlock Text="{loc:L view_Review_AISummary}" Classes="label-caps" Opacity="0.6"/>
                                 <Button Classes="btn-accent" Command="{Binding GenerateFinalSummaryCommand}" IsEnabled="{Binding !IsGlobalBusy}"  HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal"  Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
-                                        <TextBlock Text="General Summary"/>
+                                        <TextBlock Text="{loc:L view_Review_GeneralSummary}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-accent" Command="{Binding GenerateTemplateSummaryCommand}"  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="Magic" Width="18"/>
-                                        <TextBlock Text="Template Summary"/>
+                                        <TextBlock Text="{loc:L view_Review_TemplateSummary}"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Classes="btn-secondary" Command="{Binding ToggleEditModeCommand}"  HorizontalAlignment="Stretch"  >
@@ -218,7 +219,7 @@
                                 <Button Classes="btn-secondary" Command="{Binding SaveSummaryCommand}" HorizontalAlignment="Stretch" IsEnabled="{Binding !IsGlobalBusy}" >
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <icons:MaterialIcon Kind="FileWordOutline" Width="18"/>
-                                        <TextBlock Text="Export to Word"/>
+                                        <TextBlock Text="{loc:L view_Review_ExportWord}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -250,13 +251,13 @@
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <icons:MaterialIcon Kind="ContentSave" IsVisible="{Binding !IsDirty}" Width="18"/>
                                     <icons:MaterialIcon Kind="ContentSaveAlert" IsVisible="{Binding IsDirty}" Foreground="#FF5252" Width="18"/>
-                                    <TextBlock Text="Save Changes"/>
+                                    <TextBlock Text="{loc:L view_Review_SaveChanges}"/>
                                 </StackPanel>
                             </Button>
                             <Button Classes="btn-secondary"  Command="{Binding CloseReviewCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252" IsEnabled="{Binding !IsGlobalBusy}" >
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                                     <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
-                                    <TextBlock Text="Close Review"/>
+                                    <TextBlock Text="{loc:L view_Review_CloseReview}"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>

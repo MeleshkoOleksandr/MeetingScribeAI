@@ -53,8 +53,27 @@
     "view_Logs_ClearSession": "Clear Session",
     "view_Logs_ToggleStackTraceToolTip": "Toggle StackTrace",
     "view_Logs_CopyToClipboardToolTip": "Copy to clipboard",
-    "view_Logs_DebugInfoStackTrace": "DEBUG INFO / STACK TRACE:"
+    "view_Logs_DebugInfoStackTrace": "DEBUG INFO / STACK TRACE:",
 
-
+    "______ReviewMeetingView.axaml": "ReviewMeeting",
+    "view_Review_TabGeneral": "General",
+    "view_Review_TabCorpTemplate": "Corporate Template",
+    "view_Review_MetadataTitle": "Meeting Metadata",
+    "view_Review_MeetingName": "MEETING NAME",
+    "view_Review_Description": "DESCRIPTION",
+    "view_Review_MeetingTopics": "Meeting Topics",
+    "view_Review_MainTabScript": "Script",
+    "view_Review_MainTabSummary": "Summary",
+    "view_Review_MainTabInfo": "Info",
+    "view_Review_ScriptActions": "SCRIPT ACTIONS",
+    "view_Review_ImproveRecognition": "Improve Recognition",
+    "view_Review_CancelProcess": "Cancel Process",
+    "view_Review_Diarization": "Diarization and Refinement",
+    "view_Review_AISummary": "AI SUMMARY",
+    "view_Review_GeneralSummary": "General Summary",
+    "view_Review_TemplateSummary": "Template Summary",
+    "view_Review_ExportWord": "Export to Word",
+    "view_Review_SaveChanges": "Save Changes",
+    "view_Review_CloseReview": "Close Review"
 
 }
