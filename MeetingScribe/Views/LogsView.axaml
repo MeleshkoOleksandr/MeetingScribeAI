@@ -5,6 +5,7 @@
              xmlns:vm="using:MeetingScribe.ViewModels"
              xmlns:log="clr-namespace:MeetingScribe.Logic.Services"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:loc="using:MeetingScribe.UILogic"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.LogsView"
              x:Name="RootLogsView"
@@ -14,15 +15,15 @@
         <!-- Header / Search -->
         <Border Grid.Row="0" Padding="20" Background="{StaticResource BrushSurfaceContainerLow}">
             <Grid ColumnDefinitions="*, Auto, Auto">
-                <TextBox Grid.Column="0" Text="{Binding SearchQuery}" PlaceholderText="Search logs..." Classes="lumina-input" DockPanel.Dock="Left">
+                <TextBox Grid.Column="0" Text="{Binding SearchQuery}" PlaceholderText="{loc:L view_Logs_SearchPlaceholder}" Classes="lumina-input" DockPanel.Dock="Left">
                     <TextBox.InnerLeftContent><icons:MaterialIcon Kind="Search" Margin="10,0"/></TextBox.InnerLeftContent>
                 </TextBox>
                 <Border Grid.Column="1" Background="{StaticResource BrushSurfaceContainerHigh}"
                         CornerRadius="6" Width="190" Margin="20,0,20,0" Padding="6,0">
                     <Grid ColumnDefinitions="*, *">
-                        <ToggleButton Grid.Column="0" Content="Session" Classes="tab"
+                        <ToggleButton Grid.Column="0" Content="{loc:L view_Logs_TabSession}" Classes="tab"
                                       IsChecked="{Binding !IsHistoryMode}"/>
-                        <ToggleButton Grid.Column="1" Content="History" Classes="tab"
+                        <ToggleButton Grid.Column="1" Content="{loc:L view_Logs_TabHistory}" Classes="tab"
                                       IsChecked="{Binding IsHistoryMode}"/>
                     </Grid>
                 </Border>
@@ -30,7 +31,7 @@
                     <Button Classes="btn-secondary" Command="{Binding ClearLogsCommand}" HorizontalAlignment="Stretch" Background="#332020">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <icons:MaterialIcon Kind="TrashCanOutline" Foreground="{StaticResource ColorError}"/>
-                            <TextBlock Text="Clear Session" Foreground="{StaticResource ColorError}"/>
+                            <TextBlock Text="{loc:L view_Logs_ClearSession}" Foreground="{StaticResource ColorError}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -80,7 +81,7 @@
                                                   IsChecked="{Binding IsExpanded}"
                                                   IsVisible="{Binding HasStackTrace}"
                                                   Classes="btn-expand"
-                                                  ToolTip.Tip="Toggle StackTrace">
+                                                  ToolTip.Tip="{loc:L view_Logs_ToggleStackTraceToolTip}">
                                         <icons:MaterialIcon Kind="{Binding IsExpanded, Converter={StaticResource AlertIconToggleConverter}}"
                                                             Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}"
                                                             Width="18"/>
@@ -92,7 +93,7 @@
                                             Margin="10,0"
                                             Command="{Binding #RootLogsView.((vm:LogsViewModel)DataContext).CopyEntryToClipboardCommand}"
                                             CommandParameter="{Binding}"
-                                            ToolTip.Tip="Copy to clipboard">
+                                            ToolTip.Tip="{loc:L view_Logs_CopyToClipboardToolTip}">
                                         <icons:MaterialIcon Kind="ContentCopy" Width="16" Opacity="0.5"/>
                                     </Button>
 
@@ -105,7 +106,7 @@
                                         Margin="40,5,0,5" CornerRadius="4"
                                         BorderBrush="#331111" BorderThickness="1">
                                     <StackPanel Spacing="10">
-                                        <TextBlock Text="DEBUG INFO / STACK TRACE:" FontSize="10" Foreground="#ffb4ab" Opacity="0.5" FontWeight="Bold"/>
+                                        <TextBlock Text="{loc:L view_Logs_DebugInfoStackTrace}" FontSize="10" Foreground="#ffb4ab" Opacity="0.5" FontWeight="Bold"/>
                                         <SelectableTextBlock Text="{Binding StackTrace}"
                                                              Foreground="#ffb4ab"
                                                              FontSize="11"

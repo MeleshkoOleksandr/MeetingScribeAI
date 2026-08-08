@@ -44,6 +44,17 @@
     "view_Archive_KeyTopics": "KEY TOPICS",
     "view_Archive_Participants": "PARTICIPANTS",
     "view_Archive_OpenRecording": "Open Recording",
-    "view_Archive_DeleteFromArchive": "Delete from Archive"
+    "view_Archive_DeleteFromArchive": "Delete from Archive",
+
+    "______LogsView.axaml": "Logs",
+    "view_Logs_SearchPlaceholder": "Search logs...",
+    "view_Logs_TabSession": "Session",
+    "view_Logs_TabHistory": "History",
+    "view_Logs_ClearSession": "Clear Session",
+    "view_Logs_ToggleStackTraceToolTip": "Toggle StackTrace",
+    "view_Logs_CopyToClipboardToolTip": "Copy to clipboard",
+    "view_Logs_DebugInfoStackTrace": "DEBUG INFO / STACK TRACE:"
+
+
 
 }
