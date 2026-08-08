@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:loc="using:MeetingScribe.UILogic"
         x:Class="MeetingScribe.Views.LuminaMessageBox"
         Width="420" Height="220"
         WindowStartupLocation="CenterOwner"
@@ -51,7 +52,7 @@
 
             <Border Grid.Row="1" Padding="20,10,20,20"> 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="15" >
-                <Button Name="CancelBtn" Content="Cancel" Classes="btn-ghost" Foreground="White"
+                <Button Name="CancelBtn" Content="{loc:L view_LuminaMsg_Cancel}" Classes="btn-ghost" Foreground="White"
                         Padding="20,12" CornerRadius="8"  FontWeight="SemiBold" Opacity="0.6"/>
                 <Button Name="ConfirmBtn" Padding="20,12" CornerRadius="8" FontWeight="Bold">
                     <StackPanel Orientation="Horizontal" Spacing="8">

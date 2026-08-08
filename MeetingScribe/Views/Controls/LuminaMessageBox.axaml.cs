@@ -1,9 +1,10 @@
-using Material.Icons.Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Material.Icons;
-using System.Threading.Tasks;
+using Material.Icons.Avalonia;
 using MeetingScribe.Enums;
+using MeetingScribe.Logic.Services;
+using System.Threading.Tasks;
 
 namespace MeetingScribe.Views;
 
@@ -11,6 +12,8 @@ namespace MeetingScribe.Views;
 public partial class LuminaMessageBox : Window
 {
     public enum MessageBoxResult { Confirm, Cancel }
+
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
 
     public LuminaMessageBox()
     {
@@ -54,7 +57,7 @@ public partial class LuminaMessageBox : Window
                 mainIcon.Kind = MaterialIconKind.DeleteForeverOutline;
                 confirmBtn.Classes.Add("danger");
                 confirmIcon.Kind = MaterialIconKind.DeleteOutline;
-                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? "Delete" : confirmBtnText;
+                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? Loc("view_LuminaMsg_Delete") : confirmBtnText;
                 bottomBar.Foreground = Brush.Parse("#ffb4ab");
                 break;
 
@@ -64,7 +67,7 @@ public partial class LuminaMessageBox : Window
                 mainIcon.Kind = MaterialIconKind.HelpCircleOutline;
                 confirmBtn.Classes.Add("primary");
                 confirmIcon.Kind = MaterialIconKind.Check;
-                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? "Confirm" : confirmBtnText;
+                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? Loc("view_LuminaMsg_Confirm") : confirmBtnText;
                 bottomBar.Foreground = Brush.Parse("#b7e97e");
                 break;
 
@@ -74,7 +77,7 @@ public partial class LuminaMessageBox : Window
                 mainIcon.Kind = MaterialIconKind.InformationOutline;
                 confirmBtn.Classes.Add("primary");
                 confirmIcon.Kind = MaterialIconKind.Check;
-                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? "Got it" : confirmBtnText;
+                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? Loc("view_LuminaMsg_Gotit") : confirmBtnText;
                 cancelBtn.IsVisible = false; // Hide the cancel button for message type
                 bottomBar.Foreground = Brush.Parse("#b7e97e");
                 break;

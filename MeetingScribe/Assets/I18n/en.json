@@ -1,6 +1,12 @@
 {
     "__LanguageName": "English",
 
+    "______LuminaMessageBox.axaml": "LuminaMsg",
+    "view_LuminaMsg_Cancel": "Cancel",
+    "view_LuminaMsg_Delete": "Delete",
+    "view_LuminaMsg_Confirm": "Confirm",
+    "view_LuminaMsg_Gotit": "Got it",
+
     "______NewMeetingView.axaml": "NewMeet",
     "view_NewMeet_MeetingDetails": "Meeting Details",
     "view_NewMeet_MeetingName": "MEETING NAME",
