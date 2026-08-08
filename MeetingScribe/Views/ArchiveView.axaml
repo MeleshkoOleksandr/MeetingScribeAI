@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:MeetingScribe.ViewModels"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:loc="using:MeetingScribe.UILogic"
              x:DataType="vm:ArchiveViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.ArchiveView">
@@ -14,7 +15,7 @@
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
                  <!-- Search -->
                 <TextBox Grid.Column="0" Text="{Binding SearchText}"
-                         PlaceholderText="Search archive..." Classes="lumina-input">
+                         PlaceholderText="{loc:L view_Archive_SearchPlaceholder}" Classes="lumina-input">
                     <TextBox.InnerLeftContent>
                         <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
                     </TextBox.InnerLeftContent>
@@ -44,7 +45,7 @@
                 </Button>
                 </StackPanel>
             </Grid>
-            <TextBlock Grid.Row="1" Text="Archive" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
+            <TextBlock Grid.Row="1" Text="{loc:L view_Archive_Title}" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
             <!-- List of Meetings -->
             <ListBox Grid.Row="2" Background="Transparent" BorderThickness="0" Classes="LuminaList"
                      ItemsSource="{Binding FilteredMeetings}"
@@ -70,9 +71,11 @@
                                                        FontSize="13" Foreground="Gray"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <icons:MaterialIcon Kind="ClockOutline" Width="14" Foreground="Gray"/>
-                                           <TextBlock Text="{Binding Duration, StringFormat=\{0:mm\} min}"
-                                                       FontSize="13" Foreground="Gray"/>
+                                           <icons:MaterialIcon Kind="ClockOutline" Width="14" Foreground="Gray"/>
+                                           <TextBlock FontSize="13" Foreground="Gray">
+                                               <Run Text="{Binding Duration, StringFormat=\{0:mm\}}" />          
+                                               <Run Text="{loc:L view_Archive_Min}" />
+                                           </TextBlock>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
@@ -92,7 +95,7 @@
             <!-- We display details only if something is selected -->
             <Grid IsVisible="{Binding SelectedMeeting, Converter={x:Static ObjectConverters.IsNotNull}}" RowDefinitions="Auto, *, Auto" >
                 <StackPanel Grid.Row="0" Spacing="10">
-                    <TextBlock Text="MEETING DETAILS" Classes="label-caps" Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
+                    <TextBlock Text="{loc:L view_Archive_MeetingDetails}" Classes="label-caps" Foreground="{StaticResource BrushSecondary}" Opacity="0.6"/>
                     <TextBlock Text="{Binding SelectedMeeting.Name}" FontSize="22" FontWeight="Bold" TextWrapping="Wrap" Margin="0,10,0,0"/>
                     <StackPanel  Orientation="Horizontal" Spacing="10" >
                         <StackPanel Orientation="Horizontal" Spacing="3" Opacity="0.4">
@@ -101,7 +104,10 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="3" Opacity="0.4">
                             <icons:MaterialIcon Kind="ClockOutline" Width="14"/>
-                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:mm\} min}" FontSize="12"/>
+                            <TextBlock FontSize="12">
+                                <Run Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:mm\}}" />       
+                                <Run Text="{loc:L view_Archive_Min}" />
+                            </TextBlock>
                         </StackPanel>
                         
                         <!-- Separaor -->
@@ -110,29 +116,29 @@
                         <icons:MaterialIcon Kind="TextAccount" 
                                             Width="16" Height="16"
                                             Foreground="{Binding SelectedMeeting.hasTranscription, Converter={StaticResource BoolToStatusBrushConverter}}"
-                                            ToolTip.Tip="Transcription Available"/>
+                                            ToolTip.Tip="{loc:L view_Archive_TranscriptionAvailable}"/>
                         <!-- Sammary -->
                         <icons:MaterialIcon Kind="AutoFix" 
                                             Width="16" Height="16"
                                             Foreground="{Binding SelectedMeeting.hasSummary, Converter={StaticResource BoolToStatusBrushConverter}}"
-                                            ToolTip.Tip="AI Summary Available"/>
+                                            ToolTip.Tip="{loc:L view_Archive_SummaryAvailable}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <ScrollViewer Grid.Row="1" Margin="0,20,0,0">
                     <StackPanel Spacing="20">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="DESCRIPTION" Classes="label-caps" Opacity="0.6"/>
+                            <TextBlock Text="{loc:L view_Archive_Description}" Classes="label-caps" Opacity="0.6"/>
                             <TextBlock Text="{Binding SelectedMeeting.Description}" TextWrapping="Wrap" LineHeight="20"/>
                         </StackPanel>
                         <!--   Topics -->
                         <StackPanel Spacing="10">
-                            <TextBlock Text="KEY TOPICS" Classes="label-caps" Opacity="0.6"/>
+                            <TextBlock Text="{loc:L view_Archive_KeyTopics}" Classes="label-caps" Opacity="0.6"/>
                             <Border Classes="chip" HorizontalAlignment="Left"><TextBlock Text="Tags mockup"/></Border>
                         </StackPanel>
                         <!--   Team -->
                         <StackPanel Spacing="10">
-                            <TextBlock Text="PARTICIPANTS" Classes="label-caps" Opacity="0.6"/>
+                            <TextBlock Text="{loc:L view_Archive_Participants}" Classes="label-caps" Opacity="0.6"/>
                             <StackPanel Orientation="Horizontal" Spacing="2">
                            <!-- <Border Classes="chip" CornerRadius="180" Height="30" Background="Red" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
                                 <Border Classes="chip" CornerRadius="180" Height="30" Background="BlueViolet" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
@@ -147,13 +153,13 @@
                     <Button Classes="btn-accent" Command="{Binding OpenSelectedMeetingCommand}" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <icons:MaterialIcon Kind="OpenInApp" Width="18"/>
-                            <TextBlock Text="Open Recording"/>
+                            <TextBlock Text="{loc:L view_Archive_OpenRecording}"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="btn-secondary"  Command="{Binding DeleteMeetingCommand}"  HorizontalAlignment="Stretch" Foreground="#FF5252">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                             <icons:MaterialIcon Kind="DeleteOutline" Width="18"/>
-                            <TextBlock Text="Delete from Archive"/>
+                            <TextBlock Text="{loc:L view_Archive_DeleteFromArchive}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

@@ -31,6 +31,19 @@
     "view_NewMeet_ParticipantList": "Participant List",
     "view_NewMeet_ParticipantsAdded": "{0} added",
     "view_NewMeet_StartRecording": "Start Recording",
-    "view_NewMeet_LoadFromFile": "Load from file"
+    "view_NewMeet_LoadFromFile": "Load from file",
+
+    "______ArchiveView.axaml": "Archive",
+    "view_Archive_SearchPlaceholder": "Search archive...",
+    "view_Archive_Title": "Archive",
+    "view_Archive_Min": "min",
+    "view_Archive_MeetingDetails": "MEETING DETAILS",
+    "view_Archive_TranscriptionAvailable": "Transcription Available",
+    "view_Archive_SummaryAvailable": "AI Summary Available",
+    "view_Archive_Description": "DESCRIPTION",
+    "view_Archive_KeyTopics": "KEY TOPICS",
+    "view_Archive_Participants": "PARTICIPANTS",
+    "view_Archive_OpenRecording": "Open Recording",
+    "view_Archive_DeleteFromArchive": "Delete from Archive"
 
 }
