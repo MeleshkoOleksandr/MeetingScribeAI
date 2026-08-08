@@ -89,6 +89,19 @@
     "view_Settings_PauseDuration": "PAUSE DURATION:",
     "view_Settings_MicBoost": "MIC BOOST (Gain):",
     "view_Settings_RealTimeModel": "REAL TIME RECOGNITION MODEL",
-    "view_Settings_AccurateModel": "ACCURATE MODEL"
+    "view_Settings_AccurateModel": "ACCURATE MODEL",
 
+    "______TeamView.axaml": "Team",
+    "view_Team_ParticipantsTitle": "Participants",
+    "view_Team_SearchPlaceholder": "Search members...",
+    "view_Team_BtnAdd": "+ ADD",
+    "view_Team_BtnDelete": "DELETE",
+    "view_Team_BtnClear": "CLEAR",
+    "view_Team_GroupsTitle": "Groups",
+    "view_Team_MembersCount": "Members",
+    "view_Team_FullName": "FULL NAME",
+    "view_Team_Alias": "ALIAS",
+    "view_Team_TagColor": "TAG COLOR",
+    "view_Team_Position": "POSITION",
+    "view_Team_AssignedGroups": "ASSIGNED GROUPS"
 }

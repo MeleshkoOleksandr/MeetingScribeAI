@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:MeetingScribe.ViewModels"
              xmlns:meet="using:MeetingScribe.Logic.Meeting"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:loc="using:MeetingScribe.UILogic"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.TeamView" x:DataType="vm:TeamViewModel">
     <Grid ColumnDefinitions="*, 300">
@@ -18,11 +19,11 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
                         <icons:MaterialIcon Margin="0,5" Kind="AccountMultiple" IconSize="20" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="Participants" Classes="card-title"/>
+                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="{loc:L view_Team_ParticipantsTitle}" Classes="card-title"/>
                     </StackPanel>
                     <!-- Search -->
                     <TextBox Grid.Column="0" Text="{Binding ParticipantSearchText}"
-                             PlaceholderText="Search members..." Classes="lumina-input">
+                             PlaceholderText="{loc:L view_Team_SearchPlaceholder}" Classes="lumina-input">
                         <TextBox.InnerLeftContent>
                             <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
                         </TextBox.InnerLeftContent>
@@ -55,11 +56,11 @@
             <!-- Participant Control Buttons-->
             <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
                 <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
                             Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
-                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
                             Command="{Binding DeleteParticipantCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
                             Command="{Binding ClearParticipantsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
@@ -70,7 +71,7 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
                         <icons:MaterialIcon Margin="0,5" Kind="AccountGroup" IconSize="20" Foreground="{StaticResource BrushSecondary}"/>
-                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushSecondary}" FontSize="20" Text="Groups" Classes="card-title"/>
+                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushSecondary}" FontSize="20" Text="{loc:L view_Team_GroupsTitle}" Classes="card-title"/>
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -88,7 +89,11 @@
                                                     Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding MemberCount, StringFormat='\{0\} Members'}"  FontSize="11" Opacity="0.4"/>
+                                    <TextBlock FontSize="11" Opacity="0.4">
+                                        <Run Text="{Binding MemberCount}" />
+                                        <Run Text=" " />
+                                        <Run Text="{loc:L view_Team_MembersCount}" />
+                                    </TextBlock>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -99,11 +104,11 @@
             <!-- Group Control Buttons-->
             <Border Grid.Row="5"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
                 <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="+ ADD" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
                             Command="{Binding AddGroupCommand}" Classes="btn-primary"/>
-                    <Button Grid.Column="1" Margin="5" Content="DELETE" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
                             Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="CLEAR" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
                             Command="{Binding ClearGroupsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
                 </Grid>
             </Border>
@@ -156,17 +161,17 @@
 
                     <!-- Input fields -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="FULL NAME" Classes="label-caps"/>
+                        <TextBlock Text="{loc:L view_Team_FullName}" Classes="label-caps"/>
                         <TextBox Text="{Binding SelectedParticipant.Name , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                     </StackPanel>
 
                     <Grid ColumnDefinitions="*, *">
                         <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
-                            <TextBlock Text="ALIAS" Classes="label-caps"/>
+                            <TextBlock Text="{loc:L view_Team_Alias}" Classes="label-caps"/>
                             <TextBox Text="{Binding SelectedParticipant.Alias , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8">
-                            <TextBlock Text="TAG COLOR" Classes="label-caps"/>
+                            <TextBlock Text="{loc:L view_Team_TagColor}" Classes="label-caps"/>
                             <ColorPicker Color="{Binding SelectedParticipant.TagColor, Converter={StaticResource HexToColorConverter}}"
                                          Palette="{StaticResource ColorPickerPalette}"
                                          Width="120" Height="40"
@@ -176,12 +181,12 @@
                     </Grid>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="POSITION" Classes="label-caps"/>
+                        <TextBlock Text="{loc:L view_Team_Position}" Classes="label-caps"/>
                         <TextBox Text="{Binding SelectedParticipant.Position , UpdateSourceTrigger=PropertyChanged}" Classes="lumina-input"/>
                     </StackPanel>
 
                     <StackPanel Spacing="10" Margin="0,15,0,0">
-                        <TextBlock Text="ASSIGNED GROUPS" Classes="label-caps" Opacity="0.6"/>
+                        <TextBlock Text="{loc:L view_Team_AssignedGroups}" Classes="label-caps" Opacity="0.6"/>
 
                         <WrapPanel Orientation="Horizontal">
                             <!-- List of added teams -->
