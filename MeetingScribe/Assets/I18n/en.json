@@ -75,6 +75,8 @@
     "view_Review_ExportWord": "Export to Word",
     "view_Review_SaveChanges": "Save Changes",
     "view_Review_CloseReview": "Close Review",
+    "view_Review_AssignSPEAKER": "ASSIGN SPEAKER",
+
 
     "______SettingsView.axaml": "Settings",
     "view_Settings_GeneralSettings": "General Settings",

@@ -48,37 +48,11 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isImprovingText; // Flag to indicate if text improvement is in progress
     [ObservableProperty] private bool _isAIRef; // Flag to indicate ai refinement is in progress
 
-    ///   ---   Summaries
-    // 0 = General, 1 = Template
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CurrentSummaryText))]
-    private int _selectedSummaryTab = 0;  //Summary tab selection index for UI binding
-
-    // The property MarkdownViewer is binded to
-    public string? CurrentSummaryText
-    {
-        get => SelectedSummaryTab == 0 ? Session.GeneralSummary : Session.TemplateSummary;
-        set
-        {
-            //  The setter determines where to write the data
-            if (SelectedSummaryTab == 0)
-            {
-                Session.GeneralSummary = value;
-            }
-            else
-            {
-                Session.TemplateSummary = value;
-            }
-            // Please be advised that the value has changed
-            OnPropertyChanged(nameof(CurrentSummaryText));
-            // We mark the session as “modified” so that the save logic works
-            IsDirty = true;
-        }
-    }
-
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private string _editModeText = "Edit Summary";
 
+    [ObservableProperty] private TranscriptLine? _selectedTranscriptLine;
+    [ObservableProperty] private Participant? _selectedParticipantForLine;
 
     public ReviewMeetingViewModel(MeetingSession session, TranscriptionService transcriptionService, string whisperPath, AppSettings settings, MainWindowViewModel mainVm, Action<ReviewMeetingViewModel>? onCloseRequest = null)
     {
@@ -367,10 +341,94 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
     }
 
+    private bool _isSyncingSelection; // Fuse Flag 
+    // When we select a line, we clear the selected member in the combo box,
+    // to prevent it from being accidentally renamed right away
+    partial void OnSelectedTranscriptLineChanged(TranscriptLine? value)
+    {
+        if (value == null)
+        {
+            SelectedParticipantForLine = null;
+            return;
+        }
+        // Enable sync mode (to prevent the renaming from taking effect)
+        _isSyncingSelection = true;
+       try
+        {
+            // Search the list of participants for the one whose name matches the name in the line
+            SelectedParticipantForLine = Session.Participants.FirstOrDefault(p =>
+                p.Name.Equals(value.SpeakerName, StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            // Turn off sync mode
+            _isSyncingSelection = false;
+        }
+    }
+
+    // When we select a person from the ComboBox
+    partial void OnSelectedParticipantForLineChanged(Participant? value)
+    {
+        // CRITICAL : If this is just synchronization when clicking on a row, do nothing
+        if (_isSyncingSelection) return;
+
+        if (value == null || SelectedTranscriptLine == null) return;
+
+        string oldName = SelectedTranscriptLine.SpeakerName;
+        string newName = value.Name;
+
+        // check to see if we've selected the same person who has already been appointed
+        if (oldName == newName) return;
+
+        // THE LOGIC BEHIND THE RENAMING 
+        if (oldName.StartsWith("Speaker", StringComparison.OrdinalIgnoreCase))
+        {
+            // Batch Replacement for Speaker X
+            foreach (var line in Session.FullTranscript)
+            {
+                if (line.SpeakerName == oldName) line.SpeakerName = newName;
+            }
+        }
+        else
+        {
+            // Selective Replacement
+            SelectedTranscriptLine.SpeakerName = newName;
+        }
+
+        IsDirty = true;
+    }
+
     #endregion
 
 
     #region Sammary mode
+
+    // 0 = General, 1 = Template
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentSummaryText))]
+    private int _selectedSummaryTab = 0;  //Summary tab selection index for UI binding
+
+    // The property MarkdownViewer is binded to
+    public string? CurrentSummaryText
+    {
+        get => SelectedSummaryTab == 0 ? Session.GeneralSummary : Session.TemplateSummary;
+        set
+        {
+            //  The setter determines where to write the data
+            if (SelectedSummaryTab == 0)
+            {
+                Session.GeneralSummary = value;
+            }
+            else
+            {
+                Session.TemplateSummary = value;
+            }
+            // Please be advised that the value has changed
+            OnPropertyChanged(nameof(CurrentSummaryText));
+            // We mark the session as “modified” so that the save logic works
+            IsDirty = true;
+        }
+    }
 
     private enum SummaryTypes
     {
@@ -419,7 +477,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         {
             var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(Session);
             MeetingSummarySaver.SaveTemplateSummaryAsync(Session.TemplateSummary, Session.StartTime.ToString("dd.MM.yyyy"), present, absent, Session.MeetingTopics, desktop.MainWindow);
-        }    
+        }
     }
 
     private void RefreshSummaryUI()

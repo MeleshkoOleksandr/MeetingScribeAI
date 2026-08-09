@@ -75,6 +75,7 @@
     "view_Review_ExportWord": "Esporta in Word",
     "view_Review_SaveChanges": "Salva modifiche",
     "view_Review_CloseReview": "Chiudi revisione",
+    "view_Review_AssignSPEAKER": "ASSEGNARE L'ORATORE",
 
     "______SettingsView.axaml": "Settings",
     "view_Settings_GeneralSettings": "Impostazioni generali",
