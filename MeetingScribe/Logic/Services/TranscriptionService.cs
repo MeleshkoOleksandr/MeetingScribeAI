@@ -54,8 +54,10 @@ public class TranscriptionService : IDisposable
     /// <summary>
     /// Loads AI models and initializes engines.
     /// </summary>
-    public async Task InitializeAsync(string whisperModelPath, string transcriptionLanguage, string initialPrompt = "", bool useAllProcessor = false)
+    public async Task InitializeAsync(string whisperModelPath, string transcriptionLanguage, AppSettings activeSettings, string initialPrompt = "", bool useAllProcessor = false)
     {
+        ActiveSettings  = activeSettings;
+
         if (!File.Exists(whisperModelPath))
             throw new FileNotFoundException("AI Model files not found. Check Assets folder.");
         // If models are already loaded, unload them first to free resources

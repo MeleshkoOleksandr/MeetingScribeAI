@@ -205,7 +205,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             // Initialize the service with the Quality Model and our Prompt
             // We use 'true' for useAllProcessor to finish faster
-            await _transcriptionService.InitializeAsync(_whisperPath, Session.Language, oldText, true);
+            await _transcriptionService.InitializeAsync(_whisperPath, Session.Language, Settings, oldText, true);
 
             // Start processing with progress reporting
             IsIndeterminate = false;

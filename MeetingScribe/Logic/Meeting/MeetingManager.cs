@@ -42,7 +42,7 @@ public class MeetingManager
 
         // 4. Init Whisper
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", settings.SelectedModel);
-        await _transcriptionService.InitializeAsync(whisperPath, CurrentSession.Language);
+        await _transcriptionService.InitializeAsync(whisperPath, CurrentSession.Language, settings);
 
         return CurrentSession;
     }
