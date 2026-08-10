@@ -51,6 +51,10 @@ public class TranscriptionService : IDisposable
     // Event for UI to show the volume meter (0.0 to 1.0)
     public event Action<float>? VolumeLevelChanged;
 
+    //Audio boost settings
+    const float SoftKneeThreshold = 0.8f;
+    const float MeterSensitivity = 1.5f; 
+
     /// <summary>
     /// Loads AI models and initializes engines.
     /// </summary>
@@ -279,41 +283,58 @@ public class TranscriptionService : IDisposable
     }
 
     /// <summary>
-    /// Converts raw PCM bytes to normalized float samples [-1.0, 1.0].
+    /// Converts raw PCM bytes to normalized float samples [-1.0, 1.0],
+    /// applying gain with a soft-knee limiter, and reports RMS level.
     /// </summary>
     private float[] ConvertToFloat(byte[] buffer)
     {
         int sampleCount = buffer.Length / 2;
         float[] rawSamples = new float[sampleCount];
         float[] boostedSamples = new float[sampleCount];
-        float maxAbs = 0;
+
+        // Set the gain once for the entire buffer—this prevents a gain “spike”
+        // in the middle of the buffer if ActiveSettings changes in another thread.
+        float gain = ActiveSettings.AudioGain;
+        float sumOfSquares = 0f;
 
         for (int i = 0; i < sampleCount; i++)
         {
             short sample = BitConverter.ToInt16(buffer, i * 2);
+
             // --- Raw audio ---
-            float normalized = sample / 32768.0f;
-            rawSamples[i] = normalized;
-
+            float raw = sample / 32768.0f;
+            rawSamples[i] = raw;
             // --- Boosted audio ---
-            float boosted = normalized * ActiveSettings.AudioGain;
-            // Soft clipping formula: simple cubic limiter
-            if (boosted > 1.0f) boosted = 1.0f;
-            else if (boosted < -1.0f) boosted = -1.0f;
-            else boosted = boosted - (float)Math.Pow(boosted, 3) / 3; // Soften the peaks
+            float boosted = raw * gain;
 
-            boostedSamples[i] = Math.Clamp(boosted, -1.0f, 1.0f);
+            // Soft-knee limiter: the signal is processed only if it exceeds the threshold.
+            // Below the threshold, the signal remains unaltered, so no unnecessary distortion
+            // occurs during quiet passages.
+            if (boosted > SoftKneeThreshold)
+            {
+                float excess = boosted - SoftKneeThreshold;
+                boosted = SoftKneeThreshold + excess / (1f + excess * 2f);
+            }
+            else if (boosted < -SoftKneeThreshold)
+            {
+                float excess = boosted + SoftKneeThreshold;
+                boosted = -SoftKneeThreshold + excess / (1f - excess * 2f);
+            }
+            // Hard cap in case of extreme gain (the formula above
+            // asymptotically approaches ~1.3, so clamping is mandatory).
+            boosted = Math.Clamp(boosted, -1.0f, 1.0f);
+            boostedSamples[i] = boosted;
 
-            // Track peak for the meter
-            float abs = Math.Abs(boostedSamples[i]);
-            if (abs > maxAbs) maxAbs = abs;
+            sumOfSquares += boosted * boosted;
         }
+
         // Record to file the raw and boosted audio for the full meeting
         RawAudioCaptured?.Invoke(rawSamples);
         BoostedAudioCaptured?.Invoke(boostedSamples);
 
-        // Raise event with the peak level
-        VolumeLevelChanged?.Invoke(maxAbs);
+        // RMS provides a smoother and more “accurate” measure of volume
+        float rms = (float)Math.Sqrt(sumOfSquares / sampleCount);
+        VolumeLevelChanged?.Invoke(Math.Clamp(rms * MeterSensitivity, 0f, 1f));
 
         return boostedSamples;
     }
