@@ -119,11 +119,19 @@ public class GeminiAiService : IAiService
 
                 5. SUMMARIZING (FACT-PRESERVING DIGEST): Create a comprehensive, dense but complete summary of THIS segment specifically optimized for later consolidation into a final meeting summary.
                    CRITICAL: Do not generalize. You must preserve:
-                   - Key discusion topics and points
-                   - Specific numbers, metrics, dates, and deadlines (e.g., ""SIR meeting on August 4th and 6th"").
-                   - Names of projects, documents, and tools 
-                   - Names of people mentioned and their roles or actions 
-                   - Action items, decisions, and specific problems raised.
+                    a. PRESERVE ALL DATA & METRICS:
+                       - Extract exact numbers, KPIs, percentages, and metrics.
+                       - ALWAYS capture context and comparisons if present (e.g., ""2025 vs 2026"", ""drop caused by X impacting Y"").
+                    b. DECISIONS & ACTION ITEMS (THE ""GOLDEN TRIANGLE""):
+                       - Explicitly highlight: WHAT must be done (Action) + WHO is responsible (Role/Name: e.g., CR, SM, CF) + WHEN (Deadline/Date).
+                       - Never extract an action without looking for its owner and deadline in the text.
+                    c. FEEDBACK & DIRECTIVES (Direction / UMA / Client):
+                       - Separate external/management feedback into structured operational instructions (What needs to be done, what changes, constraints).
+                    d. TOOLS & PROCESSES:
+                       - Explicitly log mentions of systems, tools, and internal procedures (e.g., Hyper, Job Room, PCI). Record what to do, how, and when.
+                    e. ELIMINATE CHITCHAT & VAGUE STATEMENTS:
+                       - Filter out vague statements like ""things are going well"" or general discussions without consequences.
+                       - Focus exclusively on: Findings / Operational Implications / What Changes / Action Required.
                 
                 6. Do not translate the meeting transcription. The result and summary must be in the same language as the input data. 
 
@@ -212,32 +220,60 @@ public class GeminiAiService : IAiService
         string langInstruction = GetLanguageInstruction(langCode);
 
         // Making a prompt for company tenplate summaries
-        string prompt = $@"You are a professional meeting minutes assistant.
+        string prompt = $@"You are a professional executive meeting minutes assistant.
 
                         {langInstruction}
 
-                        INITIAL CONTEXT (Agenda): {meetingAgenda}
-    
+                        INITIAL CONTEXT (Agenda / Ordine del Giorno):
+                        {meetingAgenda}
+
                         SUMMARIES OF SEGMENTS TO BE PROCESSED:
                         {combinedPartials}
 
-                        TASK: Based on the following partial summaries from different segments of the meeting, create a comprehensive and professional final protocol strictly following this structure            
+                        TASK:
+                        Based on the agenda and the partial segment summaries, generate a comprehensive meeting protocol in Markdown strictly using the 4 main sections below.
 
-                        (Important: All headings in the final result must be in the same language as the main text)
-                        STRUCTURE: 
-                        # VERBALE DI RIUNIONE: [Meeting Name]
-    
+                        AGENDA MAPPING RULE:
+                        - Map topics/points (Trattande) from the Agenda ({{meetingAgenda}}) into the corresponding section (1, 2, 3, or 4).
+                        - For example, if a specific topic or decision (e.g. review procedure/escaletta, Sarah sync) belongs to ""Parte operativa"", place its full summary, actions, responsible person, and deadline under ""## 3. Parte Operativa"".
+
+                        VADEMECUM QUALITY RULES FOR CONTENTS:
+                        1. NO VAGUENESS: Transform descriptions into clear operational instructions (what changes, action required).
+                        2. CONTEXTUALIZED DATA: Format metrics as [Data + Comparison] -> [Cause / Impact].
+                        3. DECISION TRIAD: Every decision/action MUST specify:
+                           - Action item (☐ Cosa fare)
+                           - Responsabile (Name/Role/Sigla: e.g. CR, SM, CF). If missing, write ""Da definire"".
+                           - Scadenza (Deadline). If missing, write ""Da definire"".
+                        4. LANGUAGE: Keep headings exactly as defined below. The generated content under headings must match the required target language.
+
+                        STRICT MARKDOWN STRUCTURE (Output MUST contain EXACTLY these 4 level-2 headings):
+
                         ## 1. Informazioni dalla Direzione
-                        (Riassumi qui le comunicazioni, gli annunci e le direttive provenienti dai vertici o dalla direzione)
+                        Tema: [Nome del tema]
+                        Sintesi: [Sintesi chiara di cosa emerge]
+                        Indicazioni operative:
+                        • ☐ [Cosa deve essere fatto / cosa cambia]
+                        Responsabile: [Nome / Sigla / Da definire]
+                        Scadenza: [Data / Da definire]
 
                         ## 2. Parte Gestionale
-                        (Riassumi le decisioni riguardanti l'organizzazione, le risorse umane, i budget o i processi interni)
+                        Tema: [Nome del tema]
+                        Decisione / Modalità operativa:
+                        • ☐ [Azione definita o processo interno]
+                        Responsabile: [Nome / Sigla / Da definire]
+                        Scadenza: [Data / Da definire]
 
                         ## 3. Parte Operativa
-                        (Riassumi i dettagli tecnici, lo stato di avanzamento dei progetti e le attività pratiche discusse)
+                        Tema: [Nome del tema / Trattanda dall'Agenda]
+                        Dati / Dettagli tecnici: [Numeri/Confronto 2025 vs 2026 oppure dettagli tecnici/strumenti]
+                        Lettura del dato / Impatto: [Spiegazione causa/impatto o contesto]
+                        Azioni operative:
+                        • ☐ [Cosa fare, come farlo, quando]
+                        Responsabile: [Nome / Sigla / Da definire]
+                        Scadenza: [Data / Da definire]
 
                         ## 4. Eventuali
-                        (Riassumi varie ed eventuali, comunicazioni minori o punti sollevati alla fine della riunione)
+                        (Inserire qui solo comunicazioni minori o punti sollevati alla fine. Se non ve ne sono, scrivere: ""Nessun punto da segnalare"")
                         ";
 
         return await SendSammaryPromt(prompt);
