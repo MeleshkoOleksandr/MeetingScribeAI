@@ -9,109 +9,125 @@
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
              x:Class="MeetingScribe.Views.TeamView" x:DataType="vm:TeamViewModel">
     <Grid ColumnDefinitions="*, 300">
+         <!-- LEFT SIDE: LISTs -->
+        <Grid Grid.Column="0"  RowDefinitions="*, 6, *">   
 
-        <!-- LEFT SIDE: LIST -->
-        <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto, Auto, *, Auto" Margin="0">
+            <Grid Grid.Row="0"  RowDefinitions="Auto, *, Auto" >
+                <!-- Participants header -->
+                <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerLow}" MinHeight="1" Padding="10"
+                        BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
+                            <icons:MaterialIcon Margin="0,5" Kind="AccountMultiple" IconSize="20" Foreground="{StaticResource BrushPrimary}"/>
+                            <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="{loc:L view_Team_ParticipantsTitle}" Classes="card-title"/>
+                        </StackPanel>
+                        <!-- Search -->
+                        <TextBox Grid.Column="0" Text="{Binding ParticipantSearchText}"
+                                 PlaceholderText="{loc:L view_Team_SearchPlaceholder}" Classes="lumina-input">
+                            <TextBox.InnerLeftContent>
+                                <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
+                            </TextBox.InnerLeftContent>
+                        </TextBox>
+                    </DockPanel>
+                </Border>
 
-            <!-- Participants header -->
-            <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerLow}" Padding="10"
-                    BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
-                        <icons:MaterialIcon Margin="0,5" Kind="AccountMultiple" IconSize="20" Foreground="{StaticResource BrushPrimary}"/>
-                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushPrimary}" FontSize="20" Text="{loc:L view_Team_ParticipantsTitle}" Classes="card-title"/>
-                    </StackPanel>
-                    <!-- Search -->
-                    <TextBox Grid.Column="0" Text="{Binding ParticipantSearchText}"
-                             PlaceholderText="{loc:L view_Team_SearchPlaceholder}" Classes="lumina-input">
-                        <TextBox.InnerLeftContent>
-                            <icons:MaterialIcon Kind="Search" Width="18" Margin="10,0"/>
-                        </TextBox.InnerLeftContent>
-                    </TextBox>
-                </DockPanel>
-            </Border>
+                <!-- Participants list -->
+                <ListBox Grid.Row="1" Margin="5,5,0,0" MinHeight="1" 
+                         ItemsSource="{Binding FilteredParticipants}"
+                         SelectedItem="{Binding SelectedParticipant}"
+                         Background="{StaticResource ColorBackground}"
+                         Classes="LuminaList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="15,10">
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <Border Width="40" Height="40" CornerRadius="20" Background="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}" Margin="0,0,15,0">
+                                        <TextBlock Text="{Binding Alias}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Text="{Binding Position}" FontSize="12" Opacity="0.5"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-            <!-- Participants list -->
-            <ListBox Grid.Row="1" Margin="5,5,0,0"
-                     ItemsSource="{Binding FilteredParticipants}"
-                     SelectedItem="{Binding SelectedParticipant}"
-                     Classes="LuminaList">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="15,10">
-                            <Grid ColumnDefinitions="Auto, *">
-                                <Border Width="40" Height="40" CornerRadius="20" Background="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}" Margin="0,0,15,0">
-                                    <TextBlock Text="{Binding Alias}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15"/>
-                                    <TextBlock Text="{Binding Position}" FontSize="12" Opacity="0.5"/>
+                <!-- Participant Control Buttons-->
+                <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" MinHeight="1"  BorderThickness="0,1,0,0" Padding="5">
+                    <Grid  ColumnDefinitions="*, *, *" >
+                        <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
+                                Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
+                        <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
+                                Command="{Binding DeleteParticipantCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                        <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
+                                Command="{Binding ClearParticipantsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- GRID SPLITTER  -->
+            <GridSplitter Grid.Row="1"
+                          Height="6"
+                          HorizontalAlignment="Stretch"
+                            Background="{StaticResource ColorBackground}"
+                          BorderBrush="{StaticResource BrushOutlineVariant}"
+                          BorderThickness="0,1"
+                          Margin="10,0"/>
+
+            <Grid Grid.Row="2"  RowDefinitions=" Auto, *, Auto"  Margin="0">
+                <!-- Participants header -->
+                <Border Grid.Row="0" Background="{StaticResource BrushSurfaceContainerLow}" Padding="10"
+                        BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
+                            <icons:MaterialIcon Margin="0,5" Kind="AccountGroup" IconSize="20" Foreground="{StaticResource BrushSecondary}"/>
+                            <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushSecondary}" FontSize="20" Text="{loc:L view_Team_GroupsTitle}" Classes="card-title"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Group list -->
+                <ListBox Grid.Row="1" Margin="5,5,0,0"
+                         ItemsSource="{Binding Groups}"
+                         SelectedItem="{Binding SelectedGroup}"
+                         Background="{StaticResource ColorBackground}"
+                         BorderBrush="{StaticResource ColorBackground}"
+                         Classes="LuminaList Accent">
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="15,12">
+                                <StackPanel Orientation="Horizontal" Spacing="15">
+                                    <icons:MaterialIcon Kind="{Binding Icon}" Width="20"
+                                                        Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                        <TextBlock FontSize="11" Opacity="0.4">
+                                            <Run Text="{Binding MemberCount}" />
+                                            <Run Text=" " />
+                                            <Run Text="{loc:L view_Team_MembersCount}" />
+                                        </TextBlock>
+                                    </StackPanel>
                                 </StackPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-            <!-- Participant Control Buttons-->
-            <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
-                <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
-                            Command="{Binding AddParticipantCommand}" Classes="btn-primary"/>
-                    <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
-                            Command="{Binding DeleteParticipantCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
-                            Command="{Binding ClearParticipantsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                </Grid>
-            </Border>
-
-            <!-- Participants header -->
-            <Border Grid.Row="3" Background="{StaticResource BrushSurfaceContainerLow}" Padding="10"
-                    BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,0,0,0">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="10" >
-                        <icons:MaterialIcon Margin="0,5" Kind="AccountGroup" IconSize="20" Foreground="{StaticResource BrushSecondary}"/>
-                        <TextBlock Margin="0,5,40,5" Foreground="{StaticResource BrushSecondary}" FontSize="20" Text="{loc:L view_Team_GroupsTitle}" Classes="card-title"/>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-
-            <!-- Group list -->
-            <ListBox Grid.Row="4" Margin="5,5,0,0"
-                     ItemsSource="{Binding Groups}"
-                     SelectedItem="{Binding SelectedGroup}"
-                     Classes="LuminaList Accent">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="15,12">
-                            <StackPanel Orientation="Horizontal" Spacing="15">
-                                <icons:MaterialIcon Kind="{Binding Icon}" Width="20"
-                                                    Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}"/>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                    <TextBlock FontSize="11" Opacity="0.4">
-                                        <Run Text="{Binding MemberCount}" />
-                                        <Run Text=" " />
-                                        <Run Text="{loc:L view_Team_MembersCount}" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-            <!-- Group Control Buttons-->
-            <Border Grid.Row="5"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
-                <Grid  ColumnDefinitions="*, *, *" >
-                    <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
-                            Command="{Binding AddGroupCommand}" Classes="btn-primary"/>
-                    <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
-                            Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                    <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
-                            Command="{Binding ClearGroupsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
-                </Grid>
-            </Border>
+                <!-- Group Control Buttons-->
+                <Border Grid.Row="2"  BorderBrush="{StaticResource BrushOutlineVariant}" BorderThickness="0,1,0,1" Padding="5">
+                    <Grid  ColumnDefinitions="*, *, *" >
+                        <Button Grid.Column="0" Margin="5" Content="{loc:L view_Team_BtnAdd}" HorizontalAlignment="Stretch"
+                                Command="{Binding AddGroupCommand}" Classes="btn-primary"/>
+                        <Button Grid.Column="1" Margin="5" Content="{loc:L view_Team_BtnDelete}" HorizontalAlignment="Stretch"
+                                Command="{Binding DeleteGroupCommand}"  Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                        <Button Grid.Column="2" Margin="5" Content="{loc:L view_Team_BtnClear}" HorizontalAlignment="Stretch"
+                                Command="{Binding ClearGroupsCommand}" Foreground="{StaticResource ColorError}" Classes="btn-secondary"/>
+                    </Grid>
+                </Border>
+            </Grid>
 
         </Grid>
 
