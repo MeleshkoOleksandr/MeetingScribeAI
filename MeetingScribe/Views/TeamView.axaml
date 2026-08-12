@@ -10,7 +10,7 @@
              x:Class="MeetingScribe.Views.TeamView" x:DataType="vm:TeamViewModel">
     <Grid ColumnDefinitions="*, 300">
          <!-- LEFT SIDE: LISTs -->
-        <Grid Grid.Column="0"  RowDefinitions="*, 6, *">   
+        <Grid Grid.Column="0"  RowDefinitions="2*, 6, *">   
 
             <Grid Grid.Row="0"  RowDefinitions="Auto, *, Auto" >
                 <!-- Participants header -->
