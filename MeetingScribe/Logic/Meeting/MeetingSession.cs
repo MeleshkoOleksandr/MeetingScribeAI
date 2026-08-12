@@ -16,6 +16,11 @@ public partial class MeetingSession : ObservableObject
     [ObservableProperty] private string _description = string.Empty;
     [ObservableProperty] private string _meetingTopics = string.Empty;
 
+    [ObservableProperty] private string _date = string.Empty;
+    [ObservableProperty] private string _time = string.Empty;
+    [ObservableProperty] private string _venue = string.Empty;
+    [ObservableProperty] private string _team = string.Empty;
+
 
     public DateTime StartTime { get; set; } = DateTime.Now;
     public TimeSpan Duration { get; set; }

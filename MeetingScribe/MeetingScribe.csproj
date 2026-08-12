@@ -16,6 +16,7 @@
     <AvaloniaResource Remove="Assets\Manifests\ai_providers.json" />
     <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
     <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
+    <AvaloniaResource Remove="Assets\Manifests\Venue.json" />
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
     <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Gen.docx" />
     <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Template.docx" />
@@ -66,6 +67,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\I18n\it.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Manifests\Venue.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Template\VerbaleRiunione_Gen.docx">

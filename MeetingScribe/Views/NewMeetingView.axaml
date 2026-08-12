@@ -19,23 +19,74 @@
                         <icons:MaterialIcon Kind="ClipboardTextOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
                         <TextBlock Text="{loc:L view_NewMeet_MeetingDetails}" Classes="card-title"/>
                     </StackPanel>
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="{loc:L view_NewMeet_MeetingName}" Classes="label-caps"/>
-                        <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_EnterMeetingName}" Text="{Binding MeetingName}">
-                            <TextBox.InnerRightContent>
-                                <Button Command="{Binding AddCurrentDateCommand}" ToolTip.Tip="{loc:L view_NewMeet_AddCurrentDateToolTip}"
-                                        Classes="btn-icon" Margin="0,0,5,0" Cursor="Hand">
-                                    <icons:MaterialIcon Kind="CalendarPlus" Width="20" Foreground="{StaticResource BrushPrimary}"/>
-                                </Button>
-                            </TextBox.InnerRightContent>
-                        </TextBox>
-                    </StackPanel>
+
+                    <!--NAME, DATA, TIME-->          
+                    <Grid ColumnDefinitions= "4*, *, *" ColumnSpacing="10" >
+                        <StackPanel Spacing="6" Grid.Column="0">
+                            <TextBlock Text="{loc:L view_NewMeet_MeetingName}" Classes="label-caps"/>
+                            <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_EnterMeetingName}" Text="{Binding MeetingName}">           
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Spacing="6" Grid.Column="1" >
+                            <TextBlock Text="{loc:L view_NewMeet_Date}" Classes="label-caps"/>
+                            <TextBox Classes="lumina-input"  Text="{Binding Date}">
+                                <TextBox.InnerRightContent>
+                                    <Button Command="{Binding AddCurrentDateCommand}" ToolTip.Tip="{loc:L view_NewMeet_AddCurrentDateToolTip}"
+                                            Classes="btn-icon" Margin="0,0,5,0" Cursor="Hand">
+                                        <icons:MaterialIcon Kind="CalendarPlus" Width="20" Foreground="{StaticResource BrushPrimary}"/>
+                                    </Button>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                        </StackPanel >
+                            <StackPanel Spacing="6" Grid.Column="2">
+                            <TextBlock Text="{loc:L view_NewMeet_Time}" Classes="label-caps"/>
+                            <TextBox Classes="lumina-input" Text="{Binding Time}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!--Description-->
                     <StackPanel Spacing="6">
                         <TextBlock Text="{loc:L view_NewMeet_Description}" Classes="label-caps"/>
                         <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_AddDescription}" Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                     </StackPanel>
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="{loc:L view_NewMeet_Language}" Classes="label-caps"/>
+
+                    <!--Team, Place, Lang-->
+                    <Grid ColumnDefinitions= "*, *, *" ColumnSpacing="10" >
+                    <StackPanel Spacing="6" Grid.Column="0" >
+                        <TextBlock Text="{loc:L view_NewMeet_Team}" Classes="label-caps"/>
+                        <ComboBox Classes="lumina-combo"
+                                  HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding AvailableTeams}"
+                                  SelectedItem="{Binding SelectedTeam}">
+                           <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:TeamGroup">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="{Binding Icon}" 
+                                                           Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}" 
+                                                           Width="16"/>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                      <StackPanel Spacing="6" Grid.Column="1">
+                        <TextBlock Text="{loc:L view_NewMeet_Venue}"  Classes="label-caps"/>
+                        <ComboBox Classes="lumina-combo"
+                                  HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding AvailableVenues}"
+                                  SelectedItem="{Binding SelectedVenue}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                      <StackPanel Spacing="6" Grid.Column="2">
+                        <TextBlock Text="{loc:L view_NewMeet_Language}"  Classes="label-caps"/>
                         <ComboBox Classes="lumina-combo"
                                   HorizontalAlignment="Stretch"
                                   ItemsSource="{Binding Languages}"
@@ -47,6 +98,8 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </StackPanel>
+
+                    </Grid>
                 </StackPanel>
             </Border>
 

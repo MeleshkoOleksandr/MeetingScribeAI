@@ -32,6 +32,11 @@
     "view_NewMeet_ParticipantsAdded": "{0} added",
     "view_NewMeet_StartRecording": "Start Recording",
     "view_NewMeet_LoadFromFile": "Load from file",
+    "view_NewMeet_Date": "MEETING DATE",
+    "view_NewMeet_Time": "MEETING TIME",
+    "view_NewMeet_Venue": "MEETING VENUE",
+    "view_NewMeet_Team": "TEAM",
+
 
     "______ArchiveView.axaml": "Archive",
     "view_Archive_SearchPlaceholder": "Search archive...",

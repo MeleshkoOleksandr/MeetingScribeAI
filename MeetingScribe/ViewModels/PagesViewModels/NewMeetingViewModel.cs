@@ -31,6 +31,9 @@ public partial class NewMeetingViewModel : ViewModelBase
     [ObservableProperty] private string _meetingTopics = "";
     [ObservableProperty] private string _participantsText = "";
 
+    [ObservableProperty] private string _date = string.Empty;
+    [ObservableProperty] private string _time = "08:00-08:45";
+
     // All avalable people in participants.json
     private List<Participant> _allParticipants = new();
     // People who take part in meeting
@@ -38,24 +41,55 @@ public partial class NewMeetingViewModel : ViewModelBase
     // List of persons available to join the meeting
     public ObservableCollection<Participant> AvailableToJoin { get; } = new();
 
+    // ComboBox coloctions
+    public ObservableCollection<TeamGroup> AvailableTeams { get; } = new();
+    public ObservableCollection<Venue> AvailableVenues { get; } = new();
+    // Selected items on UI
+    [ObservableProperty] private TeamGroup? _selectedTeam;
+    [ObservableProperty] private Venue? _selectedVenue;
+
     public NewMeetingViewModel()
     {
         // Default name with date
         MeetingName = "New Meeting";
         LoadLanguages();
         RefreshParticipantsFromBase();
+        LoadGroups();
+        LoadVenues();
+    }
+
+    private void LoadVenues()
+    {
+        try
+        {
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "Venue.json");
+            if (File.Exists(path))
+            {
+                var venues = JsonSerializer.Deserialize<List<Venue>>(File.ReadAllText(path));
+                AvailableVenues.Clear();
+                if (venues != null) foreach (var v in venues) AvailableVenues.Add(v);
+            }
+        }
+        catch { LogService.Instance.LogError("Couldn't load json file with Venue list"); }
+    }
+
+    private void LoadGroups()
+    {
+        var (_, groups) = TeamStorageService.LoadData();
+        AvailableTeams.Clear();
+        foreach (var g in groups) AvailableTeams.Add(g);
     }
 
     [RelayCommand]
     private void AddCurrentDate()
     {
-        string datePrefix = $"[{DateTime.Now:yy-MM-dd}]";
+        string datePrefix = $"{DateTime.Now:dd-MM-yyyy}";
 
         // If the meeting name already contains the date prefix, do not add it again
         if (!string.IsNullOrEmpty(MeetingName) && MeetingName.Contains(datePrefix))
             return;
 
-        MeetingName = MeetingName + datePrefix;
+        Date = datePrefix;
     }
 
     private void LoadLanguages()
@@ -75,7 +109,12 @@ public partial class NewMeetingViewModel : ViewModelBase
         Description = Description,
         MeetingTopics = MeetingTopics,
         Language = SelectedLanguage?.Code ?? "auto", // Save the CODE (ru, en)
-        Participants = new ObservableCollection<Participant>(SelectedParticipants)
+        Participants = new ObservableCollection<Participant>(SelectedParticipants),
+
+        Date = Date,
+        Time = Time,
+        Team = SelectedTeam?.Name ?? string.Empty,
+        Venue = SelectedVenue?.Name ?? string.Empty
     };
 
     public void ResetForm()
@@ -84,6 +123,12 @@ public partial class NewMeetingViewModel : ViewModelBase
         MeetingName = "";
         Description = "";
         MeetingTopics = "";
+
+        SelectedTeam = null;
+        SelectedVenue = null;
+        Date = string.Empty;
+        Time = "08:00-08:45";
+
         // 2. Clear the list of selected participants
         SelectedParticipants.Clear();
         // 3. Update the list of participants available for selection
