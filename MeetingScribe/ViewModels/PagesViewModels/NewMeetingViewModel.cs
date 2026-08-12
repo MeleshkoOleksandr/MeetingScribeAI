@@ -264,4 +264,27 @@ public partial class NewMeetingViewModel : ViewModelBase
         SelectedParticipants.Remove(p);
         UpdateAvailableList();
     }
+
+    // This method is called automatically when you select an item from the ComboBox.
+    partial void OnSelectedTeamChanged(TeamGroup? value)
+    {
+        if (value == null) return;
+
+        //Clear the selected venue when the team changes
+        SelectedParticipants.Clear();
+      
+        // Find all people from the master list (_allParticipants) who belong to this group (value.Id)
+        var teamMembers = _allParticipants.Where(p => p.GroupIds.Contains(value.Id)).ToList();
+
+        foreach (var member in teamMembers)
+        {
+            // We check to make sure we don't add the same person twice
+            if (!SelectedParticipants.Any(sp => sp.Id == member.Id))
+            {
+                SelectedParticipants.Add(member);
+            }
+        }
+        // We need to update the “Available for Addition” list
+        UpdateAvailableList();
+    }
 }
