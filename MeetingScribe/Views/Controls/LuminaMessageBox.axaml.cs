@@ -81,6 +81,17 @@ public partial class LuminaMessageBox : Window
                 cancelBtn.IsVisible = false; // Hide the cancel button for message type
                 bottomBar.Foreground = Brush.Parse("#b7e97e");
                 break;
+
+            case LuminaMessageBoxType.Error:
+                iconBorder.Background = Brush.Parse("#332020");
+                mainIcon.Foreground = Brush.Parse("#ffb4ab");
+                mainIcon.Kind = MaterialIconKind.ErrorOutline;
+                confirmBtn.Classes.Add("danger");
+                confirmIcon.Kind = MaterialIconKind.Check;
+                confirmTxt.Text = string.IsNullOrEmpty(confirmBtnText) ? Loc("view_LuminaMsg_Gotit") : confirmBtnText;
+                cancelBtn.IsVisible = false; 
+                bottomBar.Foreground = Brush.Parse("#ffb4ab");
+                break;
         }
 
         // Owner search

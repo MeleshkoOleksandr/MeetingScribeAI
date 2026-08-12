@@ -4,5 +4,6 @@ public enum LuminaMessageBoxType
 {
     Message, // informational message (Green)
     Confirm, // Confirmation message (Green)
-    Danger   // Danger action (Red)
+    Danger,   // Danger action (Red)
+    Error,   // Error (Red)
 }
