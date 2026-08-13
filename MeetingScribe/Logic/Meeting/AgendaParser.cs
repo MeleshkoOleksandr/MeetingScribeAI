@@ -1,9 +1,11 @@
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using MeetingScribe.Logic.Services;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
+using System.Text.RegularExpressions;
 
 
 namespace MeetingScribe.Logic.Meeting;
@@ -15,8 +17,8 @@ public class AgendaParser
     /// This class is writen to handle the specific structure of the agenda template in italian, which includes sections for participants, absentees, and a detailed agenda with technical subheaders.
     /// </summary>
     /// <param name="filePath">The path to the .docx file.</param>
-    /// <returns>A tuple containing (Participants, Topics).</returns>
-    public static (string Participants, string Topics) ParseMeetingAgenda(string filePath)
+    /// <returns>A tuple containing (Participants, Topics, Team, Date,Time, Venue).</returns>
+    public static (string Participants, string Topics, string Team, string Date, string Time, string Venue) ParseMeetingAgenda(string filePath)
     {
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"File not found: {filePath}");
@@ -24,11 +26,16 @@ public class AgendaParser
         var participantsBuilder = new StringBuilder();
         var topicsBuilder = new StringBuilder();
 
+        string team = string.Empty;
+        string date = string.Empty;
+        string time = string.Empty;
+        string venue = string.Empty;
+
         // Open the docx document in read-only mode (false)
         using (WordprocessingDocument doc = WordprocessingDocument.Open(filePath, false))
         {
             var body = doc.MainDocumentPart?.Document?.Body;
-            if (body == null) return (string.Empty, string.Empty);
+            if (body == null) return (string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
             // Get all paragraphs from the document body
             var paragraphs = body.Elements<Paragraph>().ToList();
@@ -43,7 +50,36 @@ public class AgendaParser
                 string text = p.InnerText?.Trim() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(text)) continue;
 
-                // --- 1. Logic for Participants ---
+                //Doc end condition: If we reach the "Prossima riunione" section, we stop reading further as it indicates the end of the relevant content.
+                if (text.StartsWith("Prossima riunione", StringComparison.OrdinalIgnoreCase) && readingTopics)
+                {
+                    break;
+                }
+                // --- Logic for Team---
+                if (text.StartsWith("TEAM", StringComparison.OrdinalIgnoreCase))
+                {
+                    team = text["TEAM ".Length..];
+                }
+                // --- Logic for Date and Place---
+                if (text.Contains("DATA", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Regex Template to extract date, time, and venue from the text
+                    string pattern = @"DATA:\s*(?<date>\d{2}\.\d{2}\.\d{4})\s*(?:ORE|–|-)?\s*(?<time>\d{1,2}\.\d{2}\s*[–-]\s*\d{1,2}\.\d{2})\s*LUOGO(?:-[A-Z]+)?[:–\s-]+\s*(?<venue>[^D]+)";
+                    Match match = Regex.Match(text, pattern);
+
+                    if (match.Success)
+                    {
+                        date = match.Groups["date"].Value;
+                        time = match.Groups["time"].Value;
+                        venue = match.Groups["venue"].Value.Trim();
+                    }
+                    else
+                    {
+                        LogService.Instance.Log("The data format did not match the expected format.", Enums.LogLevel.Warning);
+                    }
+                }
+
+                // --- Logic for Participants ---
                 if (text.StartsWith("Partecipanti:", StringComparison.OrdinalIgnoreCase))
                 {
                     readingParticipants = true;
@@ -78,7 +114,7 @@ public class AgendaParser
                     }
                 }
 
-                // --- 2. Logic for Topics (Agenda) ---
+                // --- Logic for Topics (Agenda) ---
                 if (text.StartsWith("Ordine del giorno:", StringComparison.OrdinalIgnoreCase))
                 {
                     readingTopics = true;
@@ -90,10 +126,10 @@ public class AgendaParser
                     // technical subheaders / sections, 
                     if (text.StartsWith("Parte operativa", StringComparison.OrdinalIgnoreCase) ||
                         text.StartsWith("Parte gestionale", StringComparison.OrdinalIgnoreCase) ||
-                        text.StartsWith("Informazioni dalla Direzione", StringComparison.OrdinalIgnoreCase) ||
+                        text.StartsWith("Informazioni", StringComparison.OrdinalIgnoreCase) ||
                         text.StartsWith("Eventuali", StringComparison.OrdinalIgnoreCase))
-                    { 
-                        topicsBuilder.AppendLine(counter++.ToString() +". " + text);
+                    {
+                        topicsBuilder.AppendLine(counter++.ToString() + ". " + text);
                         continue;
                     }
                     // Append topics to the string builder,
@@ -101,7 +137,6 @@ public class AgendaParser
                     {
                         topicsBuilder.AppendLine(text);
                     }
-                  
                 }
             }
         }
@@ -110,7 +145,7 @@ public class AgendaParser
         string finalParticipants = CleanUpResult(participantsBuilder.ToString());
         string finalTopics = CleanUpResult(topicsBuilder.ToString());
 
-        return (finalParticipants, finalTopics);
+        return (finalParticipants, finalTopics, team, date, time, venue);
     }
 
     /// <summary>

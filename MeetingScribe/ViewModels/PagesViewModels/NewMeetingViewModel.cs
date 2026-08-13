@@ -4,11 +4,11 @@ using Avalonia.Platform.Storage;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using MeetingScribe.Enums;
 using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic.ManifestReaders;
-
+using MeetingScribe.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +32,7 @@ public partial class NewMeetingViewModel : ViewModelBase
     [ObservableProperty] private string _participantsText = "";
 
     [ObservableProperty] private string _date = string.Empty;
-    [ObservableProperty] private string _time = "08:00-08:45";
+    [ObservableProperty] private string _time = "8:00-8:45";
 
     // All avalable people in participants.json
     private List<Participant> _allParticipants = new();
@@ -83,7 +83,7 @@ public partial class NewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private void AddCurrentDate()
     {
-        string datePrefix = $"{DateTime.Now:dd-MM-yyyy}";
+        string datePrefix = $"{DateTime.Now:dd.MM.yyyy}";
 
         // If the meeting name already contains the date prefix, do not add it again
         if (!string.IsNullOrEmpty(MeetingName) && MeetingName.Contains(datePrefix))
@@ -127,7 +127,7 @@ public partial class NewMeetingViewModel : ViewModelBase
         SelectedTeam = null;
         SelectedVenue = null;
         Date = string.Empty;
-        Time = "08:00-08:45";
+        Time = "8:00-8:45";
 
         // 2. Clear the list of selected participants
         SelectedParticipants.Clear();
@@ -137,10 +137,11 @@ public partial class NewMeetingViewModel : ViewModelBase
         LogService.Instance.LogInfo("New Meeting Form has been reset.");
     }
 
-
+    private bool isImportingAgenda = false;
     [RelayCommand]
     private async Task ImportAgenda()
     {
+
         // 1. Get the storage provider from the main window
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         var storage = desktop.MainWindow?.StorageProvider;
@@ -158,23 +159,53 @@ public partial class NewMeetingViewModel : ViewModelBase
 
         try
         {
-            // 3. Exrcuting the parsing logic from AgendaParser
+            isImportingAgenda = true;
+            //  Exrcuting the parsing logic from AgendaParser
             string filePath = result[0].Path.LocalPath;
-            var (participantsRaw, topics) = AgendaParser.ParseMeetingAgenda(filePath);
-
-            // 4. Show the parsed data in the UI
+            var (participantsRaw, topics, team, date, time, venue) = AgendaParser.ParseMeetingAgenda(filePath);
+            // Delete previous data in the form to avoid mixing old and new data
+            ResetForm();
+            // Show the parsed data in the UI
             MeetingTopics = topics;
             MatchPeopleInPlanWithTeam(participantsRaw);
+            Date = date;
+            Time = time;
+            //Venue;
+            var foundVenue = AvailableVenues.FirstOrDefault(v => v.Name.Equals(venue, StringComparison.OrdinalIgnoreCase));
+            if (foundVenue != null) { SelectedVenue = foundVenue; }
+            // Search for the team in the list of available teams and select it if found
+            if (!string.IsNullOrEmpty(team))
+            {
+                string normalizedDocTeam = Normalize(team);
+                var foundTeam = AvailableTeams.FirstOrDefault(t =>
+                    Normalize(t.Name) == normalizedDocTeam);
 
-            // Optional: If the description is empty, you can set a default description based on the agenda file name or other logic
-            if (string.IsNullOrEmpty(Description))
-                Description = $"Imported from agenda: {DateTime.Now:d}";
+                if (foundTeam != null)
+                {
+                    SelectedTeam = foundTeam;
+                }
+            }
+            isImportingAgenda = false;
+
         }
         catch (Exception ex)
         {
+            isImportingAgenda = false;
             //  Parse error handling: Log the error and optionally show a message to the user
             LogService.Instance.LogError($"Failed to parse agenda file: {ex.Message}");
+            await LuminaMessageBox.Show("Error", $"Failed open file: {ex.Message}", LuminaMessageBoxType.Error);
         }
+    }
+    static private string Normalize(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        //  Convert to lowercase
+        //  Remove spaces, dashes, and underscores
+        return input.ToLower()
+                    .Replace(" ", "")
+                    .Replace("-", "")
+                    .Replace("_", "")
+                    .Trim();
     }
 
     private void MatchPeopleInPlanWithTeam(string participantsRaw)
@@ -269,10 +300,11 @@ public partial class NewMeetingViewModel : ViewModelBase
     partial void OnSelectedTeamChanged(TeamGroup? value)
     {
         if (value == null) return;
+        if (isImportingAgenda == true) return;
 
         //Clear the selected venue when the team changes
         SelectedParticipants.Clear();
-      
+
         // Find all people from the master list (_allParticipants) who belong to this group (value.Id)
         var teamMembers = _allParticipants.Where(p => p.GroupIds.Contains(value.Id)).ToList();
 
