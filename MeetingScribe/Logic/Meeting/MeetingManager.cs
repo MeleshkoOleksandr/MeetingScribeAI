@@ -1,3 +1,4 @@
+using MeetingScribe.Logic.AI;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 
@@ -42,7 +43,7 @@ public class MeetingManager
 
         // 4. Init Whisper
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", settings.SelectedModel);
-        await _transcriptionService.InitializeAsync(whisperPath, CurrentSession.Language, settings);
+        await _transcriptionService.InitializeAsync(whisperPath, CurrentSession.Language, settings, PromtHelper.WisperInitialPrompt(CurrentSession));
 
         return CurrentSession;
     }

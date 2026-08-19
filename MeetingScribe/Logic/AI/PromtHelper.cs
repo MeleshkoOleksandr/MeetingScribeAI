@@ -1,3 +1,5 @@
+using MeetingScribe.Logic.Meeting;
+using MeetingScribe.Logic.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,9 +9,25 @@ namespace MeetingScribe.Logic.AI;
 
 public static class PromtHelper
 {
+    public static string WisperInitialPrompt(MeetingSession session)
+    {
+
+        var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(session);
+
+        return $@"You are a professional meeting assistant specializing in verbatim transcript post-processing.
+        
+                DESCRIPTION: {session.Description}
+                TEAM NAME: {session.Team}
+                PRESENT PERSON NAMES: {present}
+                Absent PERSON NAMES: {absent}
+                MEETING TOPICS: {session.MeetingTopics}
+
+                {WisperKeywordsPrompt()}";
+    }
+
     public static string WisperKeywordsPrompt()
     {
-        return $@"KEYWORDS:
+        return $@"POSIBLE KEYWORDS:
                     Internal Acronyms & Projects: PCI, WS, CF, CR, CP, URC, UMA, PML, LT, GeZ, ConvoGeZ, Labor Transfer, TRI Form, TRI Coaching, Team AtelierTRI
                     Tools & Software: Hyper, ChatGPT Business, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams
                     Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale
