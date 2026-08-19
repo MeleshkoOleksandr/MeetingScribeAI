@@ -296,6 +296,19 @@ public partial class NewMeetingViewModel : ViewModelBase
         UpdateAvailableList();
     }
 
+    [RelayCommand]
+    private void ClearTeam()
+    {
+        //  Reset the selected command
+        SelectedTeam = null;
+        //  Clear the list of meeting participants
+        SelectedParticipants.Clear();
+        //  Update the list of available options (now it contains all participants again)
+        UpdateAvailableList();
+
+        LogService.Instance.LogInfo("Team and participants cleared.");
+    }
+
     // This method is called automatically when you select an item from the ComboBox.
     partial void OnSelectedTeamChanged(TeamGroup? value)
     {

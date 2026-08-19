@@ -52,24 +52,42 @@
 
                     <!--Team, Place, Lang-->
                     <Grid ColumnDefinitions= "*, *, *" ColumnSpacing="10" >
-                    <StackPanel Spacing="6" Grid.Column="0" >
-                        <TextBlock Text="{loc:L view_NewMeet_Team}" Classes="label-caps"/>
-                        <ComboBox Classes="lumina-combo"
-                                  HorizontalAlignment="Stretch"
-                                  ItemsSource="{Binding AvailableTeams}"
-                                  SelectedItem="{Binding SelectedTeam}">
-                           <ComboBox.ItemTemplate>
-                                <DataTemplate x:DataType="models:TeamGroup">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <icons:MaterialIcon Kind="{Binding Icon}" 
-                                                           Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}" 
-                                                           Width="16"/>
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
+                        <StackPanel Spacing="6" Grid.Column="0">
+                            <TextBlock Text="{loc:L view_NewMeet_Team}" Classes="label-caps"/>
+                            <!--Team Area-->
+                            <Grid>
+                                <!-- Main ComboBox -->
+                                <ComboBox Classes="lumina-combo"
+                                          HorizontalAlignment="Stretch"
+                                          ItemsSource="{Binding AvailableTeams}"
+                                          SelectedItem="{Binding SelectedTeam}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:TeamGroup">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <icons:MaterialIcon Kind="{Binding Icon}" 
+                                                                   Foreground="{Binding Color, Converter={StaticResource HexToBrushConverter}}" 
+                                                                   Width="16"/>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <!-- Main Clear Button -->
+                                <!-- Shown only when SelectedTeam is not null -->
+                                <Button Command="{Binding ClearTeamCommand}"
+                                        Classes="btn-icon"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,0,35,0" 
+                                        Width="30" Height="30"
+                                        IsVisible="{Binding SelectedTeam, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                        ToolTip.Tip="Clear selection and participants">
+                                    <icons:MaterialIcon Kind="CloseCircle" 
+                                                        Width="16" 
+                                                        Foreground="{StaticResource ColorError}"
+                                                        Opacity="0.6"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
 
                       <StackPanel Spacing="6" Grid.Column="1">
                         <TextBlock Text="{loc:L view_NewMeet_Venue}"  Classes="label-caps"/>
