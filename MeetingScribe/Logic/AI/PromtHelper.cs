@@ -36,53 +36,61 @@ public static class PromtHelper
 
     public static string BuildCombinedPrompt(string raw, string participants, string context)
     {
-        return $@"You are a professional meeting assistant specializing in verbatim transcript post-processing.
-                IMPORTANT: You are processing a SEGMENT of a larger meeting. 
-                CONTEXT: {context}
-                LIST OF EXPECTED PARTICIPANTS: {participants}
+        return $@"You are an expert meeting processing system specialized in:
+                1) Verbatim speech-to-text post-processing and diarization.
+                2) High-density, structured intermediate summarization.
 
-                TASK:
-                1. CLEANUP (STRICT VERBATIM): Remove filler words ('umm', 'uh', 'like', 'sì', 'ecco', 'diciamo così'), stuttering, and accidental word repetitions (e.g., if a speaker says 'che è un po\' di potenza, che è un po\' di potenza', keep it only once). Fix obvious speech-to-text typos in technical terms. 
-                   CRITICAL: DO NOT paraphrase, DO NOT summarize the text inside the 'Text' field, DO NOT improve grammar if it changes the speaker's original phrasing, and DO NOT use sophisticated vocabulary. Keep the original words, word order, and spoken style exactly as they are.
+                INPUT CONTEXT:
+                - Segment Context: {context}
+                - Expected Participants: {participants}
 
-                2. DIARIZATION: Identify speakers. Based on the conversation context and the LIST OF EXPECTED PARTICIPANTS, identify who is speaking.
-                   - If you are absolutely sure of the name, use the full name from the list.
-                   - If you are unsure, use 'Speaker 1', 'Speaker 2', etc.
-                   - DO NOT invent names that are not in the list or the transcript.
+                TASK 1: TRANSCRIPT REFINEMENT & MERGING
+                - Clean: Remove filler words (e.g., 'umm', 'uh', 'like', 'sì', 'ecco', 'diciamo così'), stutters, and accidental duplicate words/phrases. Fix obvious STT transcription typos in technical names.
+                - Diarize: Match speakers to the EXPECTED PARTICIPANTS list. If uncertain, use 'Speaker 1', 'Speaker 2', etc. Do not invent names.
+                - Consolidate: Merge consecutive fragmented lines from the same speaker into coherent, continuous blocks. Keep the timestamp of the first segment in the merged block.
+                - Absolute Constraint: In the 'text' field, DO NOT summarize, paraphrase, or rewrite sentence structures. Retain the speaker's original spoken phrasing, language, and lexical style.
 
-                3. CONSOLIDATE: The raw transcript is fragmented into very short time-coded lines. You MUST MERGE consecutive lines from the same speaker into single, long paragraphs. 
-                   CRITICAL: 'Merging' means simply gluing the original text pieces together into a continuous text block after doing the CLEANUP. Do not rewrite the sentence structures during consolidation.
-                   Only create a new JSON object when the speaker changes or there is a significant pause/topic shift.
+                TASK 2: DETAILED INTERMEDIATE SEGMENT DIGEST
+                Generate an exhaustive, highly specific structured digest of THIS segment. This digest will be programmatically aggregated into a global meeting summary.
+                - Depth & Coverage: Do not abstract or compress multiple discussion points into broad generalizations. Detail each distinct topic with its underlying causes, arguments, and operational context.
+                - Key Metrics & Data: Record all exact numbers, dates, targets, percentages, and year-over-year/period comparisons.
+                - Action Items & Decisions: Extract full triples: Action + Assignee/Owner + Deadline/Condition. Note if an owner or deadline was discussed but left undefined.
+                - Systems & Workflows: Log specific tools, software, directives, or procedural constraints mentioned.
+                - Open / Unresolved Points: Note any topic left open or requiring follow-up in subsequent segments.
 
-                4. TIMESTAMPS: Use the timestamp of the FIRST segment of the merged block as the 'Timestamp' for that block.
+                LANGUAGE & FORMAT CONSTRAINTS:
+                - Output MUST be strictly valid JSON.
+                - Language: Keep both transcript text and summary data in the exact same language as the input audio/transcript.
 
-                5. SUMMARIZING (FACT-PRESERVING DIGEST): Create a comprehensive, dense but complete summary of THIS segment specifically optimized for later consolidation into a final meeting summary.
-                   CRITICAL: Do not generalize. You must preserve:
-                    a. PRESERVE ALL DATA & METRICS:
-                       - Extract exact numbers, KPIs, percentages, and metrics.
-                       - ALWAYS capture context and comparisons if present (e.g., ""2025 vs 2026"", ""drop caused by X impacting Y"").
-                    b. DECISIONS & ACTION ITEMS (THE ""GOLDEN TRIANGLE""):
-                       - Explicitly highlight: WHAT must be done (Action) + WHO is responsible (Role/Name: e.g., CR, SM, CF) + WHEN (Deadline/Date).
-                       - Never extract an action without looking for its owner and deadline in the text.
-                    c. FEEDBACK & DIRECTIVES (Direction / UMA / Client):
-                       - Separate external/management feedback into structured operational instructions (What needs to be done, what changes, constraints).
-                    d. TOOLS & PROCESSES:
-                       - Explicitly log mentions of systems, tools, and internal procedures (e.g., Hyper, Job Room, PCI). Record what to do, how, and when.
-                    e. ELIMINATE CHITCHAT & VAGUE STATEMENTS:
-                       - Filter out vague statements like ""things are going well"" or general discussions without consequences.
-                       - Focus exclusively on: Findings / Operational Implications / What Changes / Action Required.
-                
-                6. Do not translate the meeting transcription. The result and summary must be in the same language as the input data. 
-
-                STRICT CONSTRAINT:
-                The 'Text' field must contain the EXACT spoken words of the speaker (minus fillers/duplications). It must remain in the original language (Italian in this case). Never turn spoken, slightly chaotic speech into formal written business prose.
-
-                RETURN FORMAT (Strict JSON):
-                {{
-                  ""lines"": [
-                    {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
-                  ],
-                  ""segmentSummary"": ""Summary of what happened in this part...""
+                OUTPUT SCHEMA:
+                    {{
+                      ""lines"": [
+                        {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
+                      ],
+                    ""segmentDigest"": {{
+                    ""topicsDiscussed"": [
+                      {{
+                        ""topic"": ""Topic title"",
+                        ""details"": ""In-depth breakdown of what was stated, key arguments, causes, and operational context.""
+                      }}
+                    ],
+                    ""metricsAndData"": [
+                      ""Exact metric, figure, comparison, or percentage with its context""
+                    ],
+                    ""actionItemsAndDecisions"": [
+                      {{
+                        ""action"": ""Specific task or decision made"",
+                        ""owner"": ""Responsible person/role or 'Unassigned'"",
+                        ""deadline"": ""Due date, milestone, or 'Not specified'""
+                      }}
+                    ],
+                    ""toolsAndProcedures"": [
+                      ""Mentioned tool, system (e.g., Hyper, Job Room, PCI), or procedure and how it applies""
+                    ],
+                    ""unresolvedPoints"": [
+                      ""Open questions, pending verifications, or interrupted topics""
+                    ]
+                  }}
                 }}
 
                 RAW DATA:
@@ -127,62 +135,44 @@ public static class PromtHelper
         string langInstruction = GetLanguageInstruction(langCode);
 
         // Making a prompt for company tenplate summaries
-        string prompt = $@"You are a professional executive meeting minutes assistant.
+        var sections = TopicsParser.Parse(meetingAgenda);
+        string expectedStructure = TopicsParser.BuildExpectedMarkdownSkeleton(sections);
 
+        string prompt = $@"You are a professional executive meeting secretary.
                         {langInstruction}
 
-                        INITIAL CONTEXT (Agenda / Ordine del Giorno):
+                        INPUT DATA:
+                        1. OFFICIAL AGENDA (Ordine del Giorno):
                         {meetingAgenda}
 
-                        SUMMARIES OF SEGMENTS TO BE PROCESSED:
+                        2. DETAILED SEGMENT SUMMARIES / DIGESTS:
                         {combinedPartials}
 
-                        TASK:
-                        Based on the agenda and the partial segment summaries, generate a comprehensive meeting protocol in Markdown strictly using the 4 main sections below.
+                        TARGET OUTPUT STRUCTURE (MANDATORY TEMPLATE):
+                        You MUST follow this exact structure derived from the agenda. Do not remove or reorganize any section or subsection:
+                        {expectedStructure}
 
-                        AGENDA MAPPING RULE:
-                        - Map topics/points (Trattande) from the Agenda ({{meetingAgenda}}) into the corresponding section (1, 2, 3, or 4).
-                        - For example, if a specific topic or decision (e.g. review procedure/escaletta, Sarah sync) belongs to ""Parte operativa"", place its full summary, actions, responsible person, and deadline under ""## 3. Parte Operativa"".
+                        CORE GENERATION RULES:
+                        1. STRICT AGENDA ANCHORING:
+                           - For every planned topic (### Topic), locate and compile all related information from the segment digests.
+                           - If a planned agenda topic was NOT discussed in the meeting at all, write explicitly: *""Non trattato durante la riunione.""*
 
-                        VADEMECUM QUALITY RULES FOR CONTENTS:
-                        1. NO VAGUENESS: Transform descriptions into clear operational instructions (what changes, action required).
-                        2. CONTEXTUALIZED DATA: Format metrics as [Data + Comparison] -> [Cause / Impact].
-                        3. DECISION TRIAD: Every decision/action MUST specify:
-                           - Action item (☐ Cosa fare)
-                           - Responsabile (Name/Role/Sigla: e.g. CR, SM, CF). If missing, write ""Da definire"".
-                           - Scadenza (Deadline). If missing, write ""Da definire"".
-                        4. LANGUAGE: Keep headings exactly as defined below. The generated content under headings must match the required target language.
+                        2. UNIFORM CONTENT SYNTHESIS (No Vague Statements):
+                           - Under each topic, write clear, dense, and operational notes (context, changes, operational directives, guidelines, and reasons).
+                           - Metrics & Data: Format figures with context (e.g., ""FK: 2 PCI, FP: 1 PCI, LP: 3 PCI (2 convocate con ConvoGeZ)"").
+                           - Directives & Guidelines: If management/UMA requirements are discussed, list them as clear bullet points.
 
-                        STRICT MARKDOWN STRUCTURE (Output MUST contain EXACTLY these 4 level-2 headings):
+                        3. ACTION TRIAD FORMAT (Mandatory for all tasks/decisions):
+                           Under each topic's `**Azioni / Decisioni:**` section, use this exact line format:
+                           • ☐ [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
+                           *(If no action was decided for that topic, write: • Nessuna azione specifica assegnata).*
 
-                        ## 1. Informazioni dalla Direzione
-                        Tema: [Nome del tema]
-                        Sintesi: [Sintesi chiara di cosa emerge]
-                        Indicazioni operative:
-                        • ☐ [Cosa deve essere fatto / cosa cambia]
-                        Responsabile: [Nome / Sigla / Da definire]
-                        Scadenza: [Data / Da definire]
+                        4. UNPLANNED & EXTRA TOPICS:
+                           - If topics emerged during the meeting that were NOT in the official agenda, place them under `## Eventuali` (or create a subsection `### Fuori Ordine del Giorno` inside the relevant section).
 
-                        ## 2. Parte Gestionale
-                        Tema: [Nome del tema]
-                        Decisione / Modalità operativa:
-                        • ☐ [Azione definita o processo interno]
-                        Responsabile: [Nome / Sigla / Da definire]
-                        Scadenza: [Data / Da definire]
-
-                        ## 3. Parte Operativa
-                        Tema: [Nome del tema / Trattanda dall'Agenda]
-                        Dati / Dettagli tecnici: [Numeri/Confronto 2025 vs 2026 oppure dettagli tecnici/strumenti]
-                        Lettura del dato / Impatto: [Spiegazione causa/impatto o contesto]
-                        Azioni operative:
-                        • ☐ [Cosa fare, come farlo, quando]
-                        Responsabile: [Nome / Sigla / Da definire]
-                        Scadenza: [Data / Da definire]
-
-                        ## 4. Eventuali
-                        (Inserire qui solo comunicazioni minori o punti sollevati alla fine. Se non ve ne sono, scrivere: ""Nessun punto da segnalare"")
-                        ";
-
+                        OUTPUT INSTRUCTIONS:
+                        - Generate pure Markdown matching the TARGET OUTPUT STRUCTURE.
+                        - Do not output introductory or concluding meta-commentary.";
         return prompt;
     }
 
