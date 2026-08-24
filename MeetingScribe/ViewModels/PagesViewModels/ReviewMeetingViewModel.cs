@@ -1,10 +1,8 @@
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
-using Avalonia;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using MeetingScribe.Enums;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
@@ -12,11 +10,11 @@ using MeetingScribe.Logic.Meeting;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using MeetingScribe.Views;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -353,7 +351,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
         // Enable sync mode (to prevent the renaming from taking effect)
         _isSyncingSelection = true;
-       try
+        try
         {
             // Search the list of participants for the one whose name matches the name in the line
             SelectedParticipantForLine = Session.Participants.FirstOrDefault(p =>
@@ -396,6 +394,26 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
 
         IsDirty = true;
+    }
+
+    [RelayCommand]
+    private async Task ExportTranscriptToDoc()
+    {
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+
+        try
+        {
+            IsProcessing = true;
+            MeetingSummarySaver.SaveScriptAsync(Session, desktop.MainWindow);
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.LogException(ex, "Export to Markdown failed");
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
     }
 
     #endregion

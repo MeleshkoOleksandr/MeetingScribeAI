@@ -20,6 +20,7 @@
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
     <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Gen.docx" />
     <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Template.docx" />
+    <AvaloniaResource Remove="Assets\Template\VerbaleScript.docx" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-base.bin" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-large-v3-turbo-q8_0.bin" />
     <AvaloniaResource Remove="Assets\WhisperModels\ggml-large-v3-turbo.bin" />
@@ -100,6 +101,9 @@
 
   <ItemGroup>
     <None Update="Assets\Models\silero_vad.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Template\VerbaleScript.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="secrets.json">

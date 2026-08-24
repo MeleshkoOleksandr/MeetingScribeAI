@@ -3,6 +3,7 @@ using Avalonia.Platform.Storage;
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using MeetingScribe.Logic.Meeting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,6 +22,54 @@ public static class MeetingSummarySaver
     // Colors used for H1 / H2 headings. Defined once so they are easy to tweak
     private static readonly Xceed.Drawing.Color HeadingColorH1 = Xceed.Drawing.Color.Parse(183, 233, 126);
     private static readonly Xceed.Drawing.Color HeadingColorH2 = Xceed.Drawing.Color.Parse(129, 207, 255);
+
+    public static async Task SaveScriptAsync(MeetingSession session, Window ownerWindow)
+    {
+        var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", "VerbaleScript.docx");
+
+        if (!File.Exists(templatePath))
+        {
+            LogService.Instance.LogError($"Template not found: {templatePath}");
+            return;
+        }
+
+        string outputPath = await PickSaveFileAsync(ownerWindow, $"Trascrizione_{session.Date}.docx");
+        if (outputPath == null)
+        {      
+            return; // User cancelled the dialog — nothing to save or open.
+        }
+
+        using (var doc = DocX.Load(templatePath))
+        {
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{DATE}", NewValue = session.Date });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TIME}", NewValue = session.Time });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{VENUE}", NewValue = session.Venue });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TEAM}", NewValue = session.Team });
+
+            var markdownContent = ToMarkdown(session.FullTranscript, session.Team);   
+            ReplacePlaceholderWithMarkdown(doc, "{TEXT}", markdownContent);
+            doc.SaveAs(outputPath);
+        }
+        LogService.Instance.LogInfo($"Transcript file is saved : {outputPath}");
+        OpenFile(outputPath);
+    }
+
+    public static string ToMarkdown(IEnumerable<TranscriptLine> lines, string team)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var line in lines)
+        {
+            // Format: **[00:00:00] SpeakerName**
+            // We use bold font (**) for the transcript line header
+            sb.AppendLine($"**{line.Timestamp} {line.SpeakerName}**");
+            sb.AppendLine(); // Empty line for spacing
+            // Transcript text      
+            sb.AppendLine(line.Text);
+            sb.AppendLine(); // Empty line for next transcript line
+        }
+        return sb.ToString();
+    }
 
     public static async Task SaveGeneralSummaryAsync(string rawMarkdown, string meetingName, string meetingDate, Window ownerWindow)
     {

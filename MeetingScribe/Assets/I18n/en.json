@@ -81,6 +81,7 @@
     "view_Review_SaveChanges": "Save Changes",
     "view_Review_CloseReview": "Close Review",
     "view_Review_AssignSPEAKER": "ASSIGN SPEAKER",
+    "view_Review_ExportTranscript": "Export Transcript",
 
 
     "______SettingsView.axaml": "Settings",

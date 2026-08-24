@@ -208,6 +208,13 @@
                                         <TextBlock Text="{loc:L view_Review_CancelProcess}" Foreground="{StaticResource ColorError}"/>
                                     </StackPanel>
                                 </Button>
+                                <Button Classes="btn-secondary" Command="{Binding ExportTranscriptToDocCommand}"
+                                        IsEnabled="{Binding !IsGlobalBusy}" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <icons:MaterialIcon Kind="FileWordOutline" Width="18"/>
+                                        <TextBlock Text="{loc:L view_Review_ExportTranscript}"/>
+                                    </StackPanel>
+                                </Button>
 
                                 <!-- Selecting a speaker for a specified phrase -->
                                 <StackPanel Spacing="5" Margin="0,10" IsEnabled="{Binding SelectedTranscriptLine, Converter={x:Static ObjectConverters.IsNotNull}}">
