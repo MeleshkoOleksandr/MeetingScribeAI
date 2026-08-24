@@ -159,7 +159,7 @@ public class GeminiAiService : IAiService
 
             if (!response.IsSuccessStatusCode) return "Failed to generate summary.";
 
-            // Извлекаем чистый текст из ответа (здесь парсинг проще, так как это не JSON-режим)
+            //Extracting the text from the response (here parsing is simpler since it's not JSON mode)
             using var doc = JsonDocument.Parse(responseJson);
             return doc.RootElement.GetProperty("candidates")[0]
                 .GetProperty("content")

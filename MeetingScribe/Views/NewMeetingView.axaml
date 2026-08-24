@@ -13,7 +13,7 @@
 
         <Grid Grid.Row="0" RowDefinitions="Auto, *, Auto">
 
-            <Border Grid.Row="0" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10" MinHeight="300">
+            <Border Grid.Row="0" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10" MinHeight="220">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <icons:MaterialIcon Kind="ClipboardTextOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
@@ -45,13 +45,13 @@
                     </Grid>
 
                     <!--Description-->
-                    <StackPanel Spacing="6">
+                   <!-- <StackPanel Spacing="6">
                         <TextBlock Text="{loc:L view_NewMeet_Description}" Classes="label-caps"/>
                         <TextBox Classes="lumina-input" PlaceholderText="{loc:L view_NewMeet_AddDescription}" Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
-                    </StackPanel>
+                    </StackPanel>-->
 
                     <!--Team, Place, Lang-->
-                    <Grid ColumnDefinitions= "*, *, *" ColumnSpacing="10" >
+                    <Grid ColumnDefinitions= "*, *, *" ColumnSpacing="11" >
                         <StackPanel Spacing="6" Grid.Column="0">
                             <TextBlock Text="{loc:L view_NewMeet_Team}" Classes="label-caps"/>
                             <!--Team Area-->
@@ -121,7 +121,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="1" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10">
+            <Border Grid.Row="1" Classes="card" VerticalAlignment="Stretch" Margin="0,0,0,10" MinHeight="140">
                 <Grid RowDefinitions="Auto, *">
                     <StackPanel Grid.Row="0" Spacing="16" Margin="0,0,0,16">
                         <DockPanel LastChildFill="False">
@@ -151,7 +151,6 @@
 
             <Border Grid.Row="2" Classes="card">
                 <StackPanel Spacing="15">
-
                     <!-- Header -->
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <icons:MaterialIcon Kind="AccountMultipleOutline" Width="18" Height="18" Foreground="{StaticResource BrushPrimary}"/>
@@ -169,13 +168,15 @@
                         </Border>
                     </StackPanel>
 
+                    <ScrollViewer MaxHeight="140"  HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <!-- Chips area -->
-                    <WrapPanel Orientation="Horizontal">
-
+                    <WrapPanel Orientation="Horizontal">                 
                         <!-- Selected list -->
                         <ItemsControl ItemsSource="{Binding SelectedParticipants}">
                             <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:Participant">
@@ -229,9 +230,8 @@
                                 </MenuFlyout>
                             </Button.Flyout>
                         </Button>
-
                     </WrapPanel>
-
+                </ScrollViewer>
                 </StackPanel>
             </Border>
         </Grid>
@@ -252,7 +252,6 @@
                 </StackPanel>
             </Button>
         </Grid>
-
 
     </Grid>
 </UserControl>
