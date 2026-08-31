@@ -30,11 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.1.0" />
-    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.0" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.0" />
+    <PackageReference Include="Avalonia" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
@@ -45,10 +45,10 @@
     <PackageReference Include="Markdig" Version="1.3.2" />
     <PackageReference Include="Markdown.Avalonia.Tight" Version="12.0.0-a2" />
     <PackageReference Include="Material.Icons.Avalonia" Version="3.0.2" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
     <PackageReference Include="Mscc.GenerativeAI" Version="3.1.0" />
     <PackageReference Include="NAudio" Version="2.3.0" />
-    <PackageReference Include="SkiaSharp" Version="4.150.1" />
+    <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="ThingLing.Avalonia.Controls.MessageBox" Version="2.0.0" />
     <PackageReference Include="Whisper.net" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
