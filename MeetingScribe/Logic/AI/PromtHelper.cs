@@ -28,29 +28,59 @@ public static class PromtHelper
     public static string WisperKeywordsPrompt()
     {
         return $@"POSIBLE KEYWORDS:
-                    Internal Acronyms & Projects: PCI, WS, CF, CR, CP, URC, UMA, PML, LT, GeZ, ConvoGeZ, Labor Transfer, TRI Form, TRI Coaching, Team AtelierTRI
+                    Internal Acronyms & Projects: {Acronyms()}
                     Tools & Software: Hyper, ChatGPT Business, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams
                     Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale
             ";
     }
 
+    public static string Acronyms()
+    {
+        return $@" PCI, WS, CF, CR, CP, URC, UMA, PML, LT, GeZ, ConvoGeZ, Labor Transfer, TRI Form, TRI Coaching, Team AtelierTRI ";
+    
+    }
+
     public static string BuildCombinedPrompt(string raw, string participants, string context)
     {
         return $@"You are an expert meeting processing system specialized in:
-                1) Verbatim speech-to-text post-processing and diarization.
-                2) High-density, structured intermediate summarization.
-
+                Verbatim speech-to-text post-processing and diarization.
+    
                 INPUT CONTEXT:
                 - Segment Context: {context}
                 - Expected Participants: {participants}
+                - Posible Acronyms: {Acronyms()}
 
-                TASK 1: TRANSCRIPT REFINEMENT & MERGING
-                - Clean: Remove filler words (e.g., 'umm', 'uh', 'like', 'sì', 'ecco', 'diciamo così'), stutters, and accidental duplicate words/phrases. Fix obvious STT transcription typos in technical names.
-                - Diarize: Match speakers to the EXPECTED PARTICIPANTS list. If uncertain, use 'Speaker 1', 'Speaker 2', etc. Do not invent names.
+                TASK : TRANSCRIPT REFINEMENT & MERGING
+                - Clean: Remove filler words (e.g., 'umm', 'uh', 'like', 'ecco'), stutters, and accidental duplicate words/phrases. Fix obvious STT transcription typos in technical names.
                 - Consolidate: Merge consecutive fragmented lines from the same speaker into coherent, continuous blocks. Keep the timestamp of the first segment in the merged block.
                 - Absolute Constraint: In the 'text' field, DO NOT summarize, paraphrase, or rewrite sentence structures. Retain the speaker's original spoken phrasing, language, and lexical style.
+                - Diarize: If it's possible, match speakers to the EXPECTED PARTICIPANTS list. If uncertain, use 'Speaker 1', 'Speaker 2', etc. Do not invent names.
+             
+                LANGUAGE & FORMAT CONSTRAINTS:
+                - Output MUST be strictly valid JSON.
+                - Language: Keep both transcript text and summary data in the exact same language as the input audio/transcript.
 
-                TASK 2: DETAILED INTERMEDIATE SEGMENT DIGEST
+                OUTPUT SCHEMA:
+                {{
+                  ""lines"": [
+                    {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
+                  ],
+                }}
+
+                RAW DATA:
+                {raw}";
+    }
+
+    public static string PartialSummaryPrompt(string raw, string participants, string context, string langCode)
+    {
+        return $@"You are an expert meeting processing system specialized in:
+                  High-density, structured intermediate summarization.
+
+                INPUT CONTEXT:
+                - Segment Context: {context}
+                - Expected Participants: {participants}                
+
+                TASK: DETAILED INTERMEDIATE SEGMENT DIGEST
                 Generate an exhaustive, highly specific structured digest of THIS segment. This digest will be programmatically aggregated into a global meeting summary.
                 - Depth & Coverage: Do not abstract or compress multiple discussion points into broad generalizations. Detail each distinct topic with its underlying causes, arguments, and operational context.
                 - Key Metrics & Data: Record all exact numbers, dates, targets, percentages, and year-over-year/period comparisons.
@@ -60,13 +90,11 @@ public static class PromtHelper
 
                 LANGUAGE & FORMAT CONSTRAINTS:
                 - Output MUST be strictly valid JSON.
-                - Language: Keep both transcript text and summary data in the exact same language as the input audio/transcript.
+                
+                {GetLanguageInstruction(langCode)}
 
                 OUTPUT SCHEMA:
-                    {{
-                      ""lines"": [
-                        {{ ""Timestamp"": ""[00:00:00]"", ""SpeakerName"": ""Name"", ""Text"": ""..."" }}
-                      ],
+                    {{               
                     ""segmentDigest"": {{
                     ""topicsDiscussed"": [
                       {{
@@ -83,9 +111,6 @@ public static class PromtHelper
                         ""owner"": ""Responsible person/role or 'Unassigned'"",
                         ""deadline"": ""Due date, milestone, or 'Not specified'""
                       }}
-                    ],
-                    ""toolsAndProcedures"": [
-                      ""Mentioned tool, system (e.g., Hyper, Job Room, PCI), or procedure and how it applies""
                     ],
                     ""unresolvedPoints"": [
                       ""Open questions, pending verifications, or interrupted topics""

@@ -7,7 +7,8 @@ namespace MeetingScribe.Logic.AI;
 
 public interface IAiService
 {
-    Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token);
+    Task<AiResponseChunk?> RefineTranscriptAsync(string rawText, string participants, string context, CancellationToken token);
+    Task<AiResponseChunk?> MakeSummaryAsync(string rawText, string participants, string context, string langCode, CancellationToken token);
     Task<string> StitchSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode);
     Task<string> TemplateSummariesAsync(List<string> partialSummaries, string meetingAgenda, string langCode);
 }

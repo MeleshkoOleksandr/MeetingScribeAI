@@ -279,18 +279,12 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             ProcessingProgress = 0;
             CurrentTaskName = "AI is analyzing conversation flow...";
 
-            // We make participants list string for AI
-            string participantsList = string.Join(", ", Session.Participants.Select(p => $"{p.Name} ({p.Alias})"));
-            if (string.IsNullOrEmpty(participantsList))
-                participantsList = "Auto-detect from context (names not provided)";
-
-            // Making chanks of the transcript to send to the AI service
-            string rawTextFull = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
-            var lines = rawTextFull.Split('\n');
-            var chunks = TextOparations.GroupLinesByTime(lines, 15);
+            string participantsList;
+            List<List<string>> chunks;
+            prepareInfoForAI(out participantsList, out chunks, 15);
 
             var refinedTranscript = new List<TranscriptLine>();
-            Session.SegmentSummaries.Clear();
+            //Session.SegmentSummaries.Clear();
 
             for (int i = 0; i < chunks.Count; i++)
             {
@@ -301,18 +295,18 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 string chunkText = string.Join("\n", chunks[i]);
 
                 // AI service call to analyze the chunk and return speaker-labeled lines
-                var result = await aiService.ProcessChunkAsync(chunkText, participantsList, Session.Description, _processCts.Token);
+                var result = await aiService.RefineTranscriptAsync(chunkText, participantsList, Session.Description, _processCts.Token);
 
                 if (result != null)
                 {
                     refinedTranscript.AddRange(result.Lines);
-                    Session.SegmentSummaries.Add(result.SegmentSummary);
+                    //Session.SegmentSummaries.Add(result.SegmentSummary);
                 }
                 //If current task was cancelled, break the loop
                 if (_processCts.IsCancellationRequested) { return; }
                 //Make pause between chunks to avoid overwhelming the AI service
                 await Task.Delay(1000);
-                LogService.Instance.LogInfo($"Chunk {i + 1}/{chunks.Count} processed successfully.");
+                LogService.Instance.LogInfo($"Chunk {i + 1}/{chunks.Count} Diarization processed successfully.");
             }
 
             // Refresh the UI with the new speaker-labeled transcript
@@ -323,8 +317,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
                 Session.HasAIImprovements = true;
                 IsDirty = true;
-                CurrentTaskName = "Diarization & Chunk summaries complete!";
-                LogService.Instance.LogInfo("Diarization and chunk summaries completed successfully.");
+                CurrentTaskName = "Diarization & refinement complete!";
+                LogService.Instance.LogInfo("Diarization & refinement completed successfully.");
             });
         }
         finally
@@ -338,6 +332,20 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             _processCts = null;
         }
     }
+
+    void prepareInfoForAI(out string participantsList, out List<List<string>> chunks, int chunkTime)
+    {
+        // We make participants list string for AI
+        participantsList = string.Join(", ", Session.Participants.Select(p => $"{p.Name} ({p.Alias})"));
+        if (string.IsNullOrEmpty(participantsList))
+            participantsList = "Auto-detect from context (names not provided)";
+
+        // Making chanks of the transcript to send to the AI service
+        string rawTextFull = string.Join("\n", Session.FullTranscript.Select(t => $"{t.Timestamp} {t.Text}"));
+        var lines = rawTextFull.Split('\n');
+        chunks = TextOparations.GroupLinesByTime(lines, chunkTime);
+    }
+
 
     private bool _isSyncingSelection; // Fuse Flag 
     // When we select a line, we clear the selected member in the combo box,
@@ -399,7 +407,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task ExportTranscriptToDoc()
     {
-        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
 
         try
         {
@@ -457,6 +465,11 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateFinalSummary()
     {
+        if (Session.SegmentSummaries.Count == 0)
+        {
+            await GenerateSummarySegments();
+        }
+
         var result = await makeSammary(SummaryTypes.GeneralSummary);
         if (result != null)
         {
@@ -471,6 +484,11 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateTemplateSummary()
     {
+        if (Session.SegmentSummaries.Count == 0)
+        {
+            await GenerateSummarySegments();
+        }
+
         var result = await makeSammary(SummaryTypes.TemplateSammary);
         if (result != null)
         {
@@ -482,10 +500,48 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         }
     }
 
+    private async Task GenerateSummarySegments()
+    {
+        try
+        {
+            IsProcessing = true;
+            IsIndeterminate = false;
+            _processCts = new CancellationTokenSource();
+
+            string participantsList;
+            List<List<string>> chunks;
+            prepareInfoForAI(out participantsList, out chunks, 30);
+            Session.SegmentSummaries.Clear();
+
+            for (int i = 0; i < chunks.Count; i++)
+            {
+                CurrentTaskName = $"AI Analysis: Part {i + 1} of {chunks.Count}...";
+                ProcessingProgress = (double)i / chunks.Count * 100;
+
+                string chunkText = string.Join("\n", chunks[i]);
+
+                // AI service call to analyze the chunk and return a summary for that segment
+                var result = await aiService.MakeSummaryAsync(chunkText, participantsList, Session.Description, Session.Language, _processCts.Token);
+
+                if (result != null && result.SegmentDigest != null)
+                {
+
+                    Session.SegmentSummaries.Add(result.SegmentSummary);
+                }
+                if (_processCts.IsCancellationRequested) return;
+                await Task.Delay(1000);
+            }
+        }
+        finally
+        {
+            IsProcessing = false; 
+        }
+    }
+
     [RelayCommand]
     private async Task SaveSummary()
     {
-        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
 
         if (SelectedSummaryTab == 0)
         {

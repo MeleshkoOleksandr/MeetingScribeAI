@@ -30,10 +30,20 @@ public class GeminiAiService : IAiService
         _isPaid = isPaid;
     }
 
-    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token)
+    public async Task<AiResponseChunk?> RefineTranscriptAsync(string rawText, string participants, string context, CancellationToken token)
     {
         var prompt = PromtHelper.BuildCombinedPrompt(rawText, participants, context);
+        return await ProcessChunkAsync(rawText, participants, context, token, prompt);
+    }
 
+    public async Task<AiResponseChunk?> MakeSummaryAsync(string rawText, string participants, string context, string langCode, CancellationToken token )
+    {
+        var prompt = PromtHelper.PartialSummaryPrompt(rawText, participants, context, langCode);
+        return await ProcessChunkAsync(rawText, participants, context, token, prompt);
+    }
+
+    private async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token, string prompt)
+    {
         var requestBody = new
         {
             contents = new[] { new { parts = new[] { new { text = prompt } } } },
@@ -56,7 +66,8 @@ public class GeminiAiService : IAiService
 
             try
             {
-                var response = await _httpClient.SendAsync(request, token);
+                //System.Diagnostics.Debug.WriteLine($"Payload size: {jsonPayload.Length} chars");
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
 
                 // Server is bisy or rate-limited, retry after delay
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)

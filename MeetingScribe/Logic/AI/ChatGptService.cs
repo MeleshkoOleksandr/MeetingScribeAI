@@ -55,9 +55,13 @@ public class ChatGptService : IAiService
         return new List<TranscriptLine>();
     }
 
-    public async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token)
+    public async Task<AiResponseChunk?> RefineTranscriptAsync(string rawText, string participants, string context, CancellationToken token)
     {
-    
+        return null;
+    }
+
+    public async Task<AiResponseChunk?> MakeSummaryAsync(string rawText, string participants, string context, string langCode, CancellationToken token)
+    {
         return null;
     }
 
