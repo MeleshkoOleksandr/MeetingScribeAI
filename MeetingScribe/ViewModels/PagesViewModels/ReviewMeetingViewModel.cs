@@ -281,7 +281,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             string participantsList;
             List<List<string>> chunks;
-            prepareInfoForAI(out participantsList, out chunks, 15);
+            prepareInfoForAI(out participantsList, out chunks, 30);
 
             var refinedTranscript = new List<TranscriptLine>();
             //Session.SegmentSummaries.Clear();
@@ -297,11 +297,13 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 // AI service call to analyze the chunk and return speaker-labeled lines
                 var result = await aiService.RefineTranscriptAsync(chunkText, participantsList, Session.Description, _processCts.Token);
 
-                if (result != null)
+                if (result == null)
                 {
-                    refinedTranscript.AddRange(result.Lines);
-                    //Session.SegmentSummaries.Add(result.SegmentSummary);
+                    LogService.Instance.Log($"Gemini Api not responding. Operation failed.", LogLevel.Warning);
+                    return;
                 }
+                // Append the refined lines to the main transcript
+                refinedTranscript.AddRange(result.Lines);
                 //If current task was cancelled, break the loop
                 if (_processCts.IsCancellationRequested) { return; }
                 //Make pause between chunks to avoid overwhelming the AI service
@@ -507,6 +509,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsProcessing = true;
             IsIndeterminate = false;
             _processCts = new CancellationTokenSource();
+            await ConnectAiService();
 
             string participantsList;
             List<List<string>> chunks;
@@ -525,9 +528,14 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
                 if (result != null && result.SegmentDigest != null)
                 {
-
                     Session.SegmentSummaries.Add(result.SegmentSummary);
                 }
+                else
+                {
+                    LogService.Instance.Log($"Gemini Api not responding. Operation failed.", LogLevel.Warning);
+                    return; // If the result is null, we stop processing further
+                }
+
                 if (_processCts.IsCancellationRequested) return;
                 await Task.Delay(1000);
             }
