@@ -2,14 +2,14 @@
     {
         "Id": "Gemini_Free",
         "Name": "Google Gemini Free ",
-        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-        "Model": "gemini-flash-latest"
+        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "Model": "gemini-3.6-flash"
     },
     {
         "Id": "Gemini_Paid",
         "Name": "Google Gemini Paid",
-        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-        "Model": "gemini-flash-latest"
+        "Url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "Model": "gemini-3.6-flash"
     },
     {
         "Id": "ChatGPT",
