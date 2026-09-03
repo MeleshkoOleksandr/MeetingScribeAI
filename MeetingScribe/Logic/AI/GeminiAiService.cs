@@ -33,16 +33,16 @@ public class GeminiAiService : IAiService
     public async Task<AiResponseChunk?> RefineTranscriptAsync(string rawText, string participants, string context, CancellationToken token)
     {
         var prompt = PromtHelper.BuildCombinedPrompt(rawText, participants, context);
-        return await ProcessChunkAsync(rawText, participants, context, token, prompt);
+        return await ProcessChunkAsync(token, prompt);
     }
 
     public async Task<AiResponseChunk?> MakeSummaryAsync(string rawText, string participants, string context, string langCode, CancellationToken token )
     {
         var prompt = PromtHelper.PartialSummaryPrompt(rawText, participants, context, langCode);
-        return await ProcessChunkAsync(rawText, participants, context, token, prompt);
+        return await ProcessChunkAsync( token, prompt);
     }
 
-    private async Task<AiResponseChunk?> ProcessChunkAsync(string rawText, string participants, string context, CancellationToken token, string prompt)
+    private async Task<AiResponseChunk?> ProcessChunkAsync(CancellationToken token, string prompt)
     {
         var requestBody = new
         {
@@ -57,6 +57,10 @@ public class GeminiAiService : IAiService
         int maxRetries = _isPaid ? 2 : 5;
         int delayMs = _isPaid ? 1000 : 5000;
 
+        //Setting a cancellation token with a timeout to avoid hanging requests
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        cts.CancelAfter(TimeSpan.FromSeconds(90)); 
+
         for (int i = 0; i < maxRetries; i++)
         {
             // Creating new request  for each attempt to avoid issues with disposed content
@@ -67,7 +71,7 @@ public class GeminiAiService : IAiService
             try
             {
                 //System.Diagnostics.Debug.WriteLine($"Payload size: {jsonPayload.Length} chars");
-                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
 
                 // Server is bisy or rate-limited, retry after delay
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
@@ -91,10 +95,19 @@ public class GeminiAiService : IAiService
                 // Successful response, deserialize and return
                 return ParseCombinedResponse(responseJson);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
+                // Real user cancellation, not timeout — return null to indicate cancellation
                 LogService.Instance.Log("AI process was cancelled by the user.", LogLevel.Info);
                 return null;
+            }
+            catch (OperationCanceledException)
+            {
+                // This is exactly a timeout from cts, not a user cancellation — we need to retry, not return null
+                LogService.Instance.Log($"Gemini request timed out. Retry {i + 1}/{maxRetries}...", LogLevel.Warning);
+                await Task.Delay(delayMs);
+                delayMs *= 2;
+                continue;
             }
             catch (Exception ex)
             {
