@@ -10,9 +10,6 @@ public class AiResponseChunk
     [JsonPropertyName("lines")]
     public List<TranscriptLine>? Lines { get; set; }
     // Short summary of the chunk, if provided by the AI
-    [JsonPropertyName("segmentDigest")]
-    public SegmentDigest? SegmentDigest { get; set; }
-
-    //For compatibility with the old code, we will return the segment summary as a string
-    public string SegmentSummary => SegmentDigest?.ToString() ?? "";
+    [JsonPropertyName("segmentSummary")]
+    public string? SegmentSummary { get; set; }
 }

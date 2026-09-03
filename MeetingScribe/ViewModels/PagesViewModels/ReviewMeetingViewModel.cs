@@ -526,7 +526,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 // AI service call to analyze the chunk and return a summary for that segment
                 var result = await aiService.MakeSummaryAsync(chunkText, participantsList, Session.Description, Session.Language, _processCts.Token);
 
-                if (result != null && result.SegmentDigest != null)
+                if (result != null && !string.IsNullOrEmpty(result.SegmentSummary))
                 {
                     Session.SegmentSummaries.Add(result.SegmentSummary);
                 }

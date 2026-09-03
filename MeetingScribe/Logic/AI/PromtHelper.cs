@@ -37,7 +37,7 @@ public static class PromtHelper
     public static string Acronyms()
     {
         return $@" PCI, WS, CF, CR, CP, URC, UMA, PML, LT, GeZ, ConvoGeZ, Labor Transfer, TRI Form, TRI Coaching, Team AtelierTRI ";
-    
+
     }
 
     public static string BuildCombinedPrompt(string raw, string participants, string context)
@@ -88,36 +88,30 @@ public static class PromtHelper
                 - Systems & Workflows: Log specific tools, software, directives, or procedural constraints mentioned.
                 - Open / Unresolved Points: Note any topic left open or requiring follow-up in subsequent segments.
 
-                LANGUAGE & FORMAT CONSTRAINTS:
-                - Output MUST be strictly valid JSON.
-                
                 {GetLanguageInstruction(langCode)}
 
-                OUTPUT SCHEMA:
-                    {{               
-                    ""segmentDigest"": {{
-                    ""topicsDiscussed"": [
-                      {{
-                        ""topic"": ""Topic title"",
-                        ""details"": ""In-depth breakdown of what was stated, key arguments, causes, and operational context.""
-                      }}
-                    ],
-                    ""metricsAndData"": [
-                      ""Exact metric, figure, comparison, or percentage with its context""
-                    ],
-                    ""actionItemsAndDecisions"": [
-                      {{
-                        ""action"": ""Specific task or decision made"",
-                        ""owner"": ""Responsible person/role or 'Unassigned'"",
-                        ""deadline"": ""Due date, milestone, or 'Not specified'""
-                      }}
-                    ],
-                    ""unresolvedPoints"": [
-                      ""Open questions, pending verifications, or interrupted topics""
-                    ]
-                  }}
-                }}
+                OUTPUT FORMAT:
+                    Return ONLY a strictly valid JSON object with a single field 'segmentSummary'. 
+                    The value of 'segmentSummary' must be the Markdown text.
+                    The value of 'segmentSummary' must be the Markdown text formatted as described.
+                    Example: {{ ""segmentSummary"": ""## Budget\nDetails here...\n### Metrics\n- 5% increase..."" }}
 
+
+                MARKDOWN STRUCTURE :
+                   ## [Topic Title]
+                   Detailed breakdown of arguments, causes, and operational context.
+    
+                   ### Metrics & Data
+                    - List every exact figure, date, percentage, or comparison mentioned.
+    
+                   ### Action Items & Decisions
+                    - **Action**: [Specific task or decision]
+                    - **Owner**: [Responsible person or 'Unassigned']
+                    - **Deadline**: [Due date or 'Not specified']
+
+                   ## Unresolved Points
+                    - List open questions or pending verifications.
+         
                 RAW DATA:
                 {raw}";
     }
@@ -218,7 +212,7 @@ public static class PromtHelper
             _ => langCode // For other languages, just return the code
         };
 
-        return $"IMPORTANT: The entire summary, including all headings and bullet points, MUST be written in {langName}.";
+        return $"LANGUAGE: The entire summary, including all headings and bullet points, MUST be written in {langName}.";
     }
 
 }
