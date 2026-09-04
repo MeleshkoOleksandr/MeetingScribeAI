@@ -11,6 +11,14 @@ obj/
 *.userosscache
 *.sln.docstates
 
+# JetBrains Rider / IntelliJ
+.idea/
+*.iml
+out/
+
+# macOS
+.DS_Store
+
 ## --- Avalonia UI ---
 # Previewer temporary files
 .avalonia/
