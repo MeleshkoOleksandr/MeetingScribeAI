@@ -91,13 +91,15 @@ public static class TopicsParser
                 {             
                     sb.AppendLine($"### {topic.Title}");
                     sb.AppendLine("[Fill with discussion summary, context, metrics, directives]");
-                    sb.AppendLine("**Azioni / Decisioni:**");
-                    sb.AppendLine("• [Action] | **Resp:** [Person/Role] | **Scadenza:** [Date/Condition]");
+                    sb.AppendLine("#### **Azioni / Decisioni:**");
+                    sb.AppendLine(" * [Action] | **Resp:** [Person/Role] | **Scadenza:** [Date/Condition]");
                     sb.AppendLine();
                 }
             }
             else
             {
+                sb.AppendLine($"## {sec.Number}. {sec.Title}");
+                sb.AppendLine("Nessun punto da segnalare");
                 sb.AppendLine();
             }
         }

@@ -22,21 +22,24 @@ public static class PromtHelper
                 Absent PERSON NAMES: {absent}
                 MEETING TOPICS: {session.MeetingTopics}
 
-                {WisperKeywordsPrompt()}";
+                {KeywordsPrompt()}";
     }
 
-    public static string WisperKeywordsPrompt()
+    public static string KeywordsPrompt()
     {
         return $@"POSIBLE KEYWORDS:
                     Internal Acronyms & Projects: {Acronyms()}
-                    Tools & Software: Hyper, ChatGPT Business, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams
-                    Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale
+                    Tools & Software: Hyper, ChatGPT Business, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams, AIber, Aladino
+                    Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica,
+                        bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale, CV
             ";
     }
 
     public static string Acronyms()
     {
-        return $@" PCI, WS, CF, CR, CP, URC, UMA, PML, LT, GeZ, ConvoGeZ, Labor Transfer, TRI Form, TRI Coaching, Team AtelierTRI ";
+        return $@"PAIP (Piano d'Azione Individuale Planner), SGQ (Gestione Qualità), PCI (Persona in Cerca d'Impiego), WS (Workshop), CF (Coach Formatore), CR (Coach Responsabile), CP (Consulente Personale),
+        URC (Ufficio Regionale di Collocamento), UMA (Ufficio delle Misure Attive), AILS, PML (Provvedimenti inerenti al Mercato del Lavoro), GeZ (Generation Z), RF (Rapporto Finale), ConvoGeZ, Labor Transfer (LT), 
+        TRI (Tecniche Ricerca Impiego), TRI Form, TRI Center, TRI Coaching, Team AtelierTRI, TIC (Tecnologie dell'Informazione e della Comunicazione), MdL (Mercato del Lavoro), ROI (Return of Investment)";
 
     }
 
@@ -157,19 +160,12 @@ public static class PromtHelper
         var sections = TopicsParser.Parse(meetingAgenda);
         string expectedStructure = TopicsParser.BuildExpectedMarkdownSkeleton(sections);
 
-        string prompt = $@"You are a professional executive meeting secretary.
+        string prompt = $@"You are an expert meeting processing system specialized in executive meeting protocol synthesis and final minutes drafting.
+
                         {langInstruction}
 
-                        INPUT DATA:
-                        1. OFFICIAL AGENDA (Ordine del Giorno):
-                        {meetingAgenda}
-
-                        2. DETAILED SEGMENT SUMMARIES / DIGESTS:
-                        {combinedPartials}
-
-                        TARGET OUTPUT STRUCTURE (MANDATORY TEMPLATE):
-                        You MUST follow this exact structure derived from the agenda. Do not remove or reorganize any section or subsection:
-                        {expectedStructure}
+                        GLOSSARY & ACRONYMS (Use this to correctly map topics from the Agenda to the Digests): 
+                        {Acronyms()}
 
                         CORE GENERATION RULES:
                         1. STRICT AGENDA ANCHORING:
@@ -178,20 +174,32 @@ public static class PromtHelper
 
                         2. UNIFORM CONTENT SYNTHESIS (No Vague Statements):
                            - Under each topic, write clear, dense, and operational notes (context, changes, operational directives, guidelines, and reasons).
-                           - Metrics & Data: Format figures with context (e.g., ""FK: 2 PCI, FP: 1 PCI, LP: 3 PCI (2 convocate con ConvoGeZ)"").
-                           - Directives & Guidelines: If management/UMA requirements are discussed, list them as clear bullet points.
+                           - Metrics & Data: Format figures with context.
+                           - Keep all figures, dates, and quantitative data
+                           - Directives & Guidelines: If management requirements are discussed, list them as clear bullet points.
 
                         3. ACTION TRIAD FORMAT (Mandatory for all tasks/decisions):
                            Under each topic's `**Azioni / Decisioni:**` section, use this exact line format:
-                           • ☐ [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
-                           *(If no action was decided for that topic, write: • Nessuna azione specifica assegnata).*
+                           *  [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
+                           * [!] [Punto aperto / Decisione sospesa / Da approfondire]
+                        
 
                         4. UNPLANNED & EXTRA TOPICS:
-                           - If topics emerged during the meeting that were NOT in the official agenda, place them under `## Eventuali` (or create a subsection `### Fuori Ordine del Giorno` inside the relevant section).
+                           - If topics emerged during the meeting that were NOT in the official agenda, place them under `## Eventuali` (If there are no topics scheduled in this section,
+                            delete placeholder text - Non ci sono argomenti in questa sezione).
+
+                        INPUT DATA:
+                        DETAILED SEGMENT SUMMARIES / DIGESTS:
+                        {combinedPartials}
 
                         OUTPUT INSTRUCTIONS:
                         - Generate pure Markdown matching the TARGET OUTPUT STRUCTURE.
-                        - Do not output introductory or concluding meta-commentary.";
+                        - Do not output introductory or concluding meta-commentary.
+
+                        TARGET OUTPUT STRUCTURE (TEMPLATE):
+                        {expectedStructure}
+            ";
+
         return prompt;
     }
 
