@@ -162,15 +162,20 @@ public static class PromtHelper
 
         string prompt = $@"You are an expert meeting processing system specialized in executive meeting protocol synthesis and final minutes drafting.
 
+                        Aggregate the individual topic summaries provided into a single, cohesive final meeting summary. Ensure a logical flow between topics and eliminate any redundant information.
+
                         {langInstruction}
 
                         GLOSSARY & ACRONYMS (Use this to correctly map topics from the Agenda to the Digests): 
                         {Acronyms()}
 
+                        <rules>
                         CORE GENERATION RULES:
                         1. STRICT AGENDA ANCHORING:
                            - For every planned topic (### Topic), locate and compile all related information from the segment digests.
+                           - TOPIC MAPPING: Match the content from the input summaries to the exact predefined headers in the TARGET OUTPUT STRUCTURE. Do not invent new headers for sections 1, 2, and 3.
                            - If a planned agenda topic was NOT discussed in the meeting at all, write explicitly: *""Non trattato durante la riunione.""*
+                             and completely remove the ""Azioni / Decisioni"" subsection for that topic.
 
                         2. UNIFORM CONTENT SYNTHESIS (No Vague Statements):
                            - Under each topic, write clear, dense, and operational notes (context, changes, operational directives, guidelines, and reasons).
@@ -180,24 +185,30 @@ public static class PromtHelper
 
                         3. ACTION TRIAD FORMAT (Mandatory for all tasks/decisions):
                            Under each topic's `**Azioni / Decisioni:**` section, use this exact line format:
-                           *  [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
+                           * [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
                            * [!] [Punto aperto / Decisione sospesa / Da approfondire]
-                        
 
-                        4. UNPLANNED & EXTRA TOPICS:
-                           - If topics emerged during the meeting that were NOT in the official agenda, place them under `## Eventuali` (If there are no topics scheduled in this section,
-                            delete placeholder text - Non ci sono argomenti in questa sezione).
+                           - Ensure ALL placeholder values from the input (e.g., ""Unassigned"", ""Not specified"") are translated to Italian (e.g., ""Da definire"").
+
+                          4. UNPLANNED & EXTRA TOPICS:
+                            - Place any emergent topics that are not in the template under ## 4. Eventuali and remove the ""Nessun punto da segnalare"" text.
+                            - If there are no extra topics, strictly output ONLY ""Nessun punto da segnalare"" under ## 4. Eventuali.
+                        </rules>
 
                         INPUT DATA:
                         DETAILED SEGMENT SUMMARIES / DIGESTS:
+                        <digests>
                         {combinedPartials}
+                        </digests>
 
                         OUTPUT INSTRUCTIONS:
                         - Generate pure Markdown matching the TARGET OUTPUT STRUCTURE.
                         - Do not output introductory or concluding meta-commentary.
 
                         TARGET OUTPUT STRUCTURE (TEMPLATE):
+                        <template>
                         {expectedStructure}
+                        </template>
             ";
 
         return prompt;
