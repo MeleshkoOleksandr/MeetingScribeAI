@@ -96,7 +96,7 @@ public static class MeetingSummarySaver
     /// <summary>
     /// Saves the "structured" verbale (Direzione / Gestionale / Operativa / Eventuali) template.
     /// </summary>
-    public static async Task SaveTemplateSummaryAsync(string rawMarkdown, string meetingDate, string present, string absent, string topics, Window ownerWindow)
+    public static async Task SaveTemplateSummaryAsync(MeetingSession session, string present, string absent, Window ownerWindow)
     {
         var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Template", "VerbaleRiunione_Template.docx");
 
@@ -105,7 +105,7 @@ public static class MeetingSummarySaver
             throw new FileNotFoundException($"Template not found: {templatePath}");
         }
 
-        string outputPath = await PickSaveFileAsync(ownerWindow, $"Verbale_{meetingDate}.docx");
+        string outputPath = await PickSaveFileAsync(ownerWindow, $"Verbale_{session.Date}.docx");
         if (outputPath == null)
         {
             return;
@@ -118,14 +118,17 @@ public static class MeetingSummarySaver
         //   ...content...
         // Split it into { 1: "...", 2: "...", 3: "...", 4: "..." } so each part can go
         // into its own placeholder ({DEREZ}, {GEST}, {OPER}, {EVENT}).
-        var sections = SplitMarkdownIntoNumberedSections(rawMarkdown);
+        var sections = SplitMarkdownIntoNumberedSections(session.TemplateSummary);
 
         using (var doc = DocX.Load(templatePath))
         {
-            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{DATE}", NewValue = meetingDate });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{DATE}", NewValue = session.Date });
             doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{PARTS}", NewValue = present });
             doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{ASSEN}", NewValue = absent });
-            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TOPICS}", NewValue = topics });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TOPICS}", NewValue = session.MeetingTopics });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TIME}", NewValue = session.Time });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{VENUE}", NewValue = session.Venue });
+            doc.ReplaceText(new StringReplaceTextOptions { SearchValue = "{TEAM}", NewValue = session.Team });
 
             ReplacePlaceholderWithMarkdown(doc, "{DEREZ}", sections.GetValueOrDefault(1, string.Empty));
             ReplacePlaceholderWithMarkdown(doc, "{GEST}", sections.GetValueOrDefault(2, string.Empty));
@@ -249,18 +252,195 @@ public static class MeetingSummarySaver
     /// </summary>
     private static void ReplacePlaceholderWithMarkdown(DocX doc, string placeholder, string markdown)
     {
-        var targetParagraph = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains(placeholder));
-        if (targetParagraph == null)
-        {
-            return;
-        }
-
-        // Strip leading whitespace / non-breaking spaces the model sometimes emits.
         string cleanMarkdown = (markdown ?? string.Empty).TrimStart('\r', '\n', ' ', '\t', '\xa0');
 
-        AppendMarkdownToDocX(targetParagraph, cleanMarkdown);
+        // First try to find it inside a table cell (for structured templates)
+        foreach (var table in doc.Tables)
+        {
+            for (int r = 0; r < table.Rows.Count; r++)
+            {
+                var row = table.Rows[r];
+                foreach (var cell in row.Cells)
+                {
+                    var targetParagraph = cell.Paragraphs.FirstOrDefault(p => p.Text.Contains(placeholder));
+                    if (targetParagraph != null)
+                    {
+                        AppendMarkdownToTableCell(table, r, cell, targetParagraph, cleanMarkdown);
+                        targetParagraph.Remove(false);
+                        return;
+                    }
+                }
+            }
+        }
 
-        targetParagraph.Remove(false);
+        // Fallback for placeholders not inside tables
+        var pFallback = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains(placeholder));
+        if (pFallback != null)
+        {
+            AppendMarkdownToDocX(pFallback, cleanMarkdown);
+            pFallback.Remove(false);
+        }
+    }
+
+    private static void AppendMarkdownToTableCell(Table table, int startRowIndex, Cell startCell, Paragraph anchor, string markdown)
+    {
+        var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        var markdownDoc = Markdig.Markdown.Parse(markdown, pipeline);
+
+        Paragraph currentAnchor = anchor;
+        int currentRowIndex = startRowIndex;
+        bool isActionSection = false;
+
+        foreach (var block in markdownDoc)
+        {
+            if (block is HeadingBlock heading)
+            {
+                string headingText = ExtractPlainText(heading.Inline).Trim();
+                if (heading.Level >= 3 && (headingText.Contains("Azioni") || headingText.Contains("Decisioni")))
+                {
+                    isActionSection = true;
+                    // Do not insert the heading, just skip it
+                    continue;
+                }
+                else
+                {
+                    if (isActionSection)
+                    {
+                        isActionSection = false;
+                        // Insert a new row directly below the current one, and increment currentRowIndex
+                        // This ensures rows don't "fly" to the end of the table unexpectedly.
+                        var newRow = table.InsertRow(currentRowIndex + 1);
+                        currentRowIndex++;
+                        var leftCell = newRow.Cells[0];
+                        if (leftCell.Paragraphs.Count == 0)
+                            leftCell.InsertParagraph();
+                        currentAnchor = leftCell.Paragraphs.Last();
+                    }
+                    currentAnchor = InsertHeading(currentAnchor, heading);
+                }
+            }
+            else if (block is ParagraphBlock paragraphBlock)
+            {
+                currentAnchor = InsertParagraphBlock(currentAnchor, paragraphBlock);
+            }
+            else if (block is ListBlock listBlock)
+            {
+                if (isActionSection)
+                {
+                    foreach (var item in listBlock)
+                    {
+                        if (item is not ListItemBlock listItem) continue;
+
+                        var newRow = table.InsertRow(currentRowIndex + 1);
+                        currentRowIndex++;
+
+                        var leftCell = newRow.Cells.Count > 0 ? newRow.Cells[0] : null;
+                        var rightCell = newRow.Cells.Count > 1 ? newRow.Cells[1] : null;
+
+                        if (leftCell != null)
+                        {
+                            if (leftCell.Paragraphs.Count == 0) leftCell.InsertParagraph();
+                            var leftAnchor = leftCell.Paragraphs.Last();
+
+                            // Extract the full plain text of the action item from the markdown list block
+                            string fullText = ExtractPlainTextFromListItem(listItem);
+                            string actionText = fullText;
+                            string respText = "";
+                            string scadenzaText = "";
+
+                            // Parse the action string. Expected format:
+                            // "Action | Scadenza: [Date] | Resp: [Person]"
+                            int pipeIndex = fullText.IndexOf('|');
+                            if (pipeIndex >= 0)
+                            {
+                                // Everything before the first pipe is the main action description
+                                actionText = fullText.Substring(0, pipeIndex).Trim();
+                                
+                                // Split the rest by pipe to extract Responsibility and Deadline (Scadenza)
+                                string[] parts = fullText.Substring(pipeIndex + 1).Split('|', StringSplitOptions.RemoveEmptyEntries);
+                                foreach (string part in parts)
+                                {
+                                    // Remove bold markdown markers and trim whitespace
+                                    string p = part.Replace("**", "").Trim();
+                                    
+                                    if (p.StartsWith("Resp:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        respText = p.Substring(5).Trim();
+                                    }
+                                    else if (p.StartsWith("Scadenza:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        scadenzaText = p;
+                                    }
+                                    else
+                                    {
+                                        // Fallback if tags are missing: guess based on what is already populated
+                                        if (string.IsNullOrEmpty(respText)) respText = p;
+                                        else scadenzaText = p;
+                                    }
+                                }
+                            }
+
+                            // Format the left column (Action and Deadline)
+                            leftAnchor.Alignment = Alignment.left; // Align text to the left (not justified)
+                            leftAnchor.IndentationBefore = 15;     // Match the indentation of standard bullet lists
+                            leftAnchor.SpacingAfter(2);
+                            leftAnchor.Append("• ").Bold();        // Add a bullet point to the action text
+                            leftAnchor.Append(actionText);
+
+                            // Append the deadline (Scadenza) on a new line within the same left cell
+                            if (!string.IsNullOrEmpty(scadenzaText))
+                            {
+                                leftAnchor.AppendLine();
+                                if (scadenzaText.StartsWith("Scadenza:", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    leftAnchor.Append("Scadenza:").Bold(); // Bold the prefix
+                                    leftAnchor.Append(scadenzaText.Substring(9));
+                                }
+                                else
+                                {
+                                    leftAnchor.Append(scadenzaText);
+                                }
+                            }
+
+                            // Format the right column (Responsible Person/Team)
+                            if (rightCell != null && !string.IsNullOrEmpty(respText))
+                            {
+                                if (rightCell.Paragraphs.Count == 0) rightCell.InsertParagraph();
+                                var rightAnchor = rightCell.Paragraphs.Last();
+                                
+                                rightAnchor.Alignment = Alignment.left; // Align text to the left
+                                rightAnchor.SpacingAfter(2);
+                                rightAnchor.Append(respText);
+                            }
+
+                            currentAnchor = leftAnchor;
+                        }
+                    }
+                }
+                else
+                {
+                    currentAnchor = InsertList(currentAnchor, listBlock);
+                }
+            }
+            else if (block is Markdig.Extensions.Tables.Table tableBlock)
+            {
+                currentAnchor = InsertTable(currentAnchor, tableBlock);
+            }
+        }
+    }
+
+    private static string ExtractPlainTextFromListItem(ListItemBlock listItem)
+    {
+        var sb = new StringBuilder();
+        foreach (var subBlock in listItem)
+        {
+            if (subBlock is ParagraphBlock para && para.Inline != null)
+            {
+                sb.Append(ExtractPlainText(para.Inline));
+                sb.Append(" ");
+            }
+        }
+        return sb.ToString().Trim();
     }
 
     /// <summary>
@@ -304,6 +484,13 @@ public static class MeetingSummarySaver
     private static Paragraph InsertHeading(Paragraph anchor, HeadingBlock heading)
     {
         var p = anchor.InsertParagraphAfterSelf(string.Empty);
+
+        // Append a bullet point for H2 level headings
+        if (heading.Level == 2)
+        {
+            p.Append("• ");
+        }
+
         AppendInlinesToParagraph(p, heading.Inline);
 
         switch (heading.Level)

@@ -185,7 +185,7 @@ public static class PromtHelper
 
                         3. ACTION TRIAD FORMAT (Mandatory for all tasks/decisions):
                            Under each topic's `**Azioni / Decisioni:**` section, use this exact line format:
-                           * [Specific Action / Task] | **Resp:** [Name/Role/Sigla or 'Da definire'] | **Scadenza:** [Date/Deadline or 'Da definire']
+                           * [Specific Action / Task] | **Scadenza:** [Date/Deadline or 'Da definire'] | **Resp:** [Name/Role/Sigla or 'Da definire'] 
                            * [!] [Punto aperto / Decisione sospesa / Da approfondire]
 
                            - Ensure ALL placeholder values from the input (e.g., ""Unassigned"", ""Not specified"") are translated to Italian (e.g., ""Da definire"").

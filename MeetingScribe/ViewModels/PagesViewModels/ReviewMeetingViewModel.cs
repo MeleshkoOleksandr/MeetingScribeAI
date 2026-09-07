@@ -558,7 +558,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         else
         {
             var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(Session);
-            MeetingSummarySaver.SaveTemplateSummaryAsync(Session.TemplateSummary, Session.StartTime.ToString("dd.MM.yyyy"), present, absent, Session.MeetingTopics, desktop.MainWindow);
+            MeetingSummarySaver.SaveTemplateSummaryAsync(Session, present, absent, desktop.MainWindow);
         }
     }
 
