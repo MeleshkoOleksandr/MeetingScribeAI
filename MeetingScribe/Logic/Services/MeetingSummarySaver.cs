@@ -151,7 +151,7 @@ public static class MeetingSummarySaver
 
         // Matches "## 1." / "##  2." etc. at the start of a line; RegexOptions.Multiline
         // makes ^ match after every \n, not just at the start of the whole string.
-        var headingRegex = new Regex(@"^##\s*(\d+)\.", RegexOptions.Multiline);
+        var headingRegex = new Regex(@"^#\s*(\d+)\.", RegexOptions.Multiline);
         var matches = headingRegex.Matches(markdown);
 
         for (int i = 0; i < matches.Count; i++)

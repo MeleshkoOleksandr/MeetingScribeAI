@@ -86,19 +86,19 @@ public static class TopicsParser
             
             if (sec.Topics.Count > 0)
             {
-                sb.AppendLine($"## {sec.Number}. {sec.Title}");
+                sb.AppendLine($"# {sec.Number}. {sec.Title}");
                 foreach (var topic in sec.Topics)
                 {             
-                    sb.AppendLine($"### {topic.Title}");
+                    sb.AppendLine($"## {topic.Title}");
                     sb.AppendLine("[Fill with discussion summary, context, metrics, directives]");
-                    sb.AppendLine("#### **Azioni / Decisioni:**");
+                    sb.AppendLine("### **Azioni / Decisioni:**");
                     sb.AppendLine(" * [Action] | **Resp:** [Person/Role] | **Scadenza:** [Date/Condition]");
                     sb.AppendLine();
                 }
             }
             else
             {
-                sb.AppendLine($"## {sec.Number}. {sec.Title}");
+                sb.AppendLine($"# {sec.Number}. {sec.Title}");
                 sb.AppendLine("Nessun punto da segnalare");
                 sb.AppendLine();
             }
