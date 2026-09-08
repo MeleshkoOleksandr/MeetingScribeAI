@@ -293,31 +293,53 @@ public static class MeetingSummarySaver
 
         foreach (var block in markdownDoc)
         {
+            // --- FLEXIBLE ACTION TRIGGER ---
+            bool isActionTrigger = false;
+            string blockText = "";
+
+            if (block is HeadingBlock h)
+            {
+                blockText = ExtractPlainText(h.Inline).Trim();
+            }
+            else if (block is ParagraphBlock p)
+            {
+                blockText = ExtractPlainText(p.Inline).Trim();
+            }
+
+            if (!string.IsNullOrEmpty(blockText) && blockText.Length < 50)
+            {
+                string lower = blockText.ToLowerInvariant();
+                if (lower.Contains("azioni") || lower.Contains("decisioni"))
+                {
+                    if (block is HeadingBlock || lower.Contains("azioni / decisioni") || lower.Contains("azioni/decisioni") || lower.Contains("azioni e decisioni"))
+                    {
+                        isActionTrigger = true;
+                    }
+                }
+            }
+
+            if (isActionTrigger)
+            {
+                isActionSection = true;
+                continue;
+            }
+            // -------------------------------
+
             if (block is HeadingBlock heading)
             {
-                string headingText = ExtractPlainText(heading.Inline).Trim();
-                if (heading.Level >= 3 && (headingText.Contains("Azioni") || headingText.Contains("Decisioni")))
+                if (isActionSection)
                 {
-                    isActionSection = true;
-                    // Do not insert the heading, just skip it
-                    continue;
+                    isActionSection = false;
+                    // Insert a new row directly below the current one, and increment currentRowIndex
+                    // This ensures rows don't "fly" to the end of the table unexpectedly.
+                    var newRow = table.InsertRow(currentRowIndex + 1);
+                    currentRowIndex++;
+                    var leftCell = newRow.Cells[0];
+                    if (leftCell.Paragraphs.Count == 0)
+                        leftCell.InsertParagraph();
+                    currentAnchor = leftCell.Paragraphs.Last();
                 }
-                else
-                {
-                    if (isActionSection)
-                    {
-                        isActionSection = false;
-                        // Insert a new row directly below the current one, and increment currentRowIndex
-                        // This ensures rows don't "fly" to the end of the table unexpectedly.
-                        var newRow = table.InsertRow(currentRowIndex + 1);
-                        currentRowIndex++;
-                        var leftCell = newRow.Cells[0];
-                        if (leftCell.Paragraphs.Count == 0)
-                            leftCell.InsertParagraph();
-                        currentAnchor = leftCell.Paragraphs.Last();
-                    }
-                    currentAnchor = InsertHeading(currentAnchor, heading);
-                }
+                currentAnchor = InsertHeading(currentAnchor, heading);
             }
             else if (block is ParagraphBlock paragraphBlock)
             {
@@ -485,25 +507,27 @@ public static class MeetingSummarySaver
     {
         var p = anchor.InsertParagraphAfterSelf(string.Empty);
 
-        // Append a bullet point for H2 level headings
-        if (heading.Level == 2)
+        // Treat Level 2 and Level 3 as topic headings (bullet point + light blue color)
+        bool isTopicHeading = (heading.Level == 2 || heading.Level == 3);
+
+        if (isTopicHeading)
         {
             p.Append("• ");
         }
 
         AppendInlinesToParagraph(p, heading.Inline);
 
-        switch (heading.Level)
+        if (heading.Level == 1)
         {
-            case 1:
-                p.FontSize(18).Bold().Color(HeadingColorH1).SpacingBefore(12).SpacingAfter(6);
-                break;
-            case 2:
-                p.FontSize(14).Bold().Color(HeadingColorH2).SpacingBefore(10).SpacingAfter(4);
-                break;
-            default:
-                p.FontSize(12).Bold().Color(Xceed.Drawing.Color.DimGray).SpacingBefore(8).SpacingAfter(2);
-                break;
+            p.FontSize(18).Bold().Color(HeadingColorH1).SpacingBefore(12).SpacingAfter(6);
+        }
+        else if (isTopicHeading)
+        {
+            p.FontSize(14).Bold().Color(HeadingColorH2).SpacingBefore(10).SpacingAfter(4);
+        }
+        else
+        {
+            p.FontSize(12).Bold().Color(Xceed.Drawing.Color.DimGray).SpacingBefore(8).SpacingAfter(2);
         }
 
         return p;
@@ -517,7 +541,7 @@ public static class MeetingSummarySaver
         return p;
     }
 
-    private static Paragraph InsertList(Paragraph anchor, ListBlock listBlock)
+    private static Paragraph InsertList(Paragraph anchor, ListBlock listBlock, int indentLevel = 0)
     {
         int itemNumber = 1;
 
@@ -530,21 +554,27 @@ public static class MeetingSummarySaver
 
             foreach (var subBlock in listItem)
             {
-                if (subBlock is not ParagraphBlock subPara)
+                if (subBlock is ParagraphBlock subPara)
                 {
-                    continue;
+                    // Use a different marker for nested unordered lists
+                    string marker = listBlock.IsOrdered ? $"{itemNumber}. " : (indentLevel == 0 ? "• " : "o ");
+
+                    var p = anchor.InsertParagraphAfterSelf(string.Empty);
+                    p.FontSize(11).SpacingAfter(2);
+                    
+                    // Increase indentation based on the nesting level
+                    p.IndentationBefore = 15 + (indentLevel * 20);
+
+                    p.Append(marker).Bold();
+                    AppendInlinesToParagraph(p, subPara.Inline);
+
+                    anchor = p;
                 }
-
-                string marker = listBlock.IsOrdered ? $"{itemNumber}. " : "• ";
-
-                var p = anchor.InsertParagraphAfterSelf(string.Empty);
-                p.FontSize(11).SpacingAfter(2);
-                p.IndentationBefore = 15;
-
-                p.Append(marker).Bold();
-                AppendInlinesToParagraph(p, subPara.Inline);
-
-                anchor = p;
+                else if (subBlock is ListBlock nestedList)
+                {
+                    // Recursively process nested lists
+                    anchor = InsertList(anchor, nestedList, indentLevel + 1);
+                }
             }
 
             itemNumber++;
