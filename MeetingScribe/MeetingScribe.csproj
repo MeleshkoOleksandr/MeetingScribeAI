@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,6 +16,7 @@
     <AvaloniaResource Remove="Assets\Manifests\ai_providers.json" />
     <AvaloniaResource Remove="Assets\Manifests\languages_manifest.json" />
     <AvaloniaResource Remove="Assets\Manifests\models_manifest.json" />
+    <AvaloniaResource Remove="Assets\Manifests\prompts.md" />
     <AvaloniaResource Remove="Assets\Manifests\Venue.json" />
     <AvaloniaResource Remove="Assets\Models\silero_vad.onnx" />
     <AvaloniaResource Remove="Assets\Template\VerbaleRiunione_Gen.docx" />
@@ -122,6 +123,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\WhisperModels\ggml-small.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Manifests\prompts.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
