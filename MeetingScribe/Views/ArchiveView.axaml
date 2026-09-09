@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:MeetingScribe.ViewModels"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:loc="using:MeetingScribe.UILogic"
+             xmlns:meet="using:MeetingScribe.Logic.Meeting"
              x:DataType="vm:ArchiveViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MeetingScribe.Views.ArchiveView">
@@ -133,11 +134,22 @@
                         <!--   Team -->
                         <StackPanel Spacing="10">
                             <TextBlock Text="{loc:L view_Archive_Participants}" Classes="label-caps" Opacity="0.6"/>
-                            <StackPanel Orientation="Horizontal" Spacing="2">
-                           <!-- <Border Classes="chip" CornerRadius="180" Height="30" Background="Red" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
-                                <Border Classes="chip" CornerRadius="180" Height="30" Background="BlueViolet" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>
-                                <Border Classes="chip" CornerRadius="180" Height="30" Background="LightBlue" HorizontalAlignment="Left"><TextBlock Text="MO"/></Border>-->
-                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding SelectedMeeting.Participants}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="meet:Participant">
+                                        <Border Classes="chip" CornerRadius="180" Height="30" Width="40" Margin="0,0,4,4" 
+                                                Background="{Binding TagColor, Converter={StaticResource HexToBrushConverter}}" 
+                                                HorizontalAlignment="Left" ToolTip.Tip="{Binding Name}">
+                                            <TextBlock Text="{Binding Alias}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
