@@ -72,10 +72,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                            <icons:MaterialIcon Kind="ClockOutline" Width="14" Foreground="Gray"/>
-                                           <TextBlock FontSize="13" Foreground="Gray">
-                                               <Run Text="{Binding Duration, StringFormat=\{0:mm\}}" />          
-                                               <Run Text="{loc:L view_Archive_Min}" />
-                                           </TextBlock>
+                                           <TextBlock Text="{Binding Duration, StringFormat=\{0:mm\} min}" FontSize="13" Foreground="Gray"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
@@ -104,10 +101,7 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="3" Opacity="0.4">
                             <icons:MaterialIcon Kind="ClockOutline" Width="14"/>
-                            <TextBlock FontSize="12">
-                                <Run Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:mm\}}" />       
-                                <Run Text="{loc:L view_Archive_Min}" />
-                            </TextBlock>
+                            <TextBlock Text="{Binding SelectedMeeting.Duration, StringFormat=\{0:mm\} min}" FontSize="12" />
                         </StackPanel>
                         
                         <!-- Separaor -->
@@ -127,10 +121,10 @@
 
                 <ScrollViewer Grid.Row="1" Margin="0,20,0,0">
                     <StackPanel Spacing="20">
-                        <StackPanel Spacing="10">
+                      <!--  <StackPanel Spacing="10">
                             <TextBlock Text="{loc:L view_Archive_Description}" Classes="label-caps" Opacity="0.6"/>
                             <TextBlock Text="{Binding SelectedMeeting.Description}" TextWrapping="Wrap" LineHeight="20"/>
-                        </StackPanel>
+                        </StackPanel>-->
                         <!--   Topics -->
                         <StackPanel Spacing="10">
                             <TextBlock Text="{loc:L view_Archive_KeyTopics}" Classes="label-caps" Opacity="0.6"/>
