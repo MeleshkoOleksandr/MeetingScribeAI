@@ -77,6 +77,13 @@
                             <TextBlock Text="{loc:L view_Settings_KeySavedLocally}"
                                        FontSize="10" Opacity="0.4" Margin="5,0"/>
                         </StackPanel>
+
+                        <!-- Edit Prompts -->
+                        <Button Content="Edit Prompts" 
+                                Command="{Binding EditPromptsCommand}" 
+                                Classes="btn-outline" 
+                                HorizontalAlignment="Stretch"
+                                Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
             </Grid>

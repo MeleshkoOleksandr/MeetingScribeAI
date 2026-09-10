@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:MeetingScribe.ViewModels.Windows"
+        xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="MeetingScribe.Views.Windows.PromptsEditorWindow"
+        x:DataType="vm:PromptsEditorViewModel"
+        Title="Edit Prompts"
+        Width="900" Height="700"
+        WindowStartupLocation="CenterOwner"
+        ExtendClientAreaToDecorationsHint="True">
+
+    <Grid RowDefinitions="Auto, *, Auto" Margin="20">
+        <!-- Header -->
+        <TextBlock Grid.Row="0"  Text="Edit Prompts" FontSize="22" FontWeight="Bold" Foreground="White"/>
+
+
+        <!-- Editor -->
+        <Border Grid.Row="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="5">
+            <avaloniaEdit:TextEditor Name="Editor"
+                                     Document="{Binding Document}"
+                                     
+                                     SyntaxHighlighting="Markdown"
+                                     FontFamily="Consolas,Courier New,Monospace"
+                                     ShowLineNumbers="True"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Margin="5"/>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,15,0,0">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Classes="btn-outline"/>
+            <Button Content="Save" Command="{Binding SaveCommand}" Classes="btn-primary"/>
+        </StackPanel>
+    </Grid>
+</Window>

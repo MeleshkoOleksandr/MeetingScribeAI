@@ -1,11 +1,16 @@
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using MeetingScribe.Enums;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using MeetingScribe.UILogic.ManifestReaders;
+using MeetingScribe.ViewModels.Windows;
+using MeetingScribe.Views.Windows;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -128,6 +133,18 @@ public partial class SettingsViewModel : ViewModelBase
         {
             LocalizationManager.Instance.LoadLanguage(value.Code);
 
+        }
+    }
+
+    [RelayCommand]
+    private async System.Threading.Tasks.Task EditPrompts()
+    {
+        var dialog = new PromptsEditorWindow { DataContext = new PromptsEditorViewModel() };
+        var owner = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (owner != null)
+        {
+            await dialog.ShowDialog(owner);
         }
     }
 }

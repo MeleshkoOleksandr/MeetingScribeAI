@@ -1,0 +1,77 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MeetingScribe.Logic.AI;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using AvaloniaEdit.Document;
+
+namespace MeetingScribe.ViewModels.Windows;
+
+public partial class PromptsEditorViewModel : ViewModelBase
+{
+    private readonly Window _window;
+    private readonly string _promptsPath;
+
+    [ObservableProperty]
+    private TextDocument _document = new();
+
+    public PromptsEditorViewModel()
+    {
+        _promptsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Manifests", "prompts.md");
+        LoadFileContent();
+    }
+
+    private void LoadFileContent()
+    {
+        try
+        {
+            if (File.Exists(_promptsPath))
+            {
+                Document.Text = File.ReadAllText(_promptsPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Fallback or error handling
+            Document.Text = $"Error loading prompts: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        try
+        {
+            await File.WriteAllTextAsync(_promptsPath, Document.Text);
+            
+            // Also save to source directory if we are running in debug/development mode
+            try 
+            {
+                var sourcePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Assets", "Manifests", "prompts.md"));
+                if (File.Exists(sourcePath))
+                {
+                    await File.WriteAllTextAsync(sourcePath, Document.Text);
+                }
+            }
+            catch { /* Ignore if not in dev env */ }
+
+            // Reload the prompts in the application memory
+            PromtHelper.LoadPrompts();
+            
+            _window?.Close(true);
+        }
+        catch (Exception ex)
+        {
+            // Ideally show a message box here if saving fails
+            Console.WriteLine($"Error saving prompts: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        _window?.Close(false);
+    }
+}
