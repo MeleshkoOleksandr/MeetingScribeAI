@@ -11,7 +11,7 @@ public partial class AddGroupViewModel : ViewModelBase
     [ObservableProperty] private string _selectedIcon = "AccountGroup";
     [ObservableProperty] private Color _selectedColor = Color.Parse("#b7e97e");
 
-    // Список популярных иконок для быстрого выбора
+    //List of popular icons for quick selection
     public List<string> AvailableIcons { get; } = new()
     {
         "AccountGroup", "CodeBraces", "BullhornOutline", "PaletteOutline",
