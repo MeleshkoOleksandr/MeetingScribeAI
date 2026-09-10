@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="Prompts" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+	<Color name="PromptName" foreground="#B7E97E" fontWeight="bold" />
+	<Color name="Heading" foreground="#569CD6" fontWeight="bold" />
+	<Color name="Tags" foreground="#4EC9B0" fontWeight="bold" />
+	<Color name="Placeholder" foreground="#DCDCAA" />
+	<Color name="Comment" foreground="#6A9955" fontStyle="italic" />
+    <Color name="Bold" foreground="#E5C07B" fontWeight="bold" />
+
+	<RuleSet>
+		<!-- Prompt Names: # [Name] -->
+		<Rule color="PromptName">
+			^\#\s\[[a-zA-Z0-9_]+\]
+		</Rule>
+
+		<!-- Other Headers -->
+		<Rule color="Heading">
+            ^\#{1,6}\s.*
+        </Rule>
+
+		<!-- XML Tags -->
+		<Rule color="Tags">
+			&lt;/?\w+&gt;
+		</Rule>
+
+		<!-- Placeholders {0}, {1} -->
+		<Rule color="Placeholder">
+			\{\d+\}
+		</Rule>
+		
+		<!-- Comments // -->
+		<Rule color="Comment">
+			//.*
+		</Rule>
+        
+        <!-- Bold text -->
+        <Rule color="Bold">
+            \*\*.*?\*\*
+        </Rule>
+       
+	</RuleSet>
+</SyntaxDefinition>
