@@ -14,10 +14,17 @@ POSIBLE KEYWORDS:
 Internal Acronyms & Projects: {0}
 Shortened names: {1}
 Tools & Software: Hyper, ChatGPT, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams, AIber, Aladino
-Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale, CV
+Business context (Italian): formatori, collaboratori specialisti, supervisioni in aula, discenti, 
+colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, 
+assessment, esercizio, autoapprendimento, trattande, verbale, CV
 
 # [Acronyms]
-PAIP (Piano d'Azione Individuale Planner), SGQ (Gestione Qualità), PCI (Persona in Cerca d'Impiego), WS (Workshop), CF (Coach Formatore), CR (Coach Responsabile), CP (Consulente Personale), URC (Ufficio Regionale di Collocamento), UMA (Ufficio delle Misure Attive), AILS, PML (Provvedimenti inerenti al Mercato del Lavoro), GeZ (Generation Z), RF (Rapporto Finale), ConvoGeZ, Labor Transfer (LT), TRI (Tecniche Ricerca Impiego), TRI Form, TRI Center, TRI Coaching, Team AtelierTRI, TIC (Tecnologie dell'Informazione e della Comunicazione), MdL (Mercato del Lavoro), ROI (Return of Investment), Aladino
+PAIP (Piano d'Azione Individuale Planner), SGQ (Gestione Qualità), PCI (Persona in Cerca d'Impiego), WS (Workshop), 
+CF (Coach Formatore), CR (Coach Responsabile), CP (Consulente Personale), URC (Ufficio Regionale di Collocamento), 
+UMA (Ufficio delle Misure Attive), AILS, PML (Provvedimenti inerenti al Mercato del Lavoro), GeZ (Generation Z), 
+RF (Rapporto Finale), ConvoGeZ, Labor Transfer (LT), TRI (Tecniche Ricerca Impiego), TRI Form, TRI Center, 
+TRI Coaching, Team AtelierTRI, TIC (Tecnologie dell'Informazione e della Comunicazione), MdL (Mercato del Lavoro), 
+ROI (Return of Investment), Aladino
 
 # [Nicknames]
 Leonardo = Leo, Manuela = Manu, Tatiana = Tati

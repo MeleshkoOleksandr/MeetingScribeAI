@@ -11,7 +11,6 @@ namespace MeetingScribe.ViewModels.Windows;
 
 public partial class PromptsEditorViewModel : ViewModelBase
 {
-    private readonly Window _window;
     private readonly string _promptsPath;
 
     [ObservableProperty]
@@ -60,7 +59,7 @@ public partial class PromptsEditorViewModel : ViewModelBase
             // Reload the prompts in the application memory
             PromtHelper.LoadPrompts();
             
-            _window?.Close(true);
+            CloseWindow(true);
         }
         catch (Exception ex)
         {
@@ -72,6 +71,21 @@ public partial class PromptsEditorViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        _window?.Close(false);
+        CloseWindow(false);
+    }
+
+    private void CloseWindow(bool result)
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var w in desktop.Windows)
+            {
+                if (w is MeetingScribe.Views.Windows.PromptsEditorWindow)
+                {
+                    w.Close(result);
+                    break;
+                }
+            }
+        }
     }
 }

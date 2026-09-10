@@ -7,14 +7,14 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="MeetingScribe.Views.Windows.PromptsEditorWindow"
         x:DataType="vm:PromptsEditorViewModel"
-        Title="Edit Prompts"
-        Width="900" Height="700"
+        Title=""
+        Width="1000" Height="700"
         WindowStartupLocation="CenterOwner"
         ExtendClientAreaToDecorationsHint="True">
 
     <Grid RowDefinitions="Auto, *, Auto" Margin="20">
         <!-- Header -->
-        <TextBlock Grid.Row="0"  Text="Edit Prompts" FontSize="22" FontWeight="Bold" Foreground="White"/>
+        <TextBlock Grid.Row="0" TextAlignment="Center" Text="Edit Prompts" FontSize="22" FontWeight="Bold" Foreground="White"/>
 
 
         <!-- Editor -->
@@ -32,8 +32,9 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,15,0,0">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" Classes="btn-outline"/>
+            <Button Content="Cancel" Classes="btn-ghost" Command="{Binding CancelCommand}" Padding="14,14" />
             <Button Content="Save" Command="{Binding SaveCommand}" Classes="btn-primary"/>
         </StackPanel>
+    
     </Grid>
 </Window>
