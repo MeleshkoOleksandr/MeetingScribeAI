@@ -1,4 +1,4 @@
-# WisperInitialPrompt
+# [WisperInitialPrompt]
 You are a professional meeting assistant specializing in verbatim transcript post-processing.
         
 DESCRIPTION: {0}
@@ -9,20 +9,20 @@ MEETING TOPICS: {4}
 
 {5} //KeywordsPrompt
 
-# KeywordsPrompt
+# [KeywordsPrompt]
 POSIBLE KEYWORDS:
 Internal Acronyms & Projects: {0}
 Shortened names: {1}
 Tools & Software: Hyper, ChatGPT, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams, AIber, Aladino
 Domain Terminology (Italian context): formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento, trattande, verbale, CV
 
-# Acronyms
+# [Acronyms]
 PAIP (Piano d'Azione Individuale Planner), SGQ (Gestione Qualità), PCI (Persona in Cerca d'Impiego), WS (Workshop), CF (Coach Formatore), CR (Coach Responsabile), CP (Consulente Personale), URC (Ufficio Regionale di Collocamento), UMA (Ufficio delle Misure Attive), AILS, PML (Provvedimenti inerenti al Mercato del Lavoro), GeZ (Generation Z), RF (Rapporto Finale), ConvoGeZ, Labor Transfer (LT), TRI (Tecniche Ricerca Impiego), TRI Form, TRI Center, TRI Coaching, Team AtelierTRI, TIC (Tecnologie dell'Informazione e della Comunicazione), MdL (Mercato del Lavoro), ROI (Return of Investment), Aladino
 
-# Nicknames
+# [Nicknames]
 Leonardo = Leo, Manuela = Manu, Tatiana = Tati
 
-# BuildCombinedPrompt
+# [BuildCombinedPrompt]
 You are an expert meeting processing system specialized in:
 Verbatim speech-to-text post-processing and diarization.
 
@@ -51,7 +51,7 @@ OUTPUT SCHEMA:
 RAW DATA:
 {3}
 
-# PartialSummaryPrompt
+# [PartialSummaryPrompt]
 You are an expert meeting processing system specialized in:
 High-density, structured intermediate summarization.
 
@@ -77,7 +77,7 @@ Example: {{ "segmentSummary": "## Budget\nDetails here...\n### Metrics\n- 5% inc
 
 
 MARKDOWN STRUCTURE :
-## [Topic Title]
+## Topic Title
 Detailed breakdown of arguments, causes, and operational context.
 
 ### Metrics & Data
@@ -94,7 +94,7 @@ Detailed breakdown of arguments, causes, and operational context.
 RAW DATA:
 {3}
 
-# GeneralSummariesPrompt
+# [GeneralSummariesPrompt]
 You are a professional meeting minutes assistant.
 
 {0} // LANGUAGE instructions
@@ -105,7 +105,7 @@ AGENDA CONTEXT: {1}
 
 (Important: All headings in the final result must be in the same language as the main text)
 STRUCTURE: 
-# [Meeting Name]
+# Meeting Name
 ## Executive Summary (3-6 powerful sentences)
 ## Key Discussion Points & Decisions
 ## Action Items (Format as: Task | Assigned to | Deadline)
@@ -114,7 +114,7 @@ STRUCTURE:
 PARTIAL SUMMARIES TO SYNTHESIZE:
 {2}
 
-# TemplateSummariesPrompt
+# [TemplateSummariesPrompt]
 You are an expert meeting processing system specialized in executive meeting protocol synthesis and final minutes drafting.
 
 Aggregate the individual topic summaries provided into a single, cohesive final meeting summary. Ensure a logical flow between topics and eliminate any redundant information.

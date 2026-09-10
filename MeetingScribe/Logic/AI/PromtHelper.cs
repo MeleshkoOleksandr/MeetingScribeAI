@@ -34,19 +34,21 @@ public static class PromtHelper
 
             foreach (var line in lines)
             {
-                if (line.StartsWith("# "))
+                // Match lines like "# [WisperInitialPrompt]" exactly.
+                var match = System.Text.RegularExpressions.Regex.Match(line.TrimEnd(), @"^#\s+\[([a-zA-Z0-9_]+)\]$");
+                if (match.Success)
                 {
                     if (currentHeader != null)
                     {
                         _prompts[currentHeader] = currentContent.ToString().Trim();
                         currentContent.Clear();
                     }
-                    currentHeader = line.Substring(2).Trim();
+                    currentHeader = match.Groups[1].Value;
                 }
                 else if (currentHeader != null)
                 {
                     string cleanLine = line;
-                    
+
                     if (cleanLine.TrimStart().StartsWith("//"))
                     {
                         continue; // Skip comment lines entirely
@@ -71,7 +73,7 @@ public static class PromtHelper
         catch (Exception ex)
         {
             // Optional: Log the exception somewhere if a logger is available
-            Console.WriteLine($"Error loading prompts: {ex.Message}");
+            LogService.Instance.LogException(ex, "Error loading prompts from prompts.md");
         }
     }
 
@@ -83,12 +85,12 @@ public static class PromtHelper
     public static string WisperInitialPrompt(MeetingSession session)
     {
         var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(session);
-        return string.Format(GetPrompt("WisperInitialPrompt"), 
-            session.Description, 
-            session.Team, 
-            present, 
-            absent, 
-            session.MeetingTopics, 
+        return string.Format(GetPrompt("WisperInitialPrompt"),
+            session.Description,
+            session.Team,
+            present,
+            absent,
+            session.MeetingTopics,
             KeywordsPrompt());
     }
 
