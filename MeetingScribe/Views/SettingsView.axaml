@@ -79,9 +79,9 @@
                         </StackPanel>
 
                         <!-- Edit Prompts -->
-                        <Button Content="{loc:L view_Settings_EditPrompts}" 
-                                Command="{Binding EditPromptsCommand}" 
-                                Classes="btn-outline" 
+                        <Button Content="{loc:L view_Settings_EditPrompts}"
+                                Command="{Binding EditPromptsCommand}"
+                                Classes="btn-outline"
                                 HorizontalAlignment="Stretch"
                                 Margin="0,10,0,0"/>
                     </StackPanel>
@@ -157,6 +157,17 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
+
+                        <!-- Restore Defaults Button -->
+                        <Button
+                            Command="{Binding RestoreDefaultsCommand}" Classes="btn-outline" Foreground="IndianRed"  HorizontalAlignment="Stretch"
+                            Margin="0,15,0,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+                                <icons:MaterialIcon Kind="Restore" Foreground="IndianRed"/>
+                                <TextBlock Text="{loc:L view_Settings_RestoreDefaults}"/>
+                            </StackPanel>
+                        </Button>
+
                     </StackPanel>
                 </Border>
             </Grid>

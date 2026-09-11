@@ -9,7 +9,9 @@ using MeetingScribe.Logic.Services;
 using MeetingScribe.UILogic;
 using MeetingScribe.UILogic.ManifestReaders;
 using MeetingScribe.ViewModels.Windows;
+using MeetingScribe.Views;
 using MeetingScribe.Views.Windows;
+using MeetingScribe.Views.Controls;
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +25,7 @@ namespace MeetingScribe.ViewModels;
 public partial class SettingsViewModel : ViewModelBase
 {
     // --- Observables ---
-    [ObservableProperty] private AppSettings _settings = new();
+    [ObservableProperty] private AppSettings _settings;
     [ObservableProperty] private ObservableCollection<ModelManifest> _availableModels = new();
     [ObservableProperty] private ModelManifest? _selectedModelItem;
     [ObservableProperty] private ModelManifest? _selectedModelAccItem;
@@ -41,8 +43,13 @@ public partial class SettingsViewModel : ViewModelBase
 
     public SettingsViewModel()
     {
+        _settings = AppSettings.Load();
+        _settings.PropertyChanged += OnSettingsChanged;
+
         LoadManifests();
         LoadAiProviders();
+
+        LocalizationManager.Instance.LoadLanguage(_settings.UiLanguage);
         SelectedUiLanguage = Languages.FirstOrDefault(l => l.Code == LocalizationManager.Instance.CurrentLanguage);
     }
 
@@ -132,7 +139,7 @@ public partial class SettingsViewModel : ViewModelBase
         if (value != null)
         {
             LocalizationManager.Instance.LoadLanguage(value.Code);
-
+            Settings.UiLanguage = value.Code;
         }
     }
 
@@ -145,6 +152,38 @@ public partial class SettingsViewModel : ViewModelBase
         if (owner != null)
         {
             await dialog.ShowDialog(owner);
+        }
+    }
+
+    private void OnSettingsChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        _settings.Save();
+    }
+
+    [RelayCommand]
+    private async System.Threading.Tasks.Task RestoreDefaults()
+    {
+        var result = await LuminaMessageBox.Show(
+            Loc("view_Settings_RestoreTitle"),
+            Loc("view_Settings_RestoreMsg"),
+            LuminaMessageBoxType.Danger,
+            Loc("view_Settings_RestoreConfirm"));
+
+        if (result == LuminaMessageBox.MessageBoxResult.Confirm)
+        {
+            Settings.PropertyChanged -= OnSettingsChanged;
+            
+            Settings = new AppSettings();
+            Settings.Save();
+            
+            Settings.PropertyChanged += OnSettingsChanged;
+
+            // Reapply selections based on new defaults
+            SelectedModelItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedModel) ?? AvailableModels.FirstOrDefault();
+            SelectedModelAccItem = AvailableModels.FirstOrDefault(m => m.FileName == Settings.SelectedAccModel) ?? AvailableModels.FirstOrDefault();
+            SelectedAiProvider = AiProviders.FirstOrDefault(p => p.Id == Settings.AiProviderId) ?? AiProviders.FirstOrDefault();
+            LocalizationManager.Instance.LoadLanguage(Settings.UiLanguage);
+            SelectedUiLanguage = Languages.FirstOrDefault(l => l.Code == LocalizationManager.Instance.CurrentLanguage);
         }
     }
 }
