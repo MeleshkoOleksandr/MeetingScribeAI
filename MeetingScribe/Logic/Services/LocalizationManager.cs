@@ -22,7 +22,6 @@ public partial class LocalizationManager : ObservableObject
     private LocalizationManager()
     {
         DiscoverLanguages();
-        LoadLanguage("en"); // Default Language
     }
 
     // C# indexer: loc[“Key”]

@@ -49,7 +49,6 @@ public partial class SettingsViewModel : ViewModelBase
         LoadManifests();
         LoadAiProviders();
 
-        LocalizationManager.Instance.LoadLanguage(_settings.UiLanguage);
         SelectedUiLanguage = Languages.FirstOrDefault(l => l.Code == LocalizationManager.Instance.CurrentLanguage);
     }
 

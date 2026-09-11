@@ -5,6 +5,7 @@ using MeetingScribe.Enums;
 using MeetingScribe.Logic.Services;
 using MeetingScribe.ViewModels;
 using MeetingScribe.Views;
+using MeetingScribe.UILogic;
 
 using System;
 using System.Linq;
@@ -28,6 +29,9 @@ namespace MeetingScribe
 
         public override void OnFrameworkInitializationCompleted()
         {
+            var settings = AppSettings.Load();
+            LocalizationManager.Instance.LoadLanguage(settings.UiLanguage);
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow
