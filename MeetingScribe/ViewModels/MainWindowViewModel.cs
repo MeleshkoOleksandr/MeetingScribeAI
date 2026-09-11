@@ -134,7 +134,8 @@ public partial class MainWindowViewModel : ViewModelBase
         // Creating a  navigation item for this review pag
         var reviewNavItem = new NavigationItem
         {
-            Label = session.Name,
+            Description = session.Name,
+            Label = Loc("view_Main_Review"),
             Icon = "NotebookOutline",
             Target = PageNames.Review,
             Page = reviewVm
