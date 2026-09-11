@@ -19,6 +19,8 @@ namespace MeetingScribe.Logic.Services;
 
 public static class MeetingSummarySaver
 {
+    private static string Loc(string key) => LocalizationManager.Instance[key];
+
     // Colors used for H1 / H2 headings. Defined once so they are easy to tweak
     private static readonly Xceed.Drawing.Color HeadingColorH1 = Xceed.Drawing.Color.Parse(183, 233, 126);
     private static readonly Xceed.Drawing.Color HeadingColorH2 = Xceed.Drawing.Color.Parse(129, 207, 255);
@@ -138,8 +140,7 @@ public static class MeetingSummarySaver
             doc.SaveAs(outputPath);
         }
 
-        Console.WriteLine($"Файл успешно сохранен: {outputPath}");
-
+        LogService.Instance.LogInfo($"Structured summary file is saved : {outputPath}");
         OpenFile(outputPath);
     }
 
@@ -193,12 +194,12 @@ public static class MeetingSummarySaver
 
         var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save meeting summary",
+            Title = Loc("logic_SaveSummaryTitle"),
             SuggestedFileName = suggestedFileName,
             DefaultExtension = "docx",
             FileTypeChoices = new[]
             {
-                new FilePickerFileType("Word Document")
+                new FilePickerFileType(Loc("logic_WordDocument"))
                 {
                     Patterns = new[] { "*.docx" }
                 }
@@ -218,7 +219,7 @@ public static class MeetingSummarySaver
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Не удалось открыть файл автоматически: {ex.Message}");
+            LogService.Instance.LogError($"Failed to open file automatically: {ex.Message}");
         }
     }
 

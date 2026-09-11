@@ -17,6 +17,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class ArchiveViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     // Sort options for the meetings list
     public List<string> SortOptions { get; } = ["▽ DATE", "△ DATE", "▽ NAME", "△ NAME"];
     [ObservableProperty] private string _selectedSortOption = "▽ DATE";
@@ -71,9 +73,6 @@ public partial class ArchiveViewModel : ViewModelBase
         SelectedSortOption = option;
     }
 
-    public ArchiveViewModel()
-    {
-    }
     public void InitArchiveViewModel(Action<MeetingSession> onOpenRequest)
     {
         _onOpenRequest = onOpenRequest;
@@ -126,8 +125,8 @@ public partial class ArchiveViewModel : ViewModelBase
         // Is meeting selected? If not, exit the method
         if (SelectedMeeting == null) return;
 
-        var result =  await LuminaMessageBox.Show("Delete Recording?", $"Are you sure you want to permanently delete '{SelectedMeeting.Name}'? This action cannot be undone.",
-            LuminaMessageBoxType.Danger, "Delete Forever");
+        var result =  await LuminaMessageBox.Show(Loc("view_Archive_DeleteRecording"), string.Format(Loc("view_Archive_DeleteRecordingMsg"), SelectedMeeting.Name),
+            LuminaMessageBoxType.Danger, Loc("view_Archive_DeleteForever"));
 
         if (result == LuminaMessageBox.MessageBoxResult.Confirm)
         {

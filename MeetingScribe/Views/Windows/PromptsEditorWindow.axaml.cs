@@ -5,6 +5,7 @@ using AvaloniaEdit.Highlighting.Xshd;
 using System;
 using System.Xml;
 using MeetingScribe.ViewModels.Windows;
+using MeetingScribe.Logic.Services;
 
 namespace MeetingScribe.Views.Windows;
 
@@ -27,7 +28,7 @@ public partial class PromptsEditorWindow : Window
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error loading custom highlighting: " + ex.Message);
+            LogService.Instance.LogError("Error loading custom highlighting: " + ex.Message);
         }
     }
 }

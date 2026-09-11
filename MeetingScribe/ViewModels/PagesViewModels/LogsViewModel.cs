@@ -18,6 +18,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class LogsViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     // Search query for filtering logs
     [ObservableProperty] private string _searchQuery = "";
 
@@ -81,9 +83,9 @@ public partial class LogsViewModel : ViewModelBase
     private async Task ClearLogs()
     {
         var result = await LuminaMessageBox.Show(
-            "Clear Log?",
-            "Are you sure you want to clear the current session logs? History files on disk will remain.",
-            LuminaMessageBoxType.Danger, "Clear");
+            Loc("view_Logs_ClearLogTitle"),
+            Loc("view_Logs_ClearLogMsg"),
+            LuminaMessageBoxType.Danger, Loc("view_Logs_Clear"));
 
         if (result == LuminaMessageBox.MessageBoxResult.Confirm)
         {
@@ -108,7 +110,7 @@ public partial class LogsViewModel : ViewModelBase
 
             await File.WriteAllTextAsync(path, json);
 
-            await LuminaMessageBox.Show("Export Successful", $"Log has been saved to:\n{path}", LuminaMessageBoxType.Message);
+            await LuminaMessageBox.Show(Loc("view_Logs_ExportSuccessTitle"), string.Format(Loc("view_Logs_ExportSuccessMsg"), path), LuminaMessageBoxType.Message);
         }
         catch (Exception ex)
         {

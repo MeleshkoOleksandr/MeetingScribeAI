@@ -80,7 +80,7 @@
                                         Margin="0,0,35,0" 
                                         Width="30" Height="30"
                                         IsVisible="{Binding SelectedTeam, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        ToolTip.Tip="Clear selection and participants">
+                                        ToolTip.Tip="{loc:L view_NewMeet_ClearSelectionToolTip}">
                                     <icons:MaterialIcon Kind="CloseCircle" 
                                                         Width="16" 
                                                         Foreground="{StaticResource ColorError}"

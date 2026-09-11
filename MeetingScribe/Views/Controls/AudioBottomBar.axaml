@@ -25,14 +25,14 @@
                                  IsVisible="{Binding IsRecording}">
                              <StackPanel Orientation="Horizontal" Spacing="8">
                                  <icons:MaterialIcon Kind="Stop" Width="18"/>
-                                 <TextBlock Text="Stop Recording"/>
+                                 <TextBlock Text="{uilogic:L view_AudioBottomBar_StopRecording}"/>
                              </StackPanel>
                          </Button>
                      </StackPanel>
 
                      <!--  (Elapsed Time) -->
                      <StackPanel Grid.Column="1" Margin="10,0,0,0"  VerticalAlignment="Center" Width="105">
-                         <TextBlock Text="ELAPSED TIME" Classes="label-caps" Opacity="0.5"/>
+                         <TextBlock Text="{uilogic:L view_AudioBottomBar_ElapsedTime}" Classes="label-caps" Opacity="0.5"/>
                          <TextBlock Text="{Binding ElapsedTime}" FontSize="24" FontWeight="Bold" Foreground="White"/>
                      </StackPanel>
 
@@ -63,7 +63,7 @@
                      <Button Grid.Column="4" Classes="btn-secondary" Padding="10,6">
                          <StackPanel Orientation="Horizontal" Spacing="6">
                              <icons:MaterialIcon Kind="BookmarkPlusOutline" Width="16"/>
-                             <TextBlock Text="Marker" FontSize="13"/>
+                             <TextBlock Text="{uilogic:L view_AudioBottomBar_Marker}" FontSize="13"/>
                          </StackPanel>
                      </Button>
                  </Grid>

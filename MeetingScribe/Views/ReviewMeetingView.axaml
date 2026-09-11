@@ -228,7 +228,7 @@
                                     <ComboBox ItemsSource="{Binding Session.Participants}"
                                               SelectedItem="{Binding SelectedParticipantForLine}"
                                               HorizontalAlignment="Stretch"
-                                              PlaceholderText="Select member...">
+                                              PlaceholderText="{loc:L view_Review_SelectMember}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="10">

@@ -23,6 +23,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class ReviewMeetingViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     // Whisper path and transcription service are injected for processing
     string _whisperPath;
     TranscriptionService _transcriptionService;
@@ -47,7 +49,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isAIRef; // Flag to indicate ai refinement is in progress
 
     [ObservableProperty] private bool _isEditMode;
-    [ObservableProperty] private string _editModeText = "Edit Summary";
+    [ObservableProperty] private string _editModeText;
 
     [ObservableProperty] private TranscriptLine? _selectedTranscriptLine;
     [ObservableProperty] private Participant? _selectedParticipantForLine;
@@ -74,6 +76,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         Session.FullTranscript.CollectionChanged += (s, e) => IsDirty = true;
         // initialize the dirty flag to false since we just loaded the session
         IsDirty = false;
+        _editModeText = Loc("view_Review_EditSummary");
     }
 
 
@@ -114,12 +117,12 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsDirty = false; // Reset the dirty flag after saving
 
             LogService.Instance.LogInfo($"Session data saved to {jsonPath}.");
-            await LuminaMessageBox.Show("Success", "All changes have been saved to the archive.", LuminaMessageBoxType.Message);
+            await LuminaMessageBox.Show(Loc("view_Review_SuccessTitle"), Loc("view_Review_SuccessMsg"), LuminaMessageBoxType.Message);
         }
         catch (Exception ex)
         {
             LogService.Instance.LogError($"Failed to save session data: {ex.Message}");
-            await LuminaMessageBox.Show("Error", $"Could not save changes: {ex.Message}", LuminaMessageBoxType.Danger);
+            await LuminaMessageBox.Show(Loc("view_Review_ErrorTitle"), string.Format(Loc("view_Review_SaveErrorMsg"), ex.Message), LuminaMessageBoxType.Danger);
         }
     }
 
@@ -131,10 +134,10 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         {
             // If there are unsaved changes, prompt the user for confirmation before closing
             var result = await LuminaMessageBox.Show(
-                "Unsaved Changes",
-                "You have unsaved changes in this session. Are you sure you want to close it and lose your work?",
+                Loc("view_Review_UnsavedChangesTitle"),
+                Loc("view_Review_UnsavedChangesMsg"),
                 LuminaMessageBoxType.Danger,
-                "Discard Changes");
+                Loc("view_Review_DiscardChanges"));
 
             if (result != LuminaMessageBox.MessageBoxResult.Confirm)
                 return; // No confirmation, so we don't close the view
@@ -158,7 +161,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             var keys = SecretsManager.LoadKeys();
             if (!keys.TryGetValue(config.Id, out var apiKey) || string.IsNullOrEmpty(apiKey))
             {
-                await LuminaMessageBox.Show("Key Missing", $"Please enter an API key for {config.Name} in Settings.", LuminaMessageBoxType.Danger);
+                await LuminaMessageBox.Show(Loc("view_Review_KeyMissingTitle"), string.Format(Loc("view_Review_KeyMissingMsg"), config.Name), LuminaMessageBoxType.Danger);
                 return;
             }
 
@@ -186,7 +189,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsIndeterminate = true;
             IsImprovingText = true;
             _mainVm.IsGlobalBusy = true;
-            CurrentTaskName = "Initializing AI Model...";
+            CurrentTaskName = Loc("view_Review_TaskInitModel");
             ProcessingProgress = 0;
 
             //  Gather existing text for the context prompt
@@ -197,7 +200,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             if (!File.Exists(audioPath))
             {
-                CurrentTaskName = "Error: Audio file not found.";
+                CurrentTaskName = Loc("view_Review_TaskErrorAudioNotFound");
                 return;
             }
 
@@ -207,7 +210,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             // Start processing with progress reporting
             IsIndeterminate = false;
-            CurrentTaskName = "Analyzing audio file...";
+            CurrentTaskName = Loc("view_Review_TaskAnalyzingAudio");
             var progressHandler = new Progress<double>(value => ProcessingProgress = value);
 
             var refinedLines = await _transcriptionService.ProcessFileAsync(audioPath, progressHandler, _processCts.Token);
@@ -222,14 +225,14 @@ public partial class ReviewMeetingViewModel : ViewModelBase
                 }
             });
 
-            CurrentTaskName = "Transcription successfully refined!";
+            CurrentTaskName = Loc("view_Review_TaskTranscriptionRefined");
             ProcessingProgress = 100;
             LogService.Instance.LogInfo("Transcription refinement completed successfully.");
         }
         catch (Exception ex)
         {
             LogService.Instance.LogError($"Error during transcription refinement: {ex.Message}");
-            CurrentTaskName = $"Failed: {ex.Message}";
+            CurrentTaskName = string.Format(Loc("view_Review_TaskFailed"), ex.Message);
         }
         finally
         {
@@ -251,7 +254,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     private void CancelCurrentAction()
     {
         _processCts?.Cancel();
-        CurrentTaskName = "Cancelling current operation...";
+        CurrentTaskName = Loc("view_Review_TaskCancelling");
 
         IsImprovingText = false;
         IsAIRef = false;
@@ -277,7 +280,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             IsAIRef = true;
             _mainVm.IsGlobalBusy = true;
             ProcessingProgress = 0;
-            CurrentTaskName = "AI is analyzing conversation flow...";
+            CurrentTaskName = Loc("view_Review_TaskAnalyzingFlow");
 
             string participantsList;
             List<List<string>> chunks;
@@ -289,7 +292,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             for (int i = 0; i < chunks.Count; i++)
             {
                 IsIndeterminate = false;
-                CurrentTaskName = $"AI Analysis: Part {i + 1} of {chunks.Count}...";
+                CurrentTaskName = string.Format(Loc("view_Review_TaskAnalysisPart"), i + 1, chunks.Count);
                 ProcessingProgress = (double)i / chunks.Count * 100;
 
                 string chunkText = string.Join("\n", chunks[i]);
@@ -319,7 +322,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
                 Session.HasAIImprovements = true;
                 IsDirty = true;
-                CurrentTaskName = "Diarization & refinement complete!";
+                CurrentTaskName = Loc("view_Review_TaskDiarizationComplete");
                 LogService.Instance.LogInfo("Diarization & refinement completed successfully.");
             });
         }
@@ -518,7 +521,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
 
             for (int i = 0; i < chunks.Count; i++)
             {
-                CurrentTaskName = $"AI Analysis: Part {i + 1} of {chunks.Count}...";
+                CurrentTaskName = string.Format(Loc("view_Review_TaskAnalysisPart"), i + 1, chunks.Count);
                 ProcessingProgress = (double)i / chunks.Count * 100;
 
                 string chunkText = string.Join("\n", chunks[i]);
@@ -590,8 +593,8 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         // Check if we have any segment summaries to work with
         if (Session.SegmentSummaries.Count == 0)
         {
-            var res = await LuminaMessageBox.Show("Step Missing",
-                "Please run 'Diarization and Refinement' first to prepare data for summary.",
+            var res = await LuminaMessageBox.Show(Loc("view_Review_StepMissingTitle"),
+                Loc("view_Review_StepMissingMsg"),
                 LuminaMessageBoxType.Message);
             return null;
         }
@@ -600,7 +603,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         {
             IsProcessing = true;
             IsIndeterminate = true;
-            CurrentTaskName = "Synthesizing final meeting protocol...";
+            CurrentTaskName = Loc("view_Review_TaskSynthesizing");
 
             // Sendind the segment summaries to the AI service for final summary generation
             switch (sammaryType)
@@ -632,7 +635,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleEditMode()
     {
-        EditModeText = "Stop Edit";
+        EditModeText = Loc("view_Review_StopEdit");
         _mainVm.IsGlobalBusy = true;
         IsEditMode = !IsEditMode;
 
@@ -640,7 +643,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         {
             OnSelectedSummaryTabChanged(0);
             _mainVm.IsGlobalBusy = false;
-            EditModeText = "Edit Summary";
+            EditModeText = Loc("view_Review_EditSummary");
         }
     }
 

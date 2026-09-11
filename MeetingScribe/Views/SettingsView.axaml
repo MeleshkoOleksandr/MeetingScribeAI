@@ -79,7 +79,7 @@
                         </StackPanel>
 
                         <!-- Edit Prompts -->
-                        <Button Content="Edit Prompts" 
+                        <Button Content="{loc:L view_Settings_EditPrompts}" 
                                 Command="{Binding EditPromptsCommand}" 
                                 Classes="btn-outline" 
                                 HorizontalAlignment="Stretch"

@@ -24,6 +24,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class TeamViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     [ObservableProperty] private ObservableCollection<Participant> _participants = new();
     [ObservableProperty] private ObservableCollection<TeamGroup> _groups = new();
     [ObservableProperty] private Participant? _selectedParticipant;
@@ -121,7 +123,7 @@ public partial class TeamViewModel : ViewModelBase
     [RelayCommand]
     private void AddParticipant()
     {
-        var p = new Participant { Name = "New Member", Alias = "NM" };
+        var p = new Participant { Name = Loc("view_Team_NewMember"), Alias = Loc("view_Team_NewMemberAlias") };
         Participants.Add(p);
         SelectedParticipant = p;
     }
@@ -132,9 +134,9 @@ public partial class TeamViewModel : ViewModelBase
         if (SelectedParticipant == null) return;
 
         var res = await LuminaMessageBox.Show(
-            "Delete Member?",
-            $"Are you sure you want to remove {SelectedParticipant.Name}?",
-            LuminaMessageBoxType.Danger, "Remove");
+            Loc("view_Team_DeleteMemberTitle"),
+            string.Format(Loc("view_Team_DeleteMemberMsg"), SelectedParticipant.Name),
+            LuminaMessageBoxType.Danger, Loc("view_Team_Remove"));
 
         if (res == LuminaMessageBox.MessageBoxResult.Confirm)
         {
@@ -149,9 +151,9 @@ public partial class TeamViewModel : ViewModelBase
         if (Participants.Count == 0) return;
 
         var res = await LuminaMessageBox.Show(
-            "Clear All?",
-            "This will remove EVERY participant from the database. This cannot be undone.",
-            LuminaMessageBoxType.Danger, "Clear All");
+            Loc("view_Team_ClearAllTitle"),
+            Loc("view_Team_ClearAllMsg"),
+            LuminaMessageBoxType.Danger, Loc("view_Team_ClearAll"));
 
         if (res == LuminaMessageBox.MessageBoxResult.Confirm)
         {
@@ -172,7 +174,7 @@ public partial class TeamViewModel : ViewModelBase
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select Profile Photo",
+            Title = Loc("view_Team_SelectPhotoTitle"),
             FileTypeFilter = new[] { FilePickerFileTypes.ImageAll }
         });
 
@@ -201,7 +203,7 @@ public partial class TeamViewModel : ViewModelBase
         catch (Exception ex)
         {
             LogService.Instance.LogError($"Error processing image for participant {SelectedParticipant.Name}: {ex.Message}");
-            await LuminaMessageBox.Show("Image Error", "Could not process image: " + ex.Message, LuminaMessageBoxType.Danger);
+            await LuminaMessageBox.Show(Loc("view_Team_ImageErrorTitle"), string.Format(Loc("view_Team_ImageErrorMsg"), ex.Message), LuminaMessageBoxType.Danger);
         }
     }
 
@@ -224,14 +226,14 @@ public partial class TeamViewModel : ViewModelBase
     private async Task DeleteGroup()
     {
         if (SelectedGroup == null) return;
-        var res = await LuminaMessageBox.Show("Delete Group?", $"Delete {SelectedGroup.Name}?", LuminaMessageBoxType.Danger);
+        var res = await LuminaMessageBox.Show(Loc("view_Team_DeleteGroupTitle"), string.Format(Loc("view_Team_DeleteGroupMsg"), SelectedGroup.Name), LuminaMessageBoxType.Danger);
         if (res == LuminaMessageBox.MessageBoxResult.Confirm) Groups.Remove(SelectedGroup);
     }
 
     [RelayCommand]
     private async Task ClearGroups()
     {
-        var res = await LuminaMessageBox.Show("Clear Groups?", "Delete all groups?", LuminaMessageBoxType.Danger);
+        var res = await LuminaMessageBox.Show(Loc("view_Team_ClearGroupsTitle"), Loc("view_Team_ClearGroupsMsg"), LuminaMessageBoxType.Danger);
         if (res == LuminaMessageBox.MessageBoxResult.Confirm) Groups.Clear();
     }
 

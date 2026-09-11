@@ -21,6 +21,9 @@ namespace MeetingScribe.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
+
     //  -- ══════ Fields & Properties  ══════ --//
     #region Fields & Properties
 
@@ -187,7 +190,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var activeVm = new ActiveMeetingViewModel(_currentSession.Name, _currentSession.Language);
             var liveNavItem = new NavigationItem
             {
-                Label = "Meeting Recording",
+                Label = Loc("view_Main_MeetingRecording"),
                 Icon = "Waveform",
                 Target = PageNames.Recording,
                 Description = _currentSession.Name,
@@ -259,7 +262,7 @@ public partial class MainWindowViewModel : ViewModelBase
         string whisperPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "WhisperModels", CurrentSettings.SelectedAccModel);
         var reviewPage = new NavigationItem
         {
-            Label = "Review:",
+            Label = Loc("view_Main_Review"),
             Description = _currentSession?.Name,
             Icon = "NotebookOutline",
             Target = PageNames.Review,
@@ -296,7 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (storage == null) return;
 
         //  Defining a filter for audio files
-        var audioFilter = new FilePickerFileType("Audio Files")
+        var audioFilter = new FilePickerFileType(Loc("view_Main_AudioFiles"))
         {
             Patterns = new[] { "*.mp3", "*.wav", "*.m4a", "*.wma", "*.flac" },
             MimeTypes = new[] { "audio/*" }
@@ -305,7 +308,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //  Open the file selection dialog
         var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select Audio File",
+            Title = Loc("view_Main_SelectAudioFile"),
             FileTypeFilter = new[] { audioFilter },
             AllowMultiple = false
         });
@@ -325,7 +328,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var reviewVm = new ReviewMeetingViewModel(session, _transcriptionService, whisperPath, CurrentSettings , this, CloseMeetingReview);
         var reviewPage = new NavigationItem
         {
-            Label = "Review: " + session.Name,
+            Label = Loc("view_Main_Review") + " " + session.Name,
             Icon = "FileMusicOutline",
             Target = PageNames.Review,
             Page = reviewVm

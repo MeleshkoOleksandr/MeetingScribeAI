@@ -23,6 +23,8 @@ namespace MeetingScribe.ViewModels;
 
 public partial class NewMeetingViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     [ObservableProperty] private ObservableCollection<LanguageManifest> _languages = new();
     [ObservableProperty] private LanguageManifest? _selectedLanguage;
 
@@ -51,7 +53,7 @@ public partial class NewMeetingViewModel : ViewModelBase
     public NewMeetingViewModel()
     {
         // Default name with date
-        MeetingName = "New Meeting";
+        MeetingName = Loc("view_NewMeet_DefaultName");
         LoadLanguages();
         RefreshParticipantsFromBase();
         LoadGroups();
@@ -150,8 +152,8 @@ public partial class NewMeetingViewModel : ViewModelBase
         // 2. Select the file using the file picker. Only allow .docx files
         var result = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select Meeting Agenda",
-            FileTypeFilter = new[] { new FilePickerFileType("Word Documents") { Patterns = new[] { "*.docx" } } },
+            Title = Loc("view_NewMeet_SelectAgenda"),
+            FileTypeFilter = new[] { new FilePickerFileType(Loc("view_NewMeet_WordDocuments")) { Patterns = new[] { "*.docx" } } },
             AllowMultiple = false
         });
 
@@ -193,7 +195,7 @@ public partial class NewMeetingViewModel : ViewModelBase
             isImportingAgenda = false;
             //  Parse error handling: Log the error and optionally show a message to the user
             LogService.Instance.LogError($"Failed to parse agenda file: {ex.Message}");
-            await LuminaMessageBox.Show("Error", $"Failed open file: {ex.Message}", LuminaMessageBoxType.Error);
+            await LuminaMessageBox.Show(Loc("view_NewMeet_ErrorTitle"), string.Format(Loc("view_NewMeet_ErrorMsg"), ex.Message), LuminaMessageBoxType.Error);
         }
     }
     static private string Normalize(string input)

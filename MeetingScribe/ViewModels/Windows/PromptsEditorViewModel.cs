@@ -6,11 +6,14 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using AvaloniaEdit.Document;
+using MeetingScribe.Logic.Services;
 
 namespace MeetingScribe.ViewModels.Windows;
 
 public partial class PromptsEditorViewModel : ViewModelBase
 {
+    protected static string Loc(string key) => LocalizationManager.Instance[key];
+
     private readonly string _promptsPath;
 
     [ObservableProperty]
@@ -34,7 +37,7 @@ public partial class PromptsEditorViewModel : ViewModelBase
         catch (Exception ex)
         {
             // Fallback or error handling
-            Document.Text = $"Error loading prompts: {ex.Message}";
+            Document.Text = string.Format(Loc("view_PromptsEditor_ErrorLoading"), ex.Message);
         }
     }
 
@@ -64,7 +67,7 @@ public partial class PromptsEditorViewModel : ViewModelBase
         catch (Exception ex)
         {
             // Ideally show a message box here if saving fails
-            Console.WriteLine($"Error saving prompts: {ex.Message}");
+            LogService.Instance.LogError($"Error saving prompts: {ex.Message}");
         }
     }
 
