@@ -588,7 +588,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         if (aiService == null) return null;
 
         // Check if we have any segment summaries to work with
-        if (!Session.HasAIImprovements || Session.SegmentSummaries.Count == 0)
+        if (Session.SegmentSummaries.Count == 0)
         {
             var res = await LuminaMessageBox.Show("Step Missing",
                 "Please run 'Diarization and Refinement' first to prepare data for summary.",

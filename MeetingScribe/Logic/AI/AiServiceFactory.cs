@@ -10,7 +10,6 @@ public static class AiServiceFactory
         {
             "Gemini_Free" => new GeminiAiService(apiKey, config.Model, config.Url, isPaid: false),
             "Gemini_Paid" => new GeminiAiService(apiKey, config.Model, config.Url, isPaid: true),
-            "ChatGPT" => new ChatGptService(apiKey, config.Model, config.Url),
             _ => null
         };
     }
