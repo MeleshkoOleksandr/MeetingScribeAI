@@ -10,4 +10,15 @@ public partial class ReviewMeetingView : UserControl
     {
         InitializeComponent();
     }
+
+    private void TranscriptListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is ViewModels.ReviewMeetingViewModel vm && vm.AutoScrollTranscript)
+        {
+            if (sender is ListBox listBox && listBox.SelectedItem != null)
+            {
+                listBox.ScrollIntoView(listBox.SelectedItem);
+            }
+        }
+    }
 }

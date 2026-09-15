@@ -83,6 +83,7 @@
     "view_Review_AssignSPEAKER": "ASSEGNARE L'ORATORE",
     "view_Review_ExportTranscript": "Esporta Trascrizione",
     "view_Review_SelectMember": "Seleziona membro...",
+    "view_Review_AutoScroll": "Scorrimento automatico",
 
     "______SettingsView.axaml": "Settings",
     "view_Settings_GeneralSettings": "Impostazioni generali",

@@ -84,7 +84,7 @@
     "view_Review_AssignSPEAKER": "ASSIGN SPEAKER",
     "view_Review_ExportTranscript": "Export Transcript",
     "view_Review_SelectMember": "Select member...",
-
+    "view_Review_AutoScroll": "Auto Scroll",
 
     "______SettingsView.axaml": "Settings",
     "view_Settings_GeneralSettings": "General Settings",

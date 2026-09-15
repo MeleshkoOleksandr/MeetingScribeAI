@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using NAudio.Wave;
 using MeetingScribe.Enums;
 using MeetingScribe.Logic;
 using MeetingScribe.Logic.AI;
@@ -48,6 +49,31 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     [ObservableProperty] private bool _isImprovingText; // Flag to indicate if text improvement is in progress
     [ObservableProperty] private bool _isAIRef; // Flag to indicate ai refinement is in progress
 
+    // --- Audio Player Properties ---
+    [ObservableProperty] private bool _isPlaying;
+    private double _playbackProgress;
+    public double PlaybackProgress
+    {
+        get => _playbackProgress;
+        set
+        {
+            if (SetProperty(ref _playbackProgress, value) && _audioFileReader != null && !_isUpdatingProgress)
+            {
+                var targetSeconds = (value / 100.0) * _audioFileReader.TotalTime.TotalSeconds;
+                _audioFileReader.CurrentTime = TimeSpan.FromSeconds(targetSeconds);
+            }
+        }
+    }
+    [ObservableProperty] private string _currentTimeText = "00:00 / 00:00";
+    [ObservableProperty] private double _volume = 0.5;
+    
+    private WaveOutEvent? _waveOut;
+    private AudioFileReader? _audioFileReader;
+    private DispatcherTimer? _playbackTimer;
+    private bool _isUpdatingProgress;
+
+    [ObservableProperty] private bool _autoScrollTranscript = true;
+
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private string _editModeText;
 
@@ -77,6 +103,86 @@ public partial class ReviewMeetingViewModel : ViewModelBase
         // initialize the dirty flag to false since we just loaded the session
         IsDirty = false;
         _editModeText = Loc("view_Review_EditSummary");
+
+        InitAudio();
+    }
+
+    private void InitAudio()
+    {
+        string audioPath = Path.Combine(Session.FolderPath, "boosted_record.wav");
+        if (!File.Exists(audioPath))
+        {
+            audioPath = Path.Combine(Session.FolderPath, "full_record.wav");
+        }
+
+        if (File.Exists(audioPath))
+        {
+            try
+            {
+                _audioFileReader = new AudioFileReader(audioPath);
+                _audioFileReader.Volume = (float)Volume;
+                _waveOut = new WaveOutEvent();
+                _waveOut.Init(_audioFileReader);
+                _waveOut.PlaybackStopped += (s, e) => { IsPlaying = false; };
+                
+                UpdateTimeText();
+            }
+            catch(Exception ex)
+            {
+                LogService.Instance.LogError($"Failed to load audio: {ex.Message}");
+            }
+        }
+
+        _playbackTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        _playbackTimer.Tick += PlaybackTimer_Tick;
+    }
+
+    private void PlaybackTimer_Tick(object? sender, EventArgs e)
+    {
+        if (_audioFileReader == null) return;
+        
+        // Update UI Progress
+        if (_audioFileReader.TotalTime.TotalSeconds > 0)
+        {
+            _isUpdatingProgress = true;
+            PlaybackProgress = (_audioFileReader.CurrentTime.TotalSeconds / _audioFileReader.TotalTime.TotalSeconds) * 100;
+            _isUpdatingProgress = false;
+        }
+        UpdateTimeText();
+
+        // Highlight transcript
+        if (IsTranscriptionView)
+        {
+            var currentTimeStr = _audioFileReader.CurrentTime.ToString(@"hh\:mm\:ss");
+            var matchingLine = Session.FullTranscript.LastOrDefault(t => string.Compare(t.Timestamp.Trim('[', ']'), currentTimeStr) <= 0);
+            
+            if (matchingLine != null && SelectedTranscriptLine != matchingLine)
+            {
+                _isSyncingSelection = true;
+                SelectedTranscriptLine = matchingLine;
+                _isSyncingSelection = false;
+            }
+        }
+    }
+    
+    private void UpdateTimeText()
+    {
+        if (_audioFileReader == null) return;
+        CurrentTimeText = $"{_audioFileReader.CurrentTime:mm\\:ss} / {_audioFileReader.TotalTime:mm\\:ss}";
+    }
+
+    partial void OnVolumeChanged(double value)
+    {
+        if (_audioFileReader != null)
+            _audioFileReader.Volume = (float)value;
+    }
+
+    private void DisposeAudio()
+    {
+        _playbackTimer?.Stop();
+        _waveOut?.Stop();
+        _waveOut?.Dispose();
+        _audioFileReader?.Dispose();
     }
 
 
@@ -99,6 +205,79 @@ public partial class ReviewMeetingViewModel : ViewModelBase
     {
         get => CurrentMode == ReviewMode.Info;
         set { if (value) CurrentMode = ReviewMode.Info; OnPropertyChanged(nameof(IsTranscriptionView)); OnPropertyChanged(nameof(IsSummaryView)); OnPropertyChanged(nameof(IsInfoView)); }
+    }
+
+    // --- Audio Player Commands ---
+    [RelayCommand]
+    private void PlayPause()
+    {
+        if (_waveOut == null) return;
+        if (_waveOut.PlaybackState == PlaybackState.Playing)
+        {
+            _waveOut.Pause();
+            _playbackTimer?.Stop();
+            IsPlaying = false;
+        }
+        else
+        {
+            _waveOut.Play();
+            _playbackTimer?.Start();
+            IsPlaying = true;
+        }
+    }
+
+    [RelayCommand]
+    private void SkipForward()
+    {
+        if (_audioFileReader == null) return;
+        var newTime = _audioFileReader.CurrentTime.Add(TimeSpan.FromSeconds(10));
+        if (newTime > _audioFileReader.TotalTime) newTime = _audioFileReader.TotalTime;
+        _audioFileReader.CurrentTime = newTime;
+        UpdateTimeText();
+    }
+
+    [RelayCommand]
+    private void SkipBackward()
+    {
+        if (_audioFileReader == null) return;
+        var newTime = _audioFileReader.CurrentTime.Subtract(TimeSpan.FromSeconds(10));
+        if (newTime < TimeSpan.Zero) newTime = TimeSpan.Zero;
+        _audioFileReader.CurrentTime = newTime;
+        UpdateTimeText();
+    }
+
+    [RelayCommand]
+    private void NextPhrase()
+    {
+        if (_audioFileReader == null || Session.FullTranscript.Count == 0) return;
+        var currentTimeStr = _audioFileReader.CurrentTime.ToString(@"hh\:mm\:ss");
+        var nextLine = Session.FullTranscript.FirstOrDefault(t => string.Compare(t.Timestamp.Trim('[', ']'), currentTimeStr) > 0);
+        if (nextLine != null)
+        {
+            SeekToLine(nextLine);
+        }
+    }
+
+    [RelayCommand]
+    private void PreviousPhrase()
+    {
+        if (_audioFileReader == null || Session.FullTranscript.Count == 0) return;
+        var currentTime = _audioFileReader.CurrentTime.Subtract(TimeSpan.FromSeconds(1)).ToString(@"hh\:mm\:ss");
+        var prevLine = Session.FullTranscript.LastOrDefault(t => string.Compare(t.Timestamp.Trim('[', ']'), currentTime) < 0);
+        if (prevLine != null)
+        {
+            SeekToLine(prevLine);
+        }
+    }
+
+    private void SeekToLine(TranscriptLine line)
+    {
+        if (_audioFileReader == null || line == null) return;
+        if (TimeSpan.TryParse(line.Timestamp.Trim('[', ']'), out TimeSpan time))
+        {
+            _audioFileReader.CurrentTime = time;
+            UpdateTimeText();
+        }
     }
 
 
@@ -142,6 +321,7 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             if (result != LuminaMessageBox.MessageBoxResult.Confirm)
                 return; // No confirmation, so we don't close the view
         }
+        DisposeAudio();
         // Close the view and invoke the callback to notify the parent view model
         _onCloseRequest?.Invoke(this);
     }
@@ -362,6 +542,13 @@ public partial class ReviewMeetingViewModel : ViewModelBase
             SelectedParticipantForLine = null;
             return;
         }
+
+        // If user clicked, seek to line
+        if (!_isSyncingSelection && _audioFileReader != null)
+        {
+            SeekToLine(value);
+        }
+
         // Enable sync mode (to prevent the renaming from taking effect)
         _isSyncingSelection = true;
         try
