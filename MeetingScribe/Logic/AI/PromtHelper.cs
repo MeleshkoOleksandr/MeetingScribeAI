@@ -84,13 +84,11 @@ public static class PromtHelper
 
     public static string WisperInitialPrompt(MeetingSession session)
     {
-        var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(session);
+        var (present, absent) = ParticipantHelper.GetFormattedParticipantLists(session, false);
         return string.Format(GetPrompt("WisperInitialPrompt"),
-            session.Description,
             session.Team,
             present,
-            absent,
-            session.MeetingTopics,
+            GetFormattedTopicsForWhisper(session.MeetingTopics),
             KeywordsPrompt());
     }
 
@@ -157,4 +155,37 @@ public static class PromtHelper
 
         return $"LANGUAGE: The entire summary, including all headings and bullet points, MUST be written in {langName}.";
     }
+
+    /// <summary>
+    /// Formats the meeting topics for Whisper by removing section headers (e.g., "1. Section") and specific keywords like "Sospesi", joining the rest with commas.
+    /// </summary>
+    public static string GetFormattedTopicsForWhisper(string meetingTopics)
+    {
+        if (string.IsNullOrWhiteSpace(meetingTopics))
+            return string.Empty;
+
+        var lines = meetingTopics.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var resultTopics = new List<string>();
+
+        foreach (var line in lines)
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+                continue;
+
+            // Skip section headers like "1. Informazioni dalla Direzione"
+            if (System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^\d+\."))
+                continue;
+
+            // Skip "Sospesi"
+            if (trimmed.Equals("Sospesi", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // Replace '_' with ' '
+            resultTopics.Add(trimmed.Replace('_', ' '));
+        }
+
+        return string.Join(", ", resultTopics);
+    }
+
 }

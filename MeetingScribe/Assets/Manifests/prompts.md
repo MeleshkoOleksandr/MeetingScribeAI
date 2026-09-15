@@ -1,22 +1,10 @@
 # [WisperInitialPrompt]
-You are a professional meeting assistant specializing in verbatim transcript post-processing.
-        
-DESCRIPTION: {0}
-TEAM NAME: {1} 
-PRESENT PERSON NAMES: {2} 
-Absent PERSON NAMES: {3} 
-MEETING TOPICS: {4} 
-
-{5} //KeywordsPrompt
+Riunione del team {0} con {1}.
+Trattande: {2}. 
+Contesto: {3}.
 
 # [KeywordsPrompt]
-POSIBLE KEYWORDS:
-Internal Acronyms & Projects: {0}
-Shortened names: {1}
-Tools & Software: Hyper, ChatGPT, Synthesia Creator, IA, AI, QR code, WhatsApp, Teams, AIber, Aladino
-Business context (Italian): formatori, collaboratori specialisti, supervisioni in aula, discenti, 
-colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, 
-assessment, esercizio, autoapprendimento, trattande, verbale, CV
+Workshop, CV, PAIP, UMA, TRI, PCI, URC, GeZ, formatori, collaboratori specialisti, supervisioni in aula, discenti, colloquio di consulenza, colloquio di aggancio, progettazione didattica, bisogno formativo, scelta metodologica, assessment, esercizio, autoapprendimento.
 
 # [Acronyms]
 PAIP (Piano d'Azione Individuale Planner), SGQ (Gestione Qualità), PCI (Persona in Cerca d'Impiego), WS (Workshop), 
